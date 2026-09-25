@@ -1,5 +1,6 @@
 # الدليل العلمي والفني الشامل لمنظومة أطلس المناخ
 # NASA POWER & Open-Meteo Climate Atlas Generator (ArcGIS 10.8)
+### إعداد وتطوير: أحمد إبراهيم (Ahmad Ibrahim) — [@ahmadibrahim4geo](https://github.com/ahmadibrahim4geo)
 
 ---
 

@@ -1,12 +1,155 @@
 # NASA POWER & Open-Meteo Climate Atlas Generator for ArcGIS Desktop 10.8
+## منظومة مولد أطلس المناخ الشامل ومكتبة الستايلات الكارتوجرافية المعتمدة لبرنامج ArcMap 10.8
 
+[![Developer](https://img.shields.io/badge/Developer-Ahmad%20Ibrahim-1F4E79.svg?style=for-the-badge&logo=github)](https://github.com/ahmadibrahim4geo)
+[![المطور](https://img.shields.io/badge/المطور-أحمد%20إبراهيم-2E75B6.svg?style=for-the-badge)](https://github.com/ahmadibrahim4geo)
 [![ArcGIS Version](https://img.shields.io/badge/ArcGIS%20Desktop-10.8%20%7C%2010.x-0079c1.svg)](https://desktop.arcgis.com/)
 [![Python Version](https://img.shields.io/badge/Python-2.7%20%7C%203.x-3776ab.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Data Sources](https://img.shields.io/badge/Data%20Sources-NASA%20POWER%20%7C%20Open--Meteo-blue.svg)](https://power.larc.nasa.gov/)
 [![Styles Count](https://img.shields.io/badge/Styles-125%20Palettes%20%7C%202%2C250%20Ramps-darkgreen.svg)](#the-cartographic-mega-system-mega-edition)
 
-An enterprise-grade, peer-reviewed Climate Atlas Generator and scientific cartography suite engineered natively for **Esri ArcMap Desktop 10.8**. 
+> **إعداد وتطوير:** **أحمد إبراهيم (Ahmad Ibrahim)**  
+> **حساب المطور على GitHub:** [@ahmadibrahim4geo](https://github.com/ahmadibrahim4geo)  
+> **مستودع المشروع:** [NASA-POWER-Climate-Atlas-Generator](https://github.com/ahmadibrahim4geo/NASA-POWER-Climate-Atlas-Generator)
+
+---
+
+## 📌 الفهرس السريع | Quick Navigation
+- [🇪🇬 دليل الاستخدام والتوثيق باللغة العربية (Arabic Documentation)](#-دليل-الاستخدام-والتوثيق-الشامل-باللغة-العربية)
+  - [١. ما هو مشروع أطلس المناخ؟](#١-ما-هو-مشروع-أطلس-المناخ؟)
+  - [٢. أبرز إمكانيات ومميزات الأداة](#٢-أبرز-إمكانيات-ومميزات-الأداة)
+  - [٣. العناصر والمؤشرات المناخية الـ 11](#٣-العناصر-والمؤشرات-المناخية-الـ-11-المغطاة)
+  - [٤. المنظومة الكارتوجرافية الشاملة (Mega Edition)](#٤-المنظومة-الكارتوجرافية-الشاملة-mega-edition)
+  - [٥. خطوات التثبيت والتشغيل في ArcMap 10.8](#٥-خطوات-التثبيت-والتشغيل-في-arcmap-108-خطوة-بخطوة)
+  - [٦. كيفية تطبيق الستايلات على خرائط الراستر](#٦-كيفية-تطبيق-الستايلات-على-خرائط-الراستر-والمضلعات)
+  - [٧. بيانات العينة المرفقة (Sample Data)](#٧-بيانات-العينة-المرفقة-sample-data)
+- [🇬🇧 English Documentation](#-english-documentation)
+  - [Key Features](#-key-features)
+  - [The Cartographic Mega System](#-the-cartographic-mega-system-mega-edition)
+  - [Repository Structure](#-repository-structure)
+  - [Getting Started](#-getting-started)
+  - [International Standards](#-international-standards--references)
+
+---
+
+# 🇪🇬 دليل الاستخدام والتوثيق الشامل باللغة العربية
+
+### ١. ما هو مشروع أطلس المناخ؟
+هذا المشروع عبارة عن منظومة برمجية متكاملة لصناديق أدوات نظم المعلومات الجغرافية (**ArcGIS Python Toolbox - `.pyt`**) مصممة ومبنية خصيصاً لتعمل مباشرة داخل برنامج **Esri ArcMap Desktop 10.8** (وكافة إصدارات ArcGIS 10.x).
+
+تم تطوير الأداة لحل أصعب المشكلات التي تواجه الباحثين الجغرافيين وخبراء البيئة والمناخ:
+1. **صعوبة جلب البيانات المناخية متعددة العقود:** تقوم الأداة بالاتصال السحابي المباشر بقواعد بيانات وكالة الفضاء الأمريكية (**NASA POWER API**) ومنصة الأرصاد العالمية (**Open-Meteo API**) وسحب سلاسل البيانات التاريخية والمستقبلية لنقاط ومحطات الرصد تلقائياً.
+2. **الاستنباط المكاني الآلي (Spatial Interpolation):** تحويل البيانات النقطية إلى أسطح راستر متصلة بدقة عالية عبر خوارزميات الاستنباط المعتمدة (IDW, Spline, Focal Statistics).
+3. **الافتقار إلى ستايلات كارتوجرافية وفيزيائية معتمدة في ArcMap:** تم بناء أكبر مكتبة ستايلات مناخية موحدة تضم **125 ستايلاً علمياً** و **2,250 تدرجاً لونياً أصلياً (Color Ramps)** متوافقة مع معايير المنظمة العالمية للأرصاد (WMO) والهيئة الحكومية الدولية المعنية بتغير المناخ (IPCC AR6).
+
+---
+
+### ٢. أبرز إمكانيات ومميزات الأداة
+- **الاتصال المزدوج بواجهات برمجة التطبيقات (Dual APIs):**
+  - **NASA POWER:** بيانات الإشعاع الشمسي، درجات الحرارة، الرطوبة، والرياح (من 1981 وحتى اليوم).
+  - **Open-Meteo:** بيانات إعادة التحليل المناخي ERA5 ونماذج التغير المناخي المستقبلية CMIP6.
+- **نافذة التقويم المرئي التفاعلي (Interactive Calendar GUI):**
+  - نافذة رسومية هادئة مدمجة داخل صندوق الأدوات تمكن المستخدم من اختيار تاريخ البداية والنهاية بنقرة زر وبسهولة تامة بين الشهور والسنوات لتجنب أي أخطاء في كتابة صيغ التواريخ.
+- **الحسابات الإحصائية والمعدلات المناخية (WMO 30-Year Normals):**
+  - حساب المعدلات الشهرية، والفصلية (شتاء، ربيع، صيف، خريف)، والسنوية، وحساب الانحراف المعياري والقيم القصوى والدنيا.
+- **حل تلقائي لمعادلات الجفاف والقحولة العالمية:**
+  - حساب مؤشر دي مارتون للقحولة (De Martonne).
+  - حساب مؤشر القحولة العالمي للأمم المتحدة (UNEP Aridity Index).
+  - التبخر-نتح الكامن بهارجريفز (Hargreaves-Samani PET).
+  - العجز المائي المناخي (Climatic Water Deficit).
+- **تصدير النتائج إلى كافة الصيغ الجغرافية:**
+  - طبقات معالم وجيوداتابيس (`.gdb`).
+  - ملفات شيب فايل (`.shp`).
+  - أسطح راستر جغرافية (`GeoTIFF`).
+  - تقارير إحصائية وجداول إكسيل منسقة (`.xlsx`).
+
+---
+
+### ٣. العناصر والمؤشرات المناخية الـ 11 المغطاة
+تغطي الأداة 11 مجالاً مناخياً رئيسياً تشمل جميع عناصر الغلاف الجوي والسطح:
+1. **درجات الحرارة (Temperature):** العظمى، الصغرى، المتوسط، ونطاق التذبذب اليومي.
+2. **التساقط والأمطار (Precipitation):** المجموع السنوي، الفصلي، التراكمي، وكثافة الأمطار.
+3. **ضغط مستوى سطح البحر (Sea Level Pressure):** خطوط تساوي الضغط (Isobars) والأنظمة السينوبتيكية.
+4. **الضغط الجوي السطحي (Surface Pressure):** الضغط الفعلي المصحح طبوغرافياً.
+5. **سرعة واتجاه الرياح (Wind Speed & Direction):** المتجهات، مقياس بوفورت، وورود الرياح.
+6. **الرطوبة النسبية (Relative Humidity):** رطوبة الهواء، نقطة الندى، والعجز البخاري (VPD).
+7. **الإشعاع الشمسي (Solar Radiation):** الإشعاع الكلي السطحي، الإشعاع المباشر والمنتشر (DNI/GHI).
+8. **مؤشر الأشعة فوق البنفسجية (UV Index):** معايير منظمة الصحة العالمية لمخاطر الإشعاع.
+9. **الغطاء السحابي وسطوع الشمس (Cloud Cover & Sunshine):** نسب تغطية السحب وساعات السطوع.
+10. **مؤشرات الجفاف والقحولة (Drought & Aridity):** العجز المائي ومؤشرات المناخ الجاف وشبه الجاف.
+11. **نماذج وسيناريوهات التغير المناخي (Climate Models):** سيناريوهات الانبعاثات والاحترار العالمي (IPCC SSPs).
+
+---
+
+### ٤. المنظومة الكارتوجرافية الشاملة (Mega Edition)
+تم تضمين أضخم مكتبة ستايلات كارتوجرافية علمية لبرنامج ArcMap داخل مجلد `style/`:
+* **125 ستايلاً علمياً معتمداً** مسنداً للمراجع الدولية.
+* **9 مستويات فئات لكل ستايل:** [3، 4، 5، 6، 7، 8، 9، 10، 11 فئة] لتغطية كافة متطلبات التحليل الإحصائي والكارتوجرافي.
+* **2,250 Color Ramps أصلية:**
+  - نمط **`[Stepped]`**: فئات لونية مصمتة ومنفصلة مخصصة لخرائط الراستر المصنفة (`Classified`).
+  - نمط **`[Smooth]`**: تدرجات لونية انسيابية مخصصة لأسطح الراستر الممتدة (`Stretched`).
+* **875 لوناً فردياً مسجلاً (`[Colors]`):** لاختيار ألوان الفئات مباشرة.
+* **875 رمز مضلع مصمت (`[Fill Symbols]`):** بحدود ناعمة (0.4pt) لتلوين نطاقات المتجهات والأقاليم.
+* **ملف إكسيل مرئي ماستر (`NASA_POWER_Climate_Atlas_Master_Styles.xlsx`):** يمثل كافة التدرجات مع خلايا ملونة بخلفيات الألوان الحقيقية.
+* **ملف توثيق مرجعي شامل (`Climate_Styles_Sources_and_References.docx`):** يوثق كافة المعادلات والروابط للمراجع الـ 15 الدولية.
+
+---
+
+### ٥. خطوات التثبيت والتشغيل في ArcMap 10.8 خطوة بخطوة
+
+1. **تحميل المشروع:**
+   قم باستنساخ المستودع عبر الأمر التالي في موجه الأوامر:
+   ```bash
+   git clone https://github.com/ahmadibrahim4geo/NASA-POWER-Climate-Atlas-Generator.git
+   ```
+   أو اضغط على زر **Code -> Download ZIP** وفك الضغط في أي مسار تريده.
+2. **فتح برنامج ArcMap 10.8:**
+   - افتح نافذة **ArcToolbox** (بالضغط على أيقونة الصندوق الأحمر في شريط الأدوات العلوي).
+   - اضغط بزر الفأرة الأيمن في أي مساحة فارغة داخل نافذة ArcToolbox واختر **`Add Toolbox...`**.
+   - تصفح للوصول إلى مجلد المشروع واختر الملف:  
+     `POWER_Climate_Atlas_Generator_10_8.pyt`
+3. **تشغيل الأداة:**
+   - ستظهر لك الأداة باسم **NASA POWER Climate Atlas Generator**.
+   - انقر نقراً مزدوجاً لفتحها، ثم حدد طبقة نقاط المحطات (يمكنك استخدام نقاط العينة في `Sample Data`).
+   - اختر العنصر المناخي (حرارة، مطر، رياح، إلخ).
+   - إذا اخترت **Custom Date Range**، فعّل خيار **Launch Visual Calendar Window** لتفتح لك نافذة التقويم المرئي التفاعلية لاختيار التواريخ بسهولة.
+   - اضغط **OK** لبدء المعالجة والاستنباط التلقائي!
+
+---
+
+### ٦. كيفية تطبيق الستايلات على خرائط الراستر والمضلعات
+
+#### لتحميل الستايلات في مدير الستايلات (Style Manager):
+1. من القائمة العلوية في أرك ماب: اختر **`Customize`** -> ثم **`Style Manager...`**.
+2. اضغط على زر **`Styles...`** من القائمة اليمنى.
+3. اضغط على زر **`Add Style to List...`**.
+4. توجه إلى مجلد:
+   `style\All_ArcMap_Styles_Consolidated\`
+5. اختر الملف الشامل: **`NASA_POWER_Climate_Atlas_Master.style`**.
+6. اضغط **Open** ثم **OK**.
+
+#### لتلوين طبقة راستر مصنفة (Classified Raster):
+1. انقر بزر الفأرة الأيمن على طبقة الراستر -> **Properties** -> تبويب **Symbology**.
+2. اختر من القائمة اليسرى: **Classified**.
+3. حدد عدد الفئات في خانة **Classes** (من 3 إلى 11 فئة).
+4. في قائمة **Color Ramp** المنسدلة، اختر التدرج الذي يحمل علامة **`[Stepped]`** للفئات المنفصلة أو **`[Smooth]`** للتدرج الانسيابي.
+5. اضغط **Apply** ثم **OK**.
+
+---
+
+### ٧. بيانات العينة المرفقة (Sample Data)
+يحتوي مجلد [`Sample Data/`](file:///C:/Users/ahmad/Desktop/NASA%20POWER%20Climate%20Atlas%20Generator/Sample%20Data) على حزمة بيانات تجريبية تطبيقية متكاملة لدراسة الحالة (جمهورية مصر العربية):
+- 📁 **`Egypt_Climate_Stations/`**: تضم شبكة محطات الرصد المناخي الـ 86 المعتمدة والموثقة لدى المنظمة العالمية للأرصاد (WMO Block 62xxx) وقاعدة بيانات NOAA ISD، متوفرة بصيغتي Geodatabase وشيب فايل WGS84، مع ملفات إكسيل و CSV منسقة وموثقة باللغة العربية والإنجليزية.
+- 📁 **`Egypt Climate Data/`**: تضم جيوداتابيس متكاملة تشمل حدود مصر الرسمية (`Egypt`) ومضلع نطاق الدراسة (`REC`) ونقاط العينات المناخية الجاهزة للاختبار الفوري.
+
+---
+
+# 🇬🇧 English Documentation
+
+An enterprise-grade, peer-reviewed Climate Atlas Generator and scientific cartography suite engineered natively for **Esri ArcMap Desktop 10.8** (compatible with all ArcGIS Desktop 10.x releases).
+
+Developed by **Ahmad Ibrahim** ([@ahmadibrahim4geo](https://github.com/ahmadibrahim4geo)).
 
 The system automates the acquisition, climatological processing, statistical aggregation, spatial interpolation, and standardized cartographic rendering of multi-decadal historical climate records and future climate change models directly inside ArcGIS Desktop.
 
@@ -15,7 +158,7 @@ The system automates the acquisition, climatological processing, statistical agg
 ## 🌟 Key Features
 
 - **Dual API Data Acquisition:** Direct integration with **NASA POWER API** (Prediction Of Worldwide Energy Resources) and **Open-Meteo Climate API** (ERA5 Reanalysis & CMIP6 Projections).
-- **Automated Climatological Engine:** Computes annual, seasonal, monthly, daily, and custom date range statistics, standard deviations, and climatological normals.
+- **Automated Climatological Engine:** Computes annual, seasonal, monthly, daily, and custom date range statistics, standard deviations, and climatological normals (WMO 30-Year Normals).
 - **Interactive Visual Calendar GUI:** Native date picker modal embedded directly into ArcMap toolbox parameters, allowing effortless month/year navigation without manual string entry.
 - **Spatial Interpolation & Focal Smoothing:** Automated generation of continuous climate surfaces via IDW (Inverse Distance Weighted), Spline, and focal neighborhood filter smoothing.
 - **The Cartographic Mega System (Mega Edition):**
@@ -71,7 +214,7 @@ NASA POWER Climate Atlas Generator/
 ├── POWER_Climate_Atlas_Generator_10_8.pyt.xml # ArcToolbox item description metadata
 ├── raster_atlas_generator.py                  # Core backend engine (APIs, spatial processing)
 ├── LICENSE                                    # Open-source MIT License
-├── README.md                                  # Repository documentation (English)
+├── README.md                                  # Repository documentation (Bilingual Arabic / English)
 ├── .gitignore                                 # Git rules for ArcGIS, Python, and OS files
 │
 ├── docs/                                      # Comprehensive User & Technical Guides
@@ -180,6 +323,14 @@ The color scales and classifications within this atlas strictly adhere to physic
 - **World Health Organization (WHO):** Global Solar UV Index guidelines.
 
 For exhaustive citations, equations, and hex tables, see [`style/Climate_Styles_Sources_and_References.docx`](file:///C:/Users/ahmad/Desktop/NASA%20POWER%20Climate%20Atlas%20Generator/style/Climate_Styles_Sources_and_References.docx).
+
+---
+
+## 👨‍💻 Developer & Author
+
+- **Author:** **Ahmad Ibrahim** (أحمد إبراهيم)
+- **GitHub:** [@ahmadibrahim4geo](https://github.com/ahmadibrahim4geo)
+- **Repository:** [NASA-POWER-Climate-Atlas-Generator](https://github.com/ahmadibrahim4geo/NASA-POWER-Climate-Atlas-Generator)
 
 ---
 

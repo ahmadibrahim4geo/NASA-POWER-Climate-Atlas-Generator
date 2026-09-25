@@ -1,5 +1,6 @@
 # ArcMap Desktop 10.8 Climate Styles User Guide
 ## NASA POWER & Open-Meteo Climate Atlas - Style User Guide (English)
+### Developed by: Ahmad Ibrahim — [@ahmadibrahim4geo](https://github.com/ahmadibrahim4geo)
 
 ---
 

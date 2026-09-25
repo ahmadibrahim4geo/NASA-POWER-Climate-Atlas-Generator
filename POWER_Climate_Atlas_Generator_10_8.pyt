@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-POWER Climate Atlas Generator — ArcMap Desktop 10.x edition (tested 10.8/10.9)
+POWER Climate Atlas Generator — ArcMap Desktop 10.x edition (tested 10.8)
 ArcGIS Desktop Python Toolbox (.pyt) — Python 2.7 compatible.
 
+Developed by: Ahmad Ibrahim (@ahmadibrahim4geo)
+إعداد وتطوير: أحمد إبراهيم
+
 Data source: NASA POWER API (https://power.larc.nasa.gov/)
+             & Open-Meteo Climate API (https://open-meteo.com/)
 
 Tool: POWER Climate Atlas Generator
 - Reads an input point layer + optional study-area mask polygon.

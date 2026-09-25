@@ -1,5 +1,6 @@
 # دليل استخدام وتطبيق ستايلات المناخ في برنامج ArcMap Desktop 10.8
 ## NASA POWER & Open-Meteo Climate Atlas - Style User Guide (Arabic)
+### إعداد وتطوير: أحمد إبراهيم (Ahmad Ibrahim) — [@ahmadibrahim4geo](https://github.com/ahmadibrahim4geo)
 
 ---
 
