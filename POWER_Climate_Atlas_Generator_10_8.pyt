@@ -143,7 +143,7 @@ SUBMODEL_DEPS = {
     "Heat Index / Thermal Stress [Requires: Temperature, Relative Humidity]": {
         "short": "Heat_Index",
         "field": "HI_Summer_Mean",
-        "fields": ["HI_Summer_Mean", "HI_Annual_Mean"],
+        "fields": ["HI_Summer_Mean", "HI_Annual_Mean", "HI_Winter_Mean"],
         "modules": ["Temperature", "Relative Humidity"],
         "params": ["T2M", "T2M_MAX", "RH2M"]
     }
@@ -589,6 +589,24 @@ def heat_index_c(t_c, rh):
     return (hi - 32.0) * 5.0 / 9.0
 
 
+def humidex_c(t_c, rh):
+    """Canadian Humidex (IH) in C from air temp C + RH %.
+
+    Formula:
+      e = 6.112 * (10.0 ** ((7.5 * t_c) / (237.7 + t_c))) * (rh / 100.0)
+      humidex = t_c + (5.0 / 9.0) * (e - 10.0)
+    Returns None when inputs are missing."""
+    if t_c is None or rh is None or is_missing(t_c) or is_missing(rh):
+        return None
+    t_c, rh = float(t_c), float(rh)
+    if rh < 0.0:
+        rh = 0.0
+    if rh > 100.0:
+        rh = 100.0
+    e = 6.112 * (10.0 ** ((7.5 * t_c) / (237.7 + t_c))) * (rh / 100.0)
+    return t_c + (5.0 / 9.0) * (e - 10.0)
+
+
 def equal_interval_breaks(vmin, vmax, n=7):
     if vmin is None or vmax is None:
         return None
@@ -602,6 +620,33 @@ def equal_interval_breaks(vmin, vmax, n=7):
 def hex_to_rgb(h):
     h = h.lstrip("#")
     return tuple(int(h[i:i + 2], 16) for i in (0, 2, 4))
+
+
+def interpolate_colors(hex_list, n):
+    """Interpolate a list of hex color codes to exactly n hex colors."""
+    if not hex_list:
+        return []
+    if n <= 1:
+        return [hex_list[0]]
+    if n == len(hex_list):
+        return list(hex_list)
+    rgb_list = [hex_to_rgb(h) for h in hex_list]
+    m = len(rgb_list)
+    result = []
+    for i in range(n):
+        t = float(i) / float(n - 1) * float(m - 1)
+        idx = int(t)
+        frac = t - idx
+        if idx >= m - 1:
+            r, g, b = rgb_list[-1]
+        else:
+            r1, g1, b1 = rgb_list[idx]
+            r2, g2, b2 = rgb_list[idx + 1]
+            r = int(round(r1 + (r2 - r1) * frac))
+            g = int(round(g1 + (g2 - g1) * frac))
+            b = int(round(b1 + (b2 - b1) * frac))
+        result.append("#%02X%02X%02X" % (r, g, b))
+    return result
 
 
 def tolerance_meters(value_text):
@@ -742,6 +787,8 @@ def compute_temperature_fields(m_tmean, m_tmax, m_tmin, m_rh=None):
     hi_m = dict((m, heat_index_c(clim.get(m), clim_rh.get(m))) for m in range(1, 13))
     hi_vals = [v for v in hi_m.values() if v is not None]
     hi_sum = [hi_m[m] for m in SEASONS["Summer"] if hi_m.get(m) is not None]
+    hi_win = [humidex_c(clim.get(m), clim_rh.get(m)) for m in SEASONS["Winter"] if clim.get(m) is not None and clim_rh.get(m) is not None]
+    hi_win_vals = [v for v in hi_win if v is not None]
     return {
         "T_Annual_Mean": s_mean["Annual"],
         "T_Winter_Mean": s_mean["Winter"],
@@ -755,6 +802,7 @@ def compute_temperature_fields(m_tmean, m_tmax, m_tmin, m_rh=None):
         "T_Annual_Min_Mean": s_min["Annual"],
         "HI_Annual_Mean": sum(hi_vals) / len(hi_vals) if hi_vals else None,
         "HI_Summer_Mean": sum(hi_sum) / len(hi_sum) if hi_sum else None,
+        "HI_Winter_Mean": sum(hi_win_vals) / len(hi_win_vals) if hi_win_vals else None,
     }
 
 
@@ -919,6 +967,7 @@ FIELD_DEFS = [
     ("T_Annual_Min_Mean", "Annual Mean Minimum Temperature", u"المتوسط السنوي لدرجات الحرارة الصغرى", "T2M_MIN", "Temperature", "Annual", "Mean", "C", u"متوسط القيم الصغرى الشهرية خلال السنة", "Annual mean of monthly T2M_MIN", "Mean of valid monthly T2M_MIN values"),
     ("HI_Annual_Mean", "Annual Mean Heat Index", u"المتوسط السنوي لمؤشر الحرارة المحسوسة", "T2M+RH2M", "Temperature", "Annual", "Mean", "C", u"متوسط مؤشر الحرارة المحسوسة الشهرية", "Annual mean Rothfusz heat index from T2M and RH2M", "Mean of monthly HI; equals T below 26.7C; needs humidity"),
     ("HI_Summer_Mean", "Summer Mean Heat Index", u"متوسط مؤشر الحرارة المحسوسة في فصل الصيف", "T2M+RH2M", "Temperature", "Summer", "Mean", "C", u"متوسط المؤشر صيفاً", "Summer mean heat index", "Mean of monthly HI for months 6,7,8"),
+    ("HI_Winter_Mean", "Winter Mean Heat Index", u"متوسط مؤشر الحرارة المحسوسة في فصل الشتاء", "T2M+RH2M", "Temperature", "Winter", "Mean", "C", u"متوسط مؤشر الحرارة المحسوسة (الهيوميدكس IH) شتاءً", "Winter mean perceived temperature (Humidex/IH)", "Mean of monthly Humidex IH for months 12,1,2"),
     ("R_Annual_Total", "Annual Total Precipitation", u"التراكم السنوي الإجمالي للأمطار", "PRECTOTCORR", "Precipitation", "Annual", "Sum", "mm/year", u"مجموع كميات المطر السنوي", "Mean annual total across years (single year: yearly sum)", "Mean of per-year annual sums"),
     ("R_Annual_Mean", "Mean Monthly Precipitation", u"المتوسط السنوي لمعدلات الأمطار الشهرية", "PRECTOTCORR", "Precipitation", "Annual", "Mean", "mm", u"متوسط الإجماليات الشهرية", "Mean of climatological monthly totals", "Mean of 12 monthly means"),
     ("R_Winter_Total", "Winter Total Precipitation", u"إجمالي أمطار فصل الشتاء", "PRECTOTCORR", "Precipitation", "Winter", "Sum", "mm", u"مجموع أمطار أشهر الشتاء", "Mean winter total across years", "Mean of per-year Dec+Jan+Feb totals"),
@@ -986,7 +1035,7 @@ for _r in FIELD_DEFS:
     MODULE_FIELDS.setdefault(_r[4], []).append(_r[0])
 MODULE_FIELDS["Climate_Models"] = [
     "DM_Aridity_Annual", "PET_Hargreaves_Annual", "UNEP_Aridity_Annual",
-    "Water_Deficit_Annual", "Dry_Months_Count", "HI_Summer_Mean", "HI_Annual_Mean"
+    "Water_Deficit_Annual", "Dry_Months_Count", "HI_Summer_Mean", "HI_Annual_Mean", "HI_Winter_Mean"
 ]
 MODULE_FIELDS["Drought & Aridity"] = [
     "DM_Aridity_Annual", "PET_Hargreaves_Annual", "UNEP_Aridity_Annual",
@@ -1018,6 +1067,7 @@ SHP_FIELD_MAP = {
     "Dry_Months_Count": "Dry_Months",
     "HI_Annual_Mean": "HI_AnnMean",
     "HI_Summer_Mean": "HI_SumMean",
+    "HI_Winter_Mean": "HI_WinMean",
     "Interp_Meth": "Intrp_Meth",
     "PSL_Annual_Mean": "PSL_AnMean",
     "PSL_Annual_Range": "PSL_AnRng",
@@ -1450,7 +1500,7 @@ REQUIRED_COLUMNS = [
     "Temporal", "Interp_Meth", "Cell_Size", "Wind_Cell", "Status", "Error_Msg",
     "T_Annual_Mean", "T_Winter_Mean", "T_Spring_Mean", "T_Summer_Mean", "T_Autumn_Mean",
     "T_Annual_Range", "T_Max_Summer_Month_Mean", "T_Min_Winter_Month_Mean",
-    "T_Annual_Max_Mean", "T_Annual_Min_Mean", "HI_Annual_Mean", "HI_Summer_Mean",
+    "T_Annual_Max_Mean", "T_Annual_Min_Mean", "HI_Annual_Mean", "HI_Summer_Mean", "HI_Winter_Mean",
     "R_Annual_Total", "R_Annual_Mean", "R_Winter_Total", "R_Spring_Total",
     "R_Summer_Total", "R_Autumn_Total", "R_Max_Daily_Month", "R_Annual_Rain_Days_Total",
     "PSL_Annual_Mean", "PSL_Winter_Mean", "PSL_Spring_Mean", "PSL_Summer_Mean", "PSL_Autumn_Mean", "PSL_Annual_Range",
@@ -1773,8 +1823,11 @@ def compute_point_fields(monthly, years, modules, temporal, daily_raw=None,
             hi_m = dict((m, heat_index_c(c_t.get(m), c_rh.get(m))) for m in range(1, 13))
             hi_vals = [v for v in hi_m.values() if v is not None]
             hi_sum = [hi_m[m] for m in SEASONS["Summer"] if hi_m.get(m) is not None]
+            hi_win = [humidex_c(c_t.get(m), c_rh.get(m)) for m in SEASONS["Winter"] if c_t.get(m) is not None and c_rh.get(m) is not None]
+            hi_win_vals = [v for v in hi_win if v is not None]
             res["HI_Annual_Mean"] = sum(hi_vals) / len(hi_vals) if hi_vals else None
             res["HI_Summer_Mean"] = sum(hi_sum) / len(hi_sum) if hi_sum else None
+            res["HI_Winter_Mean"] = sum(hi_win_vals) / len(hi_win_vals) if hi_win_vals else None
     if "Sea Level Pressure" in modules:
         conv = dict((ym, pressure_kpa_to_mbar(v)) for ym, v in monthly.get("SLP", {}).items())
         s = seasonal_means_from_monthly(conv)
@@ -2397,6 +2450,50 @@ class PowerClimateAtlasGenerator(object):
                            "in Meters or Kilometers. Default: 20000 Meters. "
                            "Enabled only when Wind module is selected.")
 
+        # ═══ Raster Reclassification ═══
+        p_reclass_en = arcpy.Parameter(
+            displayName="Enable Raster Reclassification",
+            name="Enable_Raster_Reclass",
+            datatype="GPBoolean",
+            parameterType="Optional",
+            direction="Input")
+        p_reclass_en.value = False
+        p_reclass_en.category = "Raster Reclassification"
+        p_reclass_en.description = (
+            "OPTIONAL (default OFF). When checked, generates classified rasters (_cls.tif) "
+            "with discrete thematic classes and embedded colormaps alongside the continuous rasters. "
+            "When unchecked, outputs only raw continuous floating-point rasters.")
+
+        p_reclass_cnt = arcpy.Parameter(
+            displayName="Number of Classes",
+            name="Reclass_Classes_Count",
+            datatype="GPLong",
+            parameterType="Optional",
+            direction="Input")
+        p_reclass_cnt.value = 7
+        p_reclass_cnt.category = "Raster Reclassification"
+        p_reclass_cnt.description = (
+            "RECLASS ONLY. Number of classification bins/classes (2 to 32). Default: 7.")
+
+        p_reclass_meth = arcpy.Parameter(
+            displayName="Classification Method",
+            name="Reclass_Method",
+            datatype="GPString",
+            parameterType="Optional",
+            direction="Input")
+        p_reclass_meth.filter.type = "ValueList"
+        p_reclass_meth.filter.list = [
+            "Natural Breaks (Jenks)",
+            "Equal Interval",
+            "Equal Area (Quantile)",
+            "Geometric Interval",
+            "Standard Deviation"
+        ]
+        p_reclass_meth.value = "Natural Breaks (Jenks)"
+        p_reclass_meth.category = "Raster Reclassification"
+        p_reclass_meth.description = (
+            "RECLASS ONLY. Statistical classification method to partition raster continuous values.")
+
         # ═══ Pressure Contour ═══
         p13 = arcpy.Parameter(
             displayName="Create PSL Isobar Contour (Optional)",
@@ -2517,6 +2614,7 @@ class PowerClimateAtlasGenerator(object):
                 p11, p_idw_prof, p15, p16, p17, p18, p19, p20, p21,
                 p_sp_type, p_sp_weight, p_sp_pts,
                 p9, p10,
+                p_reclass_en, p_reclass_cnt, p_reclass_meth,
                 p13, p31, p32,
                 p25, p26, p27, p24,
                 p23, p28,
@@ -2774,6 +2872,16 @@ class PowerClimateAtlasGenerator(object):
         if "Wind_Factor_Cell_Size" in pdict:
             pdict["Wind_Factor_Cell_Size"].enabled = (not dl) and ("Wind" in active_mods)
 
+        # Raster Reclassification options
+        p_rc_en = pdict.get("Enable_Raster_Reclass")
+        rc_on = bool(p_rc_en.value) if p_rc_en and p_rc_en.value is not None else False
+        if p_rc_en:
+            p_rc_en.enabled = not dl
+        if "Reclass_Classes_Count" in pdict:
+            pdict["Reclass_Classes_Count"].enabled = rc_on and not dl
+        if "Reclass_Method" in pdict:
+            pdict["Reclass_Method"].enabled = rc_on and not dl
+
         # Focal options
         p_focal = pdict.get("Focal_Smoothing")
         focal_on = bool(p_focal.value) if p_focal and p_focal.value is not None else False
@@ -2965,6 +3073,14 @@ class PowerClimateAtlasGenerator(object):
                 if p_spts and (p_spts.value is None or int(p_spts.value) < 1):
                     p_spts.setErrorMessage("Spline Number of Points must be >= 1 (default 12).")
 
+            p_rc_en = pdict.get("Enable_Raster_Reclass")
+            if p_rc_en and bool(p_rc_en.value) and not dl_only:
+                p_rc_cnt = pdict.get("Reclass_Classes_Count")
+                if p_rc_cnt:
+                    val = p_rc_cnt.value
+                    if val is None or int(val) < 2 or int(val) > 32:
+                        p_rc_cnt.setErrorMessage("Number of classes must be between 2 and 32 (default: 7).")
+
             p_foc = pdict.get("Focal_Smoothing")
             if p_foc and bool(p_foc.value) and not dl_only:
                 p_fn = pdict.get("Focal_Neighborhood")
@@ -3094,6 +3210,17 @@ class PowerClimateAtlasGenerator(object):
             p_fn = pdict.get("Focal_Neighborhood")
             focal_n = int(p_fn.value) if (p_fn and p_fn.value is not None) else 3
             focal = {"apply": focal_on, "stat": focal_stat, "size": max(1, focal_n)}
+            p_rc_en = pdict.get("Enable_Raster_Reclass")
+            reclass_enabled = bool(p_rc_en.value) if (p_rc_en and p_rc_en.value is not None) else False
+            p_rc_cnt = pdict.get("Reclass_Classes_Count")
+            reclass_nclass = int(p_rc_cnt.value) if (p_rc_cnt and p_rc_cnt.value is not None) else 7
+            p_rc_meth = pdict.get("Reclass_Method")
+            reclass_method = p_rc_meth.valueAsText if (p_rc_meth and p_rc_meth.valueAsText) else "Natural Breaks (Jenks)"
+            reclass_opts = {
+                "enable": reclass_enabled,
+                "nclass": max(2, min(32, reclass_nclass)),
+                "method": reclass_method
+            }
             provider = pdict.get("Climate_Data_Source").valueAsText if pdict.get("Climate_Data_Source") else "NASA POWER API"
             use_om = provider.startswith("Open-Meteo")
             p_om_m = pdict.get("OpenMeteo_Model")
@@ -3411,7 +3538,8 @@ class PowerClimateAtlasGenerator(object):
                         elem_rasters = self._interpolate_all(
                             None, [m], paths, eff_base, interp, mask, msg, warn,
                             iopts, kopts, is_geo, purge, scratch_dir, focal,
-                            {m: fc}, wanted_fields_by_module=wanted_fields_by_module)
+                            {m: fc}, wanted_fields_by_module=wanted_fields_by_module,
+                            reclass_opts=reclass_opts)
                         raster_registry.extend(elem_rasters)
                         if purge and os.path.exists(scratch_dir):
                             for sf in os.listdir(scratch_dir):
@@ -3629,7 +3757,8 @@ class PowerClimateAtlasGenerator(object):
                             elem_rasters = self._interpolate_all(
                                 None, [m], paths, eff_base, interp, mask, msg, warn,
                                 iopts, kopts, is_geo, purge, scratch_dir, focal,
-                                {m: fc}, wanted_fields_by_module=wanted_fields_by_module)
+                                {m: fc}, wanted_fields_by_module=wanted_fields_by_module,
+                                reclass_opts=reclass_opts)
                             raster_registry.extend(elem_rasters)
                             if purge and os.path.exists(scratch_dir):
                                 for sf in os.listdir(scratch_dir):
@@ -4171,13 +4300,13 @@ class PowerClimateAtlasGenerator(object):
             return COLOR_RAMPS["Temperature"]
         return COLOR_RAMPS.get(module, COLOR_RAMPS["Temperature"])
 
-    def _build_display(self, rp, field, module, colors, nclass, msg, warn, purge=True):
+    def _build_display(self, rp, field, module, colors, nclass, method_name, msg, warn, purge=True):
         """Classified display raster for real on-open colors in ArcMap.
 
-        Slice (equal interval) -> integer zones -> VAT -> .clr colormap applied
+        Slice according to method_name -> integer zones -> VAT -> .clr colormap applied
         with AddColormap (all core-license tools). Zones are REMAPPED so zone 1
         is the HIGHEST interval (descending legend) with colors matched (hottest
-        color on the highest zone). Returns (cls_path, clr_path) or (None, None)
+        color on the highest zone). Returns (cls_path, clr_path, breaks) or (None, None, None)
         on failure (caller falls back to the continuous raster).
         """
         from arcpy.sa import Slice
@@ -4194,7 +4323,31 @@ class PowerClimateAtlasGenerator(object):
                 except Exception:
                     pass
             try:
-                Slice(rp, nclass, "EQUAL_INTERVAL").save(ztmp)
+                meth_str = str(method_name or "Natural Breaks (Jenks)").lower()
+                if "natural" in meth_str:
+                    Slice(rp, nclass, "NATURAL_BREAKS").save(ztmp)
+                elif "area" in meth_str or "quantile" in meth_str:
+                    Slice(rp, nclass, "EQUAL_AREA").save(ztmp)
+                elif "geometric" in meth_str:
+                    try:
+                        _mn = float(arcpy.GetRasterProperties_management(rp, "MINIMUM")[0])
+                    except Exception:
+                        _mn = 0.0
+                    shift = (1.0 - _mn) if _mn <= 0 else 0.0
+                    r_pos = (arcpy.Raster(rp) + shift) if shift > 0 else arcpy.Raster(rp)
+                    Slice(arcpy.sa.Ln(r_pos), nclass, "EQUAL_INTERVAL").save(ztmp)
+                elif "standard" in meth_str or "deviation" in meth_str:
+                    try:
+                        _mean = float(arcpy.GetRasterProperties_management(rp, "MEAN")[0])
+                        _std = float(arcpy.GetRasterProperties_management(rp, "STD")[0])
+                    except Exception:
+                        _mean, _std = 0.0, 1.0
+                    r_z = ((arcpy.Raster(rp) - _mean) / _std) if _std > 1e-9 else arcpy.Raster(rp)
+                    Slice(r_z, nclass, "EQUAL_INTERVAL").save(ztmp)
+                else:
+                    # Default: Equal Interval
+                    Slice(rp, nclass, "EQUAL_INTERVAL").save(ztmp)
+
                 # descending remap: zone 1 = highest interval
                 (nclass + 1 - arcpy.Raster(ztmp)).save(cls_rp)
                 if purge:
@@ -4227,10 +4380,40 @@ class PowerClimateAtlasGenerator(object):
                 arcpy.management.AddColormap(cls_rp, "#", clr_path)
             except Exception as ex:
                 warn("Colormap for %s display skipped: %s" % (field, ex))
-            return cls_rp, clr_path
+
+            # Compute actual zone breaks from continuous raster using ZonalStatisticsAsTable
+            breaks = None
+            try:
+                scratch_dir = arcpy.env.scratchWorkspace or os.path.dirname(rp)
+                ztbl = os.path.join(scratch_dir, "zst_%s" % field[:8])
+                if arcpy.Exists(ztbl):
+                    try:
+                        arcpy.management.Delete(ztbl)
+                    except Exception:
+                        pass
+                arcpy.sa.ZonalStatisticsAsTable(cls_rp, "Value", rp, ztbl, "DATA", "MIN_MAX")
+                zone_ranges = {}
+                with arcpy.da.SearchCursor(ztbl, ["Value", "MIN", "MAX"]) as cur:
+                    for row in cur:
+                        zone_ranges[int(row[0])] = (float(row[1]), float(row[2]))
+                if purge:
+                    try:
+                        arcpy.management.Delete(ztbl)
+                    except Exception:
+                        pass
+                if len(zone_ranges) == nclass:
+                    b_list = [zone_ranges[nclass][0]]
+                    for z in range(nclass, 0, -1):
+                        b_list.append(zone_ranges[z][1])
+                    breaks = b_list
+            except Exception:
+                breaks = None
+
+            return cls_rp, clr_path, breaks
         except Exception as ex:
             warn("Classified display for %s failed (%s); layer will use the raw raster."
                  % (field, ex))
+            return None, None, None
     def _merge_offline_layers(self, in_layers_text, gdb_path, out_sr, modules,
                               active_submodels, wanted_fields_by_module, msg, warn):
         """Merges one or more precalculated point layers (multi-value) offline by coordinates/Source_ID.
@@ -4385,6 +4568,10 @@ class PowerClimateAtlasGenerator(object):
                             if hi is not None:
                                 f["HI_Summer_Mean"] = round(hi, 2)
                                 f["HI_Annual_Mean"] = round(hi, 2)
+                        if f.get("HI_Winter_Mean") is None and t_val is not None and rh_val is not None:
+                            hw = humidex_c(float(t_val), float(rh_val))
+                            if hw is not None:
+                                f["HI_Winter_Mean"] = round(hw, 2)
 
             # 5. Create primary element feature classes in GDB
             admin_names = [a[0] for a in ADMIN_FIELDS]
@@ -4613,7 +4800,7 @@ class PowerClimateAtlasGenerator(object):
     def _interpolate_all(self, master_fc, modules, paths, cell, method, mask, msg, warn,
                          iopts=None, kopts=None, is_geo=False,
                          purge=True, scratch=None, focal=None, source_by_module=None,
-                         wanted_fields_by_module=None):
+                         wanted_fields_by_module=None, reclass_opts=None):
         from arcpy.sa import ExtractByMask
         out_ws = os.path.dirname(paths["vec"])
         if scratch is None:
@@ -4624,9 +4811,15 @@ class PowerClimateAtlasGenerator(object):
         except Exception:
             pass
         focal = focal or {"apply": False, "stat": "MEAN", "size": 3}
-        msg("Raw float rasters | LZW: enforced | purge temps: %s | focal: %s" % (
-            purge, ("OFF" if not focal["apply"] else "%s %dx%d" % (
-                focal["stat"], focal["size"], focal["size"]))))
+        if reclass_opts is None:
+            reclass_opts = {"enable": False, "nclass": 7, "method": "Natural Breaks (Jenks)"}
+        reclass_on = bool(reclass_opts.get("enable", False))
+        reclass_nclass = int(reclass_opts.get("nclass", 7))
+        reclass_method = str(reclass_opts.get("method", "Natural Breaks (Jenks)"))
+        msg("Raw float rasters | LZW: enforced | purge temps: %s | focal: %s | reclass: %s" % (
+            purge,
+            ("OFF" if not focal["apply"] else "%s %dx%d" % (focal["stat"], focal["size"], focal["size"])),
+            ("%s (%d classes)" % (reclass_method, reclass_nclass)) if reclass_on else "OFF"))
         registry = []
         todo = []
         for m in modules:
@@ -4813,34 +5006,48 @@ class PowerClimateAtlasGenerator(object):
                 except Exception:
                     _rmin, _rmax = None, None
                 colors = self._colors_for(module, field)
-                nclass = 5 if module == "UV Index" else 7
-                breaks = equal_interval_breaks(_rmin, _rmax, nclass) \
-                    if _rmin is not None else None
-                # --- classified display raster so the .lyr opens WITH colors ---
-                cls_rp, clr_path = self._build_display(rp, field, module, colors,
-                                                       nclass, msg, warn)
-                if cls_rp:
-                    self._make_lyr(cls_rp, lp, field, module, colors, nclass, method,
-                                   msg, warn, breaks, rp)
+
+                if reclass_on:
+                    nclass = 5 if (module == "UV Index" and reclass_nclass == 7) else reclass_nclass
+                    interp_colors = interpolate_colors(colors, nclass)
+                    cls_rp, clr_path, breaks = self._build_display(
+                        rp, field, module, interp_colors, nclass, reclass_method, msg, warn, purge=purge)
+                    if cls_rp and arcpy.Exists(cls_rp):
+                        self._make_lyr(cls_rp, lp, field, module, interp_colors, nclass, reclass_method,
+                                       msg, warn, breaks, src_continuous=rp, is_classified=True)
+                    else:
+                        self._make_lyr(rp, lp, field, module, interp_colors, nclass, reclass_method,
+                                       msg, warn, breaks, src_continuous=rp, is_classified=False)
+                    registry.append((field, rp, lp, module, interp_colors, nclass))
+                    msg("Raster: %s [raw float, LZW] + %s [%d classes, %s]" % (
+                        rp, os.path.basename(cls_rp) if cls_rp else "", nclass, reclass_method))
                 else:
+                    # Reclass is DISABLED: only raw continuous float raster, no _cls.tif
+                    rdir = os.path.dirname(rp)
+                    old_cls = os.path.join(rdir, field + "_cls.tif")
+                    old_clr = os.path.join(rdir.replace("Rasters", "Layers"), field + ".clr")
+                    for _old in (old_cls, old_clr):
+                        try:
+                            if arcpy.Exists(_old):
+                                arcpy.management.Delete(_old)
+                        except Exception:
+                            pass
+                    nclass = len(colors)
+                    breaks = [_rmin, _rmax] if (_rmin is not None and _rmax is not None) else None
                     self._make_lyr(rp, lp, field, module, colors, nclass, method,
-                                   msg, warn, breaks, rp)
-                registry.append((field, rp, lp, module, colors, nclass))
-                msg("Raster: %s [raw float, LZW]" % rp)
+                                   msg, warn, breaks, src_continuous=rp, is_classified=False)
+                    registry.append((field, rp, lp, module, colors, nclass))
+                    msg("Raster: %s [raw float, LZW, continuous]" % rp)
             except Exception as ex:
                 warn("Raster %s failed: %s" % (field, ex))
         arcpy.ResetProgressor()
         return registry
 
     def _make_lyr(self, raster_path, lyr_path, field, module, colors, nclass, method, msg, warn,
-                  breaks=None, src_continuous=None):
-        """Create ArcMap .lyr pointing at the CLASSIFIED display raster, so colors
-        show immediately on open (colormap renderer embedded via AddColormap).
-
-        raster_path: the classified display raster (<field>_cls.tif).
-        breaks: true-value class edges computed from the continuous raster (if
-        None, derived from the display raster itself). src_continuous: the raw
-        float GeoTIFF kept alongside for analysis.
+                  breaks=None, src_continuous=None, is_classified=True):
+        """Create ArcMap .lyr pointing at the raster.
+        When is_classified is True: points to classified display raster (<field>_cls.tif) with embedded colormap.
+        When is_classified is False: points directly to the continuous float GeoTIFF (<field>.tif).
         """
         info = FIELD_BY_NAME.get(field, (field, field, "", "", module, "", "", "", "", "", ""))
         try:
@@ -4858,39 +5065,56 @@ class PowerClimateAtlasGenerator(object):
         except Exception as ex:
             warn("MakeRasterLayer failed for %s: %s" % (field, ex))
             return
-        if not breaks:
-            try:
-                _mn = float(arcpy.GetRasterProperties_management(raster_path, "MINIMUM")[0])
-                _mx = float(arcpy.GetRasterProperties_management(raster_path, "MAXIMUM")[0])
-            except Exception:
-                _mn, _mx = 0.0, 1.0
-            breaks = equal_interval_breaks(_mn, _mx, nclass) or [_mn, _mx]
-        disp_note = ("Display: classified %d-class raster (descending, zone 1 = highest) "
-                      "with embedded colormap (raw float: %s). "
-                      % (nclass, os.path.basename(src_continuous or raster_path)))
-        # descending labels: Class 1 = highest interval, colors matched
-        class_lines = []
-        for k in range(1, nclass + 1):
-            _lo, _hi = breaks[nclass - k], breaks[nclass - k + 1]
-            _ci = nclass - k if (nclass - k) < len(colors) else len(colors) - 1
-            class_lines.append("Class %d: %.4g - %.4g  color %s" % (k, _lo, _hi, colors[_ci]))
+
+        if is_classified:
+            if not breaks:
+                try:
+                    _mn = float(arcpy.GetRasterProperties_management(raster_path, "MINIMUM")[0])
+                    _mx = float(arcpy.GetRasterProperties_management(raster_path, "MAXIMUM")[0])
+                except Exception:
+                    _mn, _mx = 0.0, 1.0
+                breaks = equal_interval_breaks(_mn, _mx, nclass) or [_mn, _mx]
+            disp_note = ("Display: classified %d-class raster (%s, descending, zone 1 = highest) "
+                          "with embedded colormap (raw float: %s). "
+                          % (nclass, method, os.path.basename(src_continuous or raster_path)))
+            class_lines = []
+            for k in range(1, nclass + 1):
+                _lo, _hi = breaks[nclass - k], breaks[nclass - k + 1]
+                _ci = nclass - k if (nclass - k) < len(colors) else len(colors) - 1
+                class_lines.append("Class %d: %.4g - %.4g  color %s" % (k, _lo, _hi, colors[_ci]))
+            desc_text = ("%s | %s | Unit: %s | Period: %s | Statistic: %s | "
+                         "Method: %s (%d classes) | Source: NASA POWER. %s"
+                         % (info[1], info[2], info[7], info[5], info[6],
+                            method, nclass, disp_note))
+            credits_text = ("NASA POWER (power.larc.nasa.gov), %s. Gridded/modelled estimates, "
+                            "not station measurements. Created %s. Classification (%s): %s"
+                            % (TOOL_VERSION, now_str(), method, " ; ".join(class_lines)))
+            class_field = method
+        else:
+            disp_note = ("Display: continuous floating-point surface raster (%s). "
+                         % os.path.basename(raster_path))
+            class_lines = []
+            if breaks and len(breaks) >= 2:
+                class_lines.append("Range: %.4g to %.4g %s" % (breaks[0], breaks[-1], info[7]))
+            desc_text = ("%s | %s | Unit: %s | Period: %s | Statistic: %s | "
+                         "Method: %s (Continuous Float) | Source: NASA POWER. %s"
+                         % (info[1], info[2], info[7], info[5], info[6],
+                            method, disp_note))
+            credits_text = ("NASA POWER (power.larc.nasa.gov), %s. Gridded/modelled estimates, "
+                            "not station measurements. Created %s. Continuous floating-point surface."
+                            % (TOOL_VERSION, now_str()))
+            class_field = "Continuous"
+
         try:
             arcpy.management.SaveToLayerFile(lyr_name, lyr_path)
             try:
                 lyr = arcpy.mapping.Layer(lyr_path)
-                lyr.description = ("%s | %s | Unit: %s | Period: %s | Statistic: %s | "
-                                   "Method: %s (equal interval, %d classes) | Source: NASA POWER. %s"
-                                   % (info[1], info[2], info[7], info[5], info[6],
-                                      method, nclass, disp_note))
-                lyr.credits = ("NASA POWER (power.larc.nasa.gov), %s. Gridded/modelled estimates, "
-                               "not station measurements. Created %s. Classification: %s"
-                               % (TOOL_VERSION, now_str(), " ; ".join(class_lines)))
+                lyr.description = desc_text
+                lyr.credits = credits_text
                 lyr.save()
             except Exception as ex:
                 warn("Layer metadata for %s not fully embedded: %s" % (field, ex))
             try:
-                # Force the .lyr to reference the real display raster on disk.
-                # (In-session SA state can otherwise leave a Temp *.afr reference.)
                 _lyr2 = arcpy.mapping.Layer(lyr_path)
                 _lyr2.replaceDataSource(
                     os.path.dirname(raster_path), "RASTER_WORKSPACE",
@@ -4899,23 +5123,20 @@ class PowerClimateAtlasGenerator(object):
             except Exception as ex:
                 warn("Layer datasource relink for %s skipped: %s" % (field, ex))
             try:
-                # NOTE: plain UTF-8 WITHOUT BOM, human-readable Arabic.
-                # (py2.7 json.dump with ensure_ascii=False cannot write to a
-                # text-mode file object, so serialize then write bytes.)
                 meta = {
                     "variable_EN": info[1], "variable_AR": info[2], "unit": info[7],
                     "period": info[5], "statistic": info[6], "method": method,
-                    "classification": "EqualInterval", "classes": nclass,
-                    "breaks": breaks, "colors": colors,
+                    "classification": class_field, "classes": (nclass if is_classified else None),
+                    "breaks": breaks, "colors": (colors if is_classified else None),
                     "class_labels": class_lines,
                     "display_raster": os.path.basename(raster_path),
-                    "source_raster": os.path.basename(
-                        src_continuous or raster_path),
-                    "data_min": breaks[0], "data_max": breaks[-1],
+                    "source_raster": os.path.basename(src_continuous or raster_path),
+                    "data_min": (breaks[0] if breaks else None),
+                    "data_max": (breaks[-1] if breaks else None),
                     "source": "NASA POWER", "created": now_str(),
                     "raster": os.path.basename(raster_path),
-                    "arcmap_note": "Opens with embedded colormap colors. Raw float values "
-                                   "stay in the source_raster GeoTIFF.",
+                    "arcmap_note": ("Opens with embedded colormap colors. Raw float values stay in the source_raster GeoTIFF."
+                                    if is_classified else "Continuous floating-point surface raster."),
                 }
                 _s = json.dumps(meta, ensure_ascii=False, indent=2)
                 if not isinstance(_s, bytes):
@@ -5071,7 +5292,7 @@ class PowerClimateAtlasGenerator(object):
                 r["Notes"] = "Climatological annual total (mean of per-year sums)"
             if r["Field_Name"] == "R_Annual_Mean":
                 r["Notes"] = "Mean of climatological monthly totals (= Total/12)"
-            if r["Field_Name"] in ("HI_Annual_Mean", "HI_Summer_Mean"):
+            if r["Field_Name"] in ("HI_Annual_Mean", "HI_Summer_Mean", "HI_Winter_Mean"):
                 r["Notes"] = ((r["Notes"] + "; ") if r["Notes"] else "") + \
                     "Needs humidity (RH2M); NoData when unavailable"
             if r["Field_Name"].startswith("W_Dir"):
@@ -5212,6 +5433,7 @@ class PowerClimateAtlasGenerator(object):
         try:
             ranges = [("Temperature", "T_Annual_Mean", (-30, 45)),
                       ("Temperature", "HI_Annual_Mean", (-30, 60)),
+                      ("Temperature", "HI_Winter_Mean", (-30, 60)),
                       ("Relative Humidity", "RH_Annual_Mean", (0, 100)),
                       ("Cloud Cover", "Cld_Annual_Mean", (0, 100)),
                       ("Sea Level Pressure", "PSL_Annual_Mean", (870, 1050)),

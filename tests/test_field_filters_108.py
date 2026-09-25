@@ -7,7 +7,8 @@ Environment: ArcGIS Desktop 10.8 (Python 2.7)
 import os
 import sys
 
-BASE = r"C:\Users\ahmad\Desktop\NASA POWER Climate Atlas Generator"
+_test_dir = os.path.dirname(os.path.abspath(__file__))
+BASE = os.path.dirname(_test_dir)
 PYT = os.path.join(BASE, "POWER_Climate_Atlas_Generator_10_8.pyt")
 
 mod = type(sys)("mfilter")
@@ -25,7 +26,8 @@ def check(name, cond, detail=""):
 print("=== 1. Candidate Fields Generation (get_candidate_fields) ===")
 # All candidates for Temperature
 c_temp = mod.get_candidate_fields(["Temperature"])
-check("Temperature has 12 candidate fields", len(c_temp) == 12, len(c_temp))
+check("Temperature has 13 candidate fields", len(c_temp) == 13, len(c_temp))
+check("Temperature contains HI_Winter_Mean", "HI_Winter_Mean" in [c[0] for c in c_temp])
 
 # Summer only for Temperature
 c_sum = mod.get_candidate_fields(["Temperature"], ["Seasonal Summaries"], ["Summer (JJA)"])
@@ -35,6 +37,13 @@ check("Summer contains T_Summer_Mean", "T_Summer_Mean" in sum_names)
 check("Summer contains T_Max_Summer_Month_Mean", "T_Max_Summer_Month_Mean" in sum_names)
 check("Summer contains HI_Summer_Mean", "HI_Summer_Mean" in sum_names)
 check("Summer excludes T_Winter_Mean", "T_Winter_Mean" not in sum_names)
+check("Summer excludes HI_Winter_Mean", "HI_Winter_Mean" not in sum_names)
+
+# Winter only for Temperature
+c_win_t = mod.get_candidate_fields(["Temperature"], ["Seasonal Summaries"], ["Winter (DJF)"])
+win_t_names = [c[0] for c in c_win_t]
+check("Winter temperature has 3 fields", len(win_t_names) == 3, win_t_names)
+check("Winter contains HI_Winter_Mean", "HI_Winter_Mean" in win_t_names)
 
 # Winter only for Precipitation
 c_win_p = mod.get_candidate_fields(["Precipitation"], ["Seasonal Summaries"], ["Winter (DJF)"])
@@ -89,21 +98,25 @@ print("=== 3. Toolbox Parameters & Dynamic GUI Synchronization ===")
 import arcpy
 tool = mod.PowerClimateAtlasGenerator()
 ps = tool.getParameterInfo()
-check("Total parameters is 46", len(ps) == 46, len(ps))
+check("Total parameters is 50", len(ps) == 50, len(ps))
 
 pdict = dict((p.name, p) for p in ps)
 check("Field_Filter_Scope exists", "Field_Filter_Scope" in pdict)
 check("Included_Aggregations exists", "Included_Aggregations" in pdict)
 check("Included_Seasons exists", "Included_Seasons" in pdict)
 check("Selected_Fields exists", "Selected_Fields" in pdict)
+check("Enable_Raster_Reclass exists", "Enable_Raster_Reclass" in pdict)
+check("Reclass_Classes_Count exists", "Reclass_Classes_Count" in pdict)
+check("Reclass_Method exists", "Reclass_Method" in pdict)
+check("Enable_Raster_Reclass default False", pdict["Enable_Raster_Reclass"].value == False)
 
 # Check positions and display names
 names = [p.name for p in ps]
-check("Climate_Modules is at index 8", names[8] == "Climate_Modules")
-check("Selected_Fields is directly under Climate_Modules at index 9", names[9] == "Selected_Fields")
+check("Climate_Modules is at index 18", names[18] == "Climate_Modules")
+check("Selected_Fields is directly under Climate_Modules at index 19", names[19] == "Selected_Fields")
 check("Selected_Fields displayName is Variables Selection (Checklist)",
-      ps[9].displayName == "Variables Selection (Checklist)")
-check("Field_Filter_Scope is at index 10", names[10] == "Field_Filter_Scope")
+      ps[19].displayName == "Variables Selection (Checklist)")
+check("Field_Filter_Scope is at index 20", names[20] == "Field_Filter_Scope")
 check("Field_Filter_Scope category is Variable & Field Selection",
       pdict["Field_Filter_Scope"].category == "Variable & Field Selection")
 
@@ -113,6 +126,16 @@ tool.updateParameters(ps)
 check("Default Full Suite disables Included_Aggregations", not pdict["Included_Aggregations"].enabled)
 check("Default Full Suite disables Included_Seasons", not pdict["Included_Seasons"].enabled)
 check("Default Full Suite disables Selected_Fields", not pdict["Selected_Fields"].enabled)
+check("Default disables Reclass_Classes_Count", not pdict["Reclass_Classes_Count"].enabled)
+check("Default disables Reclass_Method", not pdict["Reclass_Method"].enabled)
+
+# Test dynamic toggle of reclass options
+pdict["Enable_Raster_Reclass"].value = True
+tool.updateParameters(ps)
+check("Enabling reclass enables Reclass_Classes_Count", pdict["Reclass_Classes_Count"].enabled)
+check("Enabling reclass enables Reclass_Method", pdict["Reclass_Method"].enabled)
+pdict["Enable_Raster_Reclass"].value = False
+tool.updateParameters(ps)
 
 # Switch to Filter by Seasons & Aggregations
 pdict["Field_Filter_Scope"].value = "Filter by Seasons & Aggregations"

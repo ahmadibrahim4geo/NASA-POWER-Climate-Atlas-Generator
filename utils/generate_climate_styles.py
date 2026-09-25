@@ -47,6 +47,42 @@ def write_clr(path, hex_colors, start_val=1):
 
 TEMPERATURE_STYLES = [
   {
+    "category": "Sequential",
+    "name_ar": "تدرج أصفر برتقالي أحمر كلاسيكي",
+    "name_en": "ColorBrewer YlOrRd Classic",
+    "id": "Temp_Seq_YlOrRd",
+    "source": "ColorBrewer YlOrRd",
+    "classes": {
+      "3": ["#FFEDA0", "#FEB24C", "#F03B20"],
+      "4": ["#FFFFB2", "#FECC5C", "#FD8D3C", "#E31A1C"],
+      "5": ["#FFFFB2", "#FECC5C", "#FD8D3C", "#F03B20", "#BD0026"],
+      "6": ["#FFFFB2", "#FED976", "#FEB24C", "#FD8D3C", "#F03B20", "#BD0026"],
+      "7": ["#FFFFB2", "#FED976", "#FEB24C", "#FD8D3C", "#FC4E2A", "#E31A1C", "#B10026"],
+      "8": ["#FFFFCC", "#FFEDA0", "#FED976", "#FEB24C", "#FD8D3C", "#FC4E2A", "#E31A1C", "#B10026"],
+      "9": ["#FFFFCC", "#FFEDA0", "#FED976", "#FEB24C", "#FD8D3C", "#FC4E2A", "#E31A1C", "#BD0026", "#800026"],
+      "10": ["#FFFFCC", "#FFF0A3", "#FED976", "#FEC157", "#FEA144", "#FD7B36", "#F54826", "#E31A1C", "#BD0026", "#800026"],
+      "11": ["#FFFFCC", "#FFF2A8", "#FFE187", "#FECB67", "#FEAC4A", "#FD8D3C", "#FD632F", "#F03722", "#D71321", "#B10026", "#800026"]
+    }
+  },
+  {
+    "category": "Sequential",
+    "name_ar": "تدرج برتقالي أحمر متتابع",
+    "name_en": "ColorBrewer OrRd Classic",
+    "id": "Temp_Seq_OrRd",
+    "source": "ColorBrewer OrRd",
+    "classes": {
+      "3": ["#FEE8C8", "#FDBB84", "#E34A33"],
+      "4": ["#FEF0D9", "#FDCC8A", "#FC8D59", "#D7301F"],
+      "5": ["#FEF0D9", "#FDBB84", "#FC8D59", "#E34A33", "#B30000"],
+      "6": ["#FEF0D9", "#FDD49E", "#FDBB84", "#FC8D59", "#E34A33", "#B30000"],
+      "7": ["#FEF0D9", "#FDD49E", "#FDBB84", "#FC8D59", "#EF6548", "#D7301F", "#990000"],
+      "8": ["#FFF7EC", "#FEE8C8", "#FDD49E", "#FDBB84", "#FC8D59", "#EF6548", "#D7301F", "#990000"],
+      "9": ["#FFF7EC", "#FEE8C8", "#FDD49E", "#FDBB84", "#FC8D59", "#EF6548", "#D7301F", "#B30000", "#7F0000"],
+      "10": ["#FFF7EC", "#FEF0D9", "#FEE0B6", "#FDC590", "#FCA76E", "#F57D4F", "#E65239", "#CE261B", "#A80000", "#7F0000"],
+      "11": ["#FFF7EC", "#FEF0D9", "#FEE3BE", "#FDCFA0", "#FDBB84", "#FC9F67", "#F78051", "#EA593C", "#D7301F", "#B10000", "#7F0000"]
+    }
+  },
+  {
     "category": "Sequential", 
     "name_ar": "تدرج أحمر دافئ متتابع", 
     "source": "ColorBrewer Reds", 

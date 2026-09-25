@@ -98,7 +98,7 @@ The tool strictly adheres to standard 3-month meteorological seasons based on fu
 - **Autumn (SON)**: September, October, November
 
 ### Module Architecture & Indicator Coverage
-1. **Temperature (`01_Temperature`)**: 12 indicators including annual/seasonal means, annual range, warmest summer month, coldest winter month, extreme daily means, and Steadman-Rothfusz Heat Index.
+1. **Temperature (`01_Temperature`)**: 13 indicators including annual/seasonal means, annual range, warmest summer month, coldest winter month, extreme daily means, and perceived temperature indices (Annual & Summer Steadman-Rothfusz Heat Index, Winter Humidex IH).
 2. **Precipitation (`02_Precipitation`)**: 8 indicators including annual total, monthly average, seasonal totals, maximum 24h rainfall, and rain days ($\ge 0.1\text{ mm}$).
 3. **Drought & Aridity (`10_Drought_And_Aridity`)**: 5 indicators (De Martonne, Hargreaves PET, UNEP Aridity Index, Climatic Water Deficit, Biologically Dry Months).
 4. **Sea Level Pressure (`03_Sea_Level_Pressure`)**: 6 indicators covering annual and seasonal mean sea level pressure (MSLP).
@@ -189,4 +189,18 @@ Generated automatically using the native `xlwt` library in Python 2.7:
 - **IDW Gentle Decay**: Uses power = 1.2 by default to eliminate artificial bullseye patterns around stations.
 - **Spline with Tension**: Produces smooth surfaces that strictly honor station values without extreme overshooting.
 - **ExtractByMask**: Clips all outputs cleanly to the polygon study area boundary with enforced LZW TIFF compression.
-- **Layer Symbology (`.lyr`)**: Generates 7-class and 5-class color-ramped ArcGIS layer files ready for immediate cartographic publishing.
+- **Layer Symbology (`.lyr`)**: Generates calibrated color-ramped ArcGIS layer files ready for immediate cartographic publishing.
+
+### Raster Reclassification Options
+Located directly beneath the **Interpolation Parameters** category:
+- **Default State (`Enable_Raster_Reclass = False`)**:
+  - Only clean, continuous floating-point surface GeoTIFFs (`.tif`) are generated, without creating additional discrete classified files. Layer files (`.lyr`) and sidecar JSONs reference the continuous raster directly.
+- **When Enabled (`Enable_Raster_Reclass = True`)**:
+  - **Number of Classes (`Reclass_Classes_Count`)**: User-selectable from 2 to 32 classes (default: 7).
+  - **Classification Method (`Reclass_Method`)**:
+    1. **Natural Breaks (Jenks)**: Minimizes squared deviations within classes while maximizing variance between classes.
+    2. **Equal Interval**: Partitions the span into intervals of equal range.
+    3. **Equal Area (Quantile)**: Equal number of grid cells per class.
+    4. **Geometric Interval**: Geometrically distributed ranges suited for skewed climate data.
+    5. **Standard Deviation**: Classifies cells relative to their mean and standard deviation.
+  - Automatically generates classified display rasters (`_cls.tif`), builds Raster Attribute Tables (VAT), embeds `.clr` colormaps mathematically interpolated to the requested class count, and documents precise true-data break boundaries in layer metadata.

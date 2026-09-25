@@ -35,3 +35,10 @@ $RECYCLE.BIN/
 .idea/
 *.suo
 *.user
+
+# Redundant build and test output files
+/All_ArcMap_Styles_Consolidated/
+/NASA_POWER_Climate_Atlas_Master.style
+style/*/STYLE/
+style/ArcMap_Style_Files/
+tests/_test_reclass_tmp/

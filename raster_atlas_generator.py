@@ -114,6 +114,10 @@ SUBMODEL_DEPS = {
     },
     "Heat Index / Thermal Stress [Requires: Temperature, Relative Humidity]": {
         "short": "Heat_Index",
+        "fields": [
+            ("HI_Summer_Mean", "Heat Index Summer Mean (deg C)"),
+            ("HI_Winter_Mean", "Heat Index Winter Mean Humidex (deg C)")
+        ],
         "field": "HI_Summer_Mean",
         "label": "Heat Index Summer Mean (deg C)",
         "modules": ["Temperature", "Relative Humidity"],
@@ -233,6 +237,25 @@ def heat_index_c(t_c, rh):
     elif rh > 85.0 and 80.0 <= t_f <= 87.0:
         hi += ((rh - 85.0) / 10.0) * ((87.0 - t_f) / 5.0)
     return (hi - 32.0) * 5.0 / 9.0
+
+
+def humidex_c(t_c, rh):
+    """Canadian Humidex (IH) in C from air temp C + RH %.
+
+    Formula:
+      e = 6.112 * (10.0 ** ((7.5 * t_c) / (237.7 + t_c))) * (rh / 100.0)
+      humidex = t_c + (5.0 / 9.0) * (e - 10.0)
+    Returns None when inputs are missing."""
+    if t_c is None or rh is None or is_missing(t_c) or is_missing(rh):
+        return None
+    t_c, rh = float(t_c), float(rh)
+    if rh < 0.0:
+        rh = 0.0
+    if rh > 100.0:
+        rh = 100.0
+    e = 6.112 * (10.0 ** ((7.5 * t_c) / (237.7 + t_c))) * (rh / 100.0)
+    return t_c + (5.0 / 9.0) * (e - 10.0)
+
 
 MODULE_FOLDER = {
     "Temperature": "01_Temperature",
@@ -1220,12 +1243,12 @@ class RasterDataClimateAtlasGenerator(object):
         for s in active_submodels:
             info = SUBMODEL_DEPS.get(s)
             if info:
-                fld = info["field"]
-                lbl = info["label"]
-                indicator_fields.append((fld, lbl))
-                existing_f = [f.name for f in arcpy.ListFields(pts_fc)]
-                if fld not in existing_f:
-                    arcpy.AddField_management(pts_fc, fld, "DOUBLE")
+                f_list = info.get("fields", [(info["field"], info["label"])])
+                for fld, lbl in f_list:
+                    indicator_fields.append((fld, lbl))
+                    existing_f = [f.name for f in arcpy.ListFields(pts_fc)]
+                    if fld not in existing_f:
+                        arcpy.AddField_management(pts_fc, fld, "DOUBLE")
 
         # Ensure Data_Start and Data_End exist in pts_fc
         existing_flds = [f.name for f in arcpy.ListFields(pts_fc)]
@@ -1288,6 +1311,8 @@ class RasterDataClimateAtlasGenerator(object):
                         val = 12.0 if (p is not None and t is not None and p < (2.0 * t)) else 0.0
                     elif fld == "HI_Summer_Mean":
                         val = heat_index_c(t, rh)
+                    elif fld == "HI_Winter_Mean":
+                        val = humidex_c(t, rh)
                     row[2 + f_idx] = round(val, 3) if val is not None else None
                 cur.updateRow(row)
 
@@ -1464,6 +1489,16 @@ class RasterDataClimateAtlasGenerator(object):
             ["Sea Level Pressure", "PSL_Annual_Mean", "Annual Mean Sea Level Pressure", "hPa", "Gridded Reanalysis"],
             ["Cloud Cover", "Cld_Annual_Mean", "Annual Mean Total Cloud Amount", "%", "Gridded Reanalysis"]
         ]
+        if "Climate_Models" in modules:
+            rows_en.extend([
+                ["Climate Models", "DM_Aridity_Annual", "De Martonne Aridity Index", "Index", "Gridded Reanalysis"],
+                ["Climate Models", "PET_Hargreaves_Annual", "Hargreaves Potential Evapotranspiration", "mm/yr", "Gridded Reanalysis"],
+                ["Climate Models", "UNEP_Aridity_Annual", "UNEP Aridity Index", "Index", "Gridded Reanalysis"],
+                ["Climate Models", "Water_Deficit_Annual", "Annual Climatic Water Deficit", "mm/yr", "Gridded Reanalysis"],
+                ["Climate Models", "Dry_Months_Count", "Walter-Lieth Biological Dry Months Count", "months", "Gridded Reanalysis"],
+                ["Climate Models", "HI_Summer_Mean", "Summer Mean Heat Index (Rothfusz)", "deg C", "Gridded Reanalysis"],
+                ["Climate Models", "HI_Winter_Mean", "Winter Mean Perceived Temperature (Humidex IH)", "deg C", "Gridded Reanalysis"],
+            ])
         write_csv(dict_en, header_en, rows_en)
 
         header_ar = ["العنصر", "اسم_الحقل", "الوصف", "الوحدة", "المصدر"]
@@ -1483,6 +1518,7 @@ class RasterDataClimateAtlasGenerator(object):
                 [u"النماذج المناخية", u"Water_Deficit_Annual", u"العجز المائي المناخي السنوي (P - PET)", u"ملم/سنة", u"مشتق من بيانات شبكية"],
                 [u"النماذج المناخية", u"Dry_Months_Count", u"عدد الشهور الجافة وفق فالتر-ليت (P < 2T)", u"شهر", u"مشتق من بيانات شبكية"],
                 [u"النماذج المناخية", u"HI_Summer_Mean", u"المتوسط الصيفي لدليل الإجهاد الحراري", u"مئوية", u"مشتق من بيانات شبكية"],
+                [u"النماذج المناخية", u"HI_Winter_Mean", u"المتوسط الشتوي لمؤشر الحرارة المحسوسة (الهيوميدكس IH)", u"مئوية", u"مشتق من بيانات شبكية"],
             ])
         write_csv(dict_ar, header_ar, rows_ar)
 

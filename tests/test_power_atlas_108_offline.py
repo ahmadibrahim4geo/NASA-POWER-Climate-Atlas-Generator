@@ -10,7 +10,9 @@ import calendar
 import os
 import sys
 
-PYT = r"C:\Users\ahmad\Desktop\NASA POWER Climate Atlas Generator\POWER_Climate_Atlas_Generator_10_8.pyt"
+_test_dir = os.path.dirname(os.path.abspath(__file__))
+BASE = os.path.dirname(_test_dir)
+PYT = os.path.join(BASE, "POWER_Climate_Atlas_Generator_10_8.pyt")
 
 mod = type(sys)("power_pyt_108")
 mod.__dict__["__name__"] = "power_pyt_108"
@@ -57,6 +59,8 @@ check("T annual max mean", abs(tf["T_Annual_Max_Mean"] - 21.5) < 1e-9, tf["T_Ann
 check("T annual min mean", abs(tf["T_Annual_Min_Mean"] - 11.5) < 1e-9, tf["T_Annual_Min_Mean"])
 check("HI equals T when cool", abs(tf["HI_Annual_Mean"] - 16.5) < 1e-9 and abs(tf["HI_Summer_Mean"] - 17.0) < 1e-9,
       (tf["HI_Annual_Mean"], tf["HI_Summer_Mean"]))
+check("HI_Winter_Mean present", tf.get("HI_Winter_Mean") is not None, tf.get("HI_Winter_Mean"))
+check("humidex calculation", mod.humidex_c(15.0, 60.0) is not None)
 check("HI below threshold", mod.heat_index_c(20.0, 50.0) == 20.0)
 _hot = mod.heat_index_c(35.0, 60.0)
 check("HI exceeds air temp when hot", _hot is not None and 40.0 < _hot < 50.0, _hot)
@@ -113,18 +117,18 @@ check("PSL range varying", abs(pfr["PSL_Annual_Range"] - 110.0) < 1e-9, pfr["PSL
 check("temp fetches RH2M", "RH2M" in mod.MODULE_PARAMS["Temperature"])
 
 rows = mod.metadata_rows_for_modules(["Temperature", "Wind"])
-check("metadata rows T+W=24", len(rows) == 12 + 12, len(rows))
+check("metadata rows T+W=25", len(rows) == 13 + 12, len(rows))
 cols = ["Field_Name", "Full_Name_EN", "Name_AR", "NASA_Code", "Module", "Period", "Statistic", "Unit", "Description_AR", "Description_EN", "Calculation", "Source", "Notes"]
 check("metadata cols", all(all(c in r for c in cols) for r in rows))
-check("REQUIRED 82", len(mod.REQUIRED_COLUMNS) == 82, len(mod.REQUIRED_COLUMNS))
+check("REQUIRED 83", len(mod.REQUIRED_COLUMNS) == 83, len(mod.REQUIRED_COLUMNS))
 check("all fielddefs in REQUIRED", all(r[0] in mod.REQUIRED_COLUMNS for r in mod.FIELD_DEFS))
 
 allf = [r[0] for r in mod.FIELD_DEFS] + [a[0] for a in mod.ADMIN_FIELDS]
 bad = [f for f in allf if len(f) > 10]
 check("long names all mapped", all(b in mod.SHP_FIELD_MAP for b in bad), bad[:3])
-check("shp map 71 unique<=10", len(mod.SHP_FIELD_MAP) == 71
+check("shp map 72 unique<=10", len(mod.SHP_FIELD_MAP) == 72
       and all(len(v) <= 10 for v in mod.SHP_FIELD_MAP.values())
-      and len(set(mod.SHP_FIELD_MAP.values())) == 71)
+      and len(set(mod.SHP_FIELD_MAP.values())) == 72)
 check("shp map covers climate", all(f in mod.SHP_FIELD_MAP for r in mod.FIELD_DEFS for f in [r[0]]))
 check("ramps 7", all(len(mod.COLOR_RAMPS[k]) == 7 for k in ["Temperature", "Precipitation", "Sea Level Pressure", "Relative Humidity", "Solar Radiation", "Cloud Cover"]))
 check("UV 5 classes", len(mod.COLOR_RAMPS["UV Index"]) == 5)

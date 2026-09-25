@@ -13,7 +13,7 @@ import shutil
 import time
 import gc
 
-BASE_DIR = "C:/Users/ahmad/Desktop/NASA POWER Climate Atlas Generator"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STYLE_DIR = os.path.join(BASE_DIR, "style")
 RAW_DIR = os.path.join(STYLE_DIR, "Raw_Climate_Styles")
 TEMPLATE_STYLE = os.path.join(RAW_DIR, "Meteorological.style")
@@ -56,7 +56,7 @@ def create_stepped_multipart_ramp(hex_list, name):
     """
     Creates a discrete stepped MultiPartColorRamp where each class
     is a uniform AlgorithmicColorRamp with FromColor == ToColor.
-    Displays in ArcMap Style Manager as crisp, flat, stepped class blocks.
+    Leaves Size = 0 so ArcMap dynamically scales the steps across 100% of the preview width.
     """
     multi_obj = comtypes.client.CreateObject("esriDisplay.MultiPartColorRamp")
     multi = multi_obj.QueryInterface(m_disp.IMultiPartColorRamp)
@@ -69,18 +69,14 @@ def create_stepped_multipart_ramp(hex_list, name):
         part.FromColor = make_rgb(r, g, b)
         part.ToColor = make_rgb(r, g, b)
         part.Algorithm = 1  # esriCIELabAlgorithm
-        part_cr = part_obj.QueryInterface(m_disp.IColorRamp)
-        part_cr.Size = 10
-        part_cr.CreateRamp()
-        multi.AddRamp(part_cr)
-    multi_cr.Size = len(hex_list) * 5
-    multi_cr.CreateRamp()
+        multi.AddRamp(part_obj.QueryInterface(m_disp.IColorRamp))
     return multi_obj
 
 def create_smooth_multipart_ramp(hex_list, name):
     """
     Creates a continuous smooth MultiPartColorRamp connecting adjacent
     class colors with CIELab interpolation for continuous raster mapping.
+    Leaves Size = 0 so ArcMap smoothly interpolates across 100% of the preview width.
     """
     multi_obj = comtypes.client.CreateObject("esriDisplay.MultiPartColorRamp")
     multi = multi_obj.QueryInterface(m_disp.IMultiPartColorRamp)
@@ -95,12 +91,7 @@ def create_smooth_multipart_ramp(hex_list, name):
         part.FromColor = make_rgb(r1, g1, b1)
         part.ToColor = make_rgb(r2, g2, b2)
         part.Algorithm = 1  # esriCIELabAlgorithm
-        part_cr = part_obj.QueryInterface(m_disp.IColorRamp)
-        part_cr.Size = 10
-        part_cr.CreateRamp()
-        multi.AddRamp(part_cr)
-    multi_cr.Size = 20
-    multi_cr.CreateRamp()
+        multi.AddRamp(part_obj.QueryInterface(m_disp.IColorRamp))
     return multi_obj
 
 def create_fill_symbol(hex_c):
@@ -184,7 +175,7 @@ def build_element_style(target_path, style_list, element_label):
             item_s = comtypes.client.CreateObject("esriFramework.StyleGalleryItem")
             it_s = item_s.QueryInterface(m_disp.IStyleGalleryItem)
             it_s.Name = stepped_name
-            it_s.Category = unicode(s_cat)
+            it_s.Category = u"Default Ramps"
             it_s.Item = r_stepped
             sg.AddItem(it_s)
             ramp_count += 1
@@ -195,7 +186,7 @@ def build_element_style(target_path, style_list, element_label):
             item_sm = comtypes.client.CreateObject("esriFramework.StyleGalleryItem")
             it_sm = item_sm.QueryInterface(m_disp.IStyleGalleryItem)
             it_sm.Name = smooth_name
-            it_sm.Category = unicode(s_cat)
+            it_sm.Category = u"Default Ramps"
             it_sm.Item = r_smooth
             sg.AddItem(it_sm)
             ramp_count += 1
@@ -219,7 +210,7 @@ def build_element_style(target_path, style_list, element_label):
                 it_col = comtypes.client.CreateObject("esriFramework.StyleGalleryItem")
                 it_c_i = it_col.QueryInterface(m_disp.IStyleGalleryItem)
                 it_c_i.Name = c_label
-                it_c_i.Category = unicode(s_cat)
+                it_c_i.Category = u"Default Ramps"
                 it_c_i.Item = rgb_obj
                 sg.AddItem(it_c_i)
                 color_count += 1
@@ -229,7 +220,7 @@ def build_element_style(target_path, style_list, element_label):
                 it_f = comtypes.client.CreateObject("esriFramework.StyleGalleryItem")
                 it_f_i = it_f.QueryInterface(m_disp.IStyleGalleryItem)
                 it_f_i.Name = f_label
-                it_f_i.Category = unicode(s_cat)
+                it_f_i.Category = u"Default Ramps"
                 it_f_i.Item = fill_obj
                 sg.AddItem(it_f_i)
                 fill_count += 1
@@ -282,6 +273,7 @@ if __name__ == "__main__":
     # 3. Master Style Database (All 125 Styles Combined: 2,250 ramps)
     master_style_file = os.path.join(OUT_STYLE_DIR, "NASA_POWER_Climate_Atlas_Master.style")
     build_element_style(master_style_file, all_master_styles, "Climate Atlas Master")
+    shutil.copyfile(master_style_file, os.path.join(BASE_DIR, "NASA_POWER_Climate_Atlas_Master.style"))
 
     # 4. Copy to element STYLE folders and consolidated folders
     print("\nSynchronizing .style files across all designated repositories...")
@@ -291,15 +283,21 @@ if __name__ == "__main__":
             shutil.copyfile(src_path, os.path.join(CONSOLIDATED_1, f))
             shutil.copyfile(src_path, os.path.join(CONSOLIDATED_2, f))
 
-    # Also copy into style/<Element>/STYLE/
+    # Also copy into style/<Element>/ and style/<Element>/STYLE/
     for el_fld, st_file in element_file_map.items():
         src_p = os.path.join(OUT_STYLE_DIR, st_file)
+        # 1. Direct element folder
+        el_root = os.path.join(STYLE_DIR, el_fld)
+        if os.path.isdir(el_root):
+            shutil.copyfile(src_p, os.path.join(el_root, st_file))
+        # 2. Subfolder STYLE
         dst_dir = os.path.join(STYLE_DIR, el_fld, "STYLE")
         if not os.path.isdir(dst_dir):
             os.makedirs(dst_dir)
         shutil.copyfile(src_p, os.path.join(dst_dir, st_file))
 
-    # Copy 01_Temperature.style into style/01_Temperature/STYLE/
+    # Copy 01_Temperature.style into style/01_Temperature/ and style/01_Temperature/STYLE/
+    shutil.copyfile(temp_style_file, os.path.join(STYLE_DIR, "01_Temperature", "01_Temperature.style"))
     t_dst = os.path.join(STYLE_DIR, "01_Temperature", "STYLE")
     if not os.path.isdir(t_dst):
         os.makedirs(t_dst)
