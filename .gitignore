@@ -1,0 +1,37 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.pytc
+
+# ArcGIS Desktop lock and temporary files
+*.ldb
+*.sr.lock
+*.rd.lock
+*.ed.lock
+*.gdb.lock
+
+# Runtime and execution logs
+*.log
+tests/logs/*.log
+tests/logs/*.txt
+!tests/logs/.gitkeep
+
+# Microsoft Office temporary files
+~$*.xlsx
+~$*.docx
+~$*.pptx
+
+# Operating System files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+*.tmp
+
+# VS Code / IDE settings
+.vscode/
+.idea/
+*.suo
+*.user
