@@ -48,7 +48,7 @@ The **NASA POWER & Open-Meteo Climate Atlas Generator** is an enterprise-grade A
 - **100% Standalone**: Runs in 32-bit ArcGIS 10.8 without external dependencies (uses native `arcpy`, `requests`, `urllib2`, `csv`, and `xlwt`).
 - **Dual Operating Modes**: Complete online download pipeline or 100% offline interpolation of pre-existing datasets.
 - **WMO Compliant**: Full adherence to World Meteorological Organization (WMO) climatological standards and meteorological seasons.
-- **Multimodal Output**: File Geodatabase feature classes, shapefiles, LZW-compressed GeoTIFF rasters, ArcGIS layer files (`.lyr`), UTF-8 BOM CSV files, and professionally styled Excel workbooks (`.xls`).
+- **Multimodal Output**: File Geodatabase feature classes, shapefiles, LZW-compressed GeoTIFF rasters (clipped to the study area and written directly inside each element folder), UTF-8 BOM CSV files, and professionally styled Excel workbooks (`.xls`).
 
 ---
 
@@ -61,7 +61,7 @@ A master parameter at the very top of the tool (`Operation_Mode`) dictates the o
 - **Behavior**:
   - `Input_Point_Features` is enabled; `Precalculated_Point_Layer` is disabled.
   - All internet access parameters (`Climate_Data_Source`, `OpenMeteo_Model`), time configuration (`Time_Mode`, `Single_Year`, `Start_Year`, `End_Year`, calendar controls), temporal resolution, and gap filling are active.
-  - Sequentially queries NASA POWER or Open-Meteo ERA5 APIs, computes 82 indicators, writes to GDB/Shapefile, generates rasters, contours, wind arrows, styled layers, and Excel files.
+  - Sequentially queries NASA POWER or Open-Meteo ERA5 APIs, computes 82 indicators, writes to GDB/Shapefile, generates clipped rasters, contours, wind arrows, map layers, and Excel files.
 
 ### B. Offline Mode: Interpolate & Map Existing Data (`Interpolate & Map Existing Data (Offline Mode - No Internet)`)
 - **Use Case**: Reprocessing, re-interpolating, re-masking, or changing cell size on point datasets generated during a previous run without requiring an internet connection.
@@ -69,7 +69,7 @@ A master parameter at the very top of the tool (`Operation_Mode`) dictates the o
   - `Input_Point_Features` is disabled; `Precalculated_Point_Layer` is enabled.
   - **All online and download parameters are disabled and locked**.
   - **Automatic Field Discovery**: When a layer is chosen, the engine scans its fields, identifies which climate modules are present, and preselects them in `Climate_Modules` and `Variables Selection (Checklist)`.
-  - Directly executes spatial interpolation (IDW / Kriging / Spline), mask clipping, focal smoothing, `.lyr` styling, and master Excel workbook creation directly from the local data.
+  - Directly executes spatial interpolation (IDW / Kriging / Spline), mask clipping, focal smoothing, and master Excel workbook creation directly from the local data, then adds the resulting rasters to the map.
 
 ---
 
@@ -184,17 +184,18 @@ Generated automatically using the native `xlwt` library in Python 2.7:
 
 ---
 
-## 9. Spatial Interpolation, Masking & Layer Styling
+## 9. Spatial Interpolation, Masking & Output Layout
 
 - **IDW Gentle Decay**: Uses power = 1.2 by default to eliminate artificial bullseye patterns around stations.
 - **Spline with Tension**: Produces smooth surfaces that strictly honor station values without extreme overshooting.
 - **ExtractByMask**: Clips all outputs cleanly to the polygon study area boundary with enforced LZW TIFF compression.
-- **Layer Symbology (`.lyr`)**: Generates calibrated color-ramped ArcGIS layer files ready for immediate cartographic publishing.
+- **Mask protection**: the reprojected mask (`_scratch/maskp.shp`) is excluded from all intermediate purges and is rebuilt automatically if lost; if clipping fails for any reason the raster is **skipped** (no unclipped surface is ever published as a final result).
+- **Flat output layout**: each element's rasters (`.tif`) are written directly inside its folder (e.g. `01_Temperature/`; wind goes to `05_Wind/Speed/` and `05_Wind/Direction/`) — no `Rasters`/`Layers` subfolders and no `.lyr` files.
 
 ### Raster Reclassification Options
 Located directly beneath the **Interpolation Parameters** category:
 - **Default State (`Enable_Raster_Reclass = False`)**:
-  - Only clean, continuous floating-point surface GeoTIFFs (`.tif`) are generated, without creating additional discrete classified files. Layer files (`.lyr`) and sidecar JSONs reference the continuous raster directly.
+  - Only clean, continuous floating-point surface GeoTIFFs (`.tif`) are generated, without creating additional discrete classified files.
 - **When Enabled (`Enable_Raster_Reclass = True`)**:
   - **Number of Classes (`Reclass_Classes_Count`)**: User-selectable from 2 to 32 classes (default: 7).
   - **Classification Method (`Reclass_Method`)**:

@@ -113,10 +113,12 @@ check("Enable_Raster_Reclass default False", pdict["Enable_Raster_Reclass"].valu
 # Check positions and display names
 names = [p.name for p in ps]
 check("Climate_Modules is at index 18", names[18] == "Climate_Modules")
-check("Selected_Fields is directly under Climate_Modules at index 19", names[19] == "Selected_Fields")
+check("Field_Filter_Scope is first in group at index 19", names[19] == "Field_Filter_Scope")
+check("Included_Aggregations follows scope at index 20", names[20] == "Included_Aggregations")
+check("Included_Seasons follows at index 21", names[21] == "Included_Seasons")
+check("Selected_Fields checklist is last in group at index 22", names[22] == "Selected_Fields")
 check("Selected_Fields displayName is Variables Selection (Checklist)",
-      ps[19].displayName == "Variables Selection (Checklist)")
-check("Field_Filter_Scope is at index 20", names[20] == "Field_Filter_Scope")
+      ps[22].displayName == "Variables Selection (Checklist)")
 check("Field_Filter_Scope category is Variable & Field Selection",
       pdict["Field_Filter_Scope"].category == "Variable & Field Selection")
 

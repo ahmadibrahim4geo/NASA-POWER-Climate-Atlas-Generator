@@ -110,14 +110,92 @@ def create_fill_symbol(hex_c):
     fill.Outline = line_obj.QueryInterface(m_disp.ILineSymbol)
     return fill_obj
 
+def get_theme_for_style(s_id, elem_label):
+    if s_id in ["Temp_Seq_WarmRed", "Temp_Seq_AmberOrange", "Temp_Multi_HeatwaveRisk", "Temp_Seq_TropicalNights", "Temp_Multi_NASA_LST"]:
+        return ("Summer Max Temperature Ramps", "Summer Heat Colors", "Summer Heat Zones")
+    elif s_id in ["Temp_Seq_CoolBlue", "Temp_Seq_FrostThreshold", "Temp_Div_Nuuk_Cryo", "Temp_Seq_DeepPurple"]:
+        return ("Winter Min Temperature Ramps", "Winter Cold Colors", "Winter Cold Zones")
+    elif s_id in ["Temp_Div_RdYlBu_Brewer", "Temp_Div_RdBu_IPCC", "Temp_Multi_WMO_Standard", "Temp_Div_HadCRUT5", "Temp_Multi_KoppenThermal"]:
+        return ("Annual Mean Temperature Ramps", "Annual Mean Colors", "Annual Mean Zones")
+    elif s_id in ["Temp_Multi_SpectralMuted", "Temp_Div_TealCoral", "Temp_Div_PuOr", "Temp_Div_ContinentalThermal"]:
+        return ("Transitional Seasons Ramps", "Transitional Colors", "Transitional Zones")
+    elif s_id in ["Temp_Multi_Thermal_Crameri", "Temp_Multi_Roma_Crameri", "Temp_Multi_NOAA_NWS", "Temp_Multi_ERA5_Thermal", "Temp_Multi_NOAA_CPC", "Temp_Div_NASA_GISTEMP"]:
+        return ("Unified Climatology Ramps", "Unified Climatological Colors", "Unified Climatological Zones")
+    elif s_id in ["Temp_Multi_SteadmanApparent"]:
+        return ("Heat Index Ramps", "Perceived Temperature Colors", "Heat Stress Zones")
+    elif s_id in ["Precip_Seq_Blues", "Precip_Multi_FlashFlood", "Precip_Multi_SnowIce", "Precip_Seq_SWE_Snowpack"]:
+        return ("Winter Rain & Snow Ramps", "Winter Flood Colors", "Winter Flood Zones")
+    elif s_id in ["Precip_Seq_BuPu", "Precip_Div_MonsoonAnomaly", "Precip_Multi_NASA_GPM"]:
+        return ("Summer Monsoon Ramps", "Monsoon Rainfall Colors", "Monsoon Rainfall Zones")
+    elif s_id in ["Precip_Seq_YlGnBu", "Precip_Seq_CHIRPS_Rain", "Precip_Multi_ERA5_Total"]:
+        return ("Annual Precipitation Ramps", "Annual Rainfall Colors", "Annual Precipitation Zones")
+    elif s_id in ["Precip_Multi_DopplerRadar", "Precip_Multi_ConvectiveStorm", "Precip_Seq_Intensity_WMO"]:
+        return ("Transitional Storm Ramps", "Radar Reflectivity Colors", "Convective Storm Zones")
+    elif s_id in ["Precip_Div_BrBG", "Precip_Div_SPI", "Precip_Div_SPEI_Multi"]:
+        return ("Precipitation Anomaly Ramps", "Drought & Surplus Colors", "SPI Drought Zones")
+    elif s_id in ["Pres_Div_WMO_MSLP", "Pres_Synoptic_HighLow", "Pres_Multi_MicrobarIsobars"]:
+        return ("Standard MSL Pressure Ramps", "Standard Pressure Colors", "Isobaric Pressure Zones")
+    elif s_id in ["Pres_Div_SiberianAnticyclone", "Pres_Div_SevereCyclone"]:
+        return ("Winter Anticyclone Ramps", "Winter Anticyclone Colors", "Winter Pressure Zones")
+    elif s_id in ["Pres_Synoptic_Subtropical", "Pres_Multi_Cyclones", "Pres_Seq_Density"]:
+        return ("Summer Subtropical Low Ramps", "Summer Low Pressure Colors", "Summer Pressure Zones")
+    elif s_id in ["SPres_Seq_Hypsometric", "SPres_Multi_Terrain", "SPres_Multi_MicroRelief"]:
+        return ("Hypsometric Surface Pressure Ramps", "Hypsometric Pressure Colors", "Hypsometric Pressure Zones")
+    elif s_id in ["SPres_Seq_ValleyBasin", "SPres_Multi_PlateauHigh", "SPres_Div_Anomaly", "SPres_Div_LapseRate", "SPres_Seq_Altimeter"]:
+        return ("Basin & Plateau Pressure Ramps", "Plateau & Basin Colors", "Plateau & Basin Zones")
+    elif s_id in ["Wind_Seq_Beaufort", "Wind_Seq_PowerDensity"]:
+        return ("Beaufort Wind Speed Ramps", "Beaufort Scale Colors", "Beaufort Wind Zones")
+    elif s_id in ["Wind_Seq_MarineGale", "Wind_Multi_WindChill", "Wind_Multi_SeaState"]:
+        return ("Winter Marine Gale Ramps", "Winter Gale Colors", "Winter Gale Zones")
+    elif s_id in ["Wind_Multi_KhamsinDust", "Wind_Multi_EF_Tornado"]:
+        return ("Spring Khamsin Dust Ramps", "Khamsin Dust Colors", "Khamsin Dust Zones")
+    elif s_id in ["Wind_Seq_ThermalBreeze", "Wind_Multi_DopplerVelocity", "Wind_Multi_JetStream", "Wind_Multi_Hurricanes", "Wind_Multi_AviationTurbulence"]:
+        return ("Coastal Breeze & Aviation Ramps", "Coastal Breeze Colors", "Coastal Breeze Zones")
+    elif s_id in ["RH_Seq_YlGnBu", "RH_Seq_SpecificHumidity", "RH_Multi_PWAT_AtmRiver"]:
+        return ("Annual Relative Humidity Ramps", "Relative Humidity Colors", "Relative Humidity Zones")
+    elif s_id in ["RH_Multi_WBGT_Stress", "RH_Seq_VPD_Agricultural", "RH_Multi_SatWaterVapor"]:
+        return ("Summer Humidity Stress Ramps", "Heat Stress Humidity Colors", "Heat Stress Humidity Zones")
+    elif s_id in ["RH_Seq_FogSaturation", "RH_Multi_DewPointTemp"]:
+        return ("Winter Fog & Saturation Ramps", "Winter Fog Colors", "Winter Fog Zones")
+    elif s_id in ["RH_Div_DewPointDepression", "RH_Div_MoistureFlux"]:
+        return ("Dew Point Depression Ramps", "Dew Point Depression Colors", "Dew Point Depression Zones")
+    elif s_id in ["Solar_Seq_YlOrRd", "Solar_Seq_ESMAP_GHI", "Solar_Seq_PVOUT"]:
+        return ("Annual Solar Radiation Ramps", "Solar Radiation Colors", "Solar Radiation Zones")
+    elif s_id in ["Solar_Seq_DNI_Thermal", "Solar_Seq_GTI_Tilted", "Solar_Seq_ClearnessIndex"]:
+        return ("Summer Peak Solar DNI Ramps", "Direct Solar Colors", "Direct Solar Zones")
+    elif s_id in ["Solar_Seq_SunshineDuration", "Solar_Seq_DHI_Diffuse", "Solar_Multi_SolarAlbedo"]:
+        return ("Winter Diffuse & Sunshine Ramps", "Diffuse Solar Colors", "Diffuse Solar Zones")
+    elif s_id in ["Solar_Seq_PAR_Agronomy"]:
+        return ("Agronomy PAR Radiation Ramps", "Agronomy PAR Colors", "Agronomy PAR Zones")
+    elif s_id in ["UV_Standard_WHO", "UV_EPA_HealthRisk"]:
+        return ("WHO Standard UV Index Ramps", "WHO UV Index Colors", "WHO UV Health Zones")
+    elif s_id in ["UV_SummerPeak", "UV_ErythemalDose", "UV_Multi_Fitzpatrick"]:
+        return ("Summer Extreme UV Peak Ramps", "Summer UV Risk Colors", "Extreme UV Risk Zones")
+    elif s_id in ["UV_Seq_VitaminDSynthesis", "UV_Multi_HighAltitude", "UV_Div_OzoneDepletion"]:
+        return ("Winter Safe UV Ramps", "Safe Vitamin D Colors", "Safe UV Synthesis Zones")
+    elif s_id in ["Cloud_Seq_Okta", "Cloud_Seq_Fraction"]:
+        return ("Okta Scale Cloud Cover Ramps", "Cloud Okta Colors", "Cloud Fraction Zones")
+    elif s_id in ["Cloud_Seq_LowCloudFog", "Cloud_Seq_OpticalDepth", "Cloud_Seq_CirrusIce"]:
+        return ("Winter Low Cloud & Fog Ramps", "Low Ceiling Cloud Colors", "Aviation Fog Zones")
+    elif s_id in ["Cloud_Multi_ConvectiveTops", "Cloud_Multi_AOD_Aerosol", "Cloud_Multi_IR_CloudTop"]:
+        return ("Summer Convective Cloud Ramps", "Convective Cloud Colors", "Convective Storm Zones")
+    elif s_id in ["Aridity_UNEP_World", "Aridity_SoilMoistureDeficit"]:
+        return ("UNEP & De Martonne Aridity Ramps", "Aridity Index Colors", "Aridity Climate Zones")
+    elif s_id in ["Drought_ETo_Hargreaves", "Drought_EDDI_Evaporative", "Drought_ETa_ActualDeficit"]:
+        return ("Summer Evapotranspiration PET Ramps", "Evapotranspiration Colors", "Evaporative Demand Zones")
+    elif s_id in ["Drought_SPEI_Index", "Drought_PDSI_Palmer", "Drought_CMI_CropMoisture", "Drought_NDWI_WaterIndex"]:
+        return ("Water Balance & Deficit Ramps", "Climatic Water Deficit Colors", "Water Balance Zones")
+    elif s_id in ["Drought_Multi_DesertBoundaries"]:
+        return ("Desert Encroachment Ramps", "Desertification Colors", "Desertification Zones")
+    elif s_id in ["Model_Div_WarmingStripes", "Model_Div_TempAnomaly", "Model_Seq_TropicalNightsTR20"]:
+        return ("Warming Stripes & Anomaly Ramps", "Warming Stripes Colors", "Warming Anomaly Zones")
+    elif s_id in ["Model_Div_PrecipChange", "Model_Div_ExtremePrecipR95p", "Model_Seq_ConsecutiveDryDays", "Model_Multi_ExtremesIndex"]:
+        return ("Precipitation Change & Extremes Ramps", "Precipitation Change Colors", "Extreme Climate Zones")
+    elif s_id in ["Model_Multi_SSPSenarios", "Model_Multi_SeaLevelRise", "Model_Seq_DegreeDays"]:
+        return ("Shared Socioeconomic SSP Ramps", "SSP Scenario Colors", "Socioeconomic Scenario Zones")
+    return (elem_label + " Ramps", elem_label + " Colors", elem_label + " Zones")
+
 def build_element_style(target_path, style_list, element_label):
-    """
-    Builds a native ArcMap .style database containing:
-    1. Stepped Color Ramps (فئات مجزأة) for tiers [3, 4, 5, 6, 7, 8, 9, 10, 11]
-    2. Smooth Color Ramps (تدرج ناعم) for tiers [3, 4, 5, 6, 7, 8, 9, 10, 11]
-    3. Individual Named Colors ([Colors])
-    4. Polygon Fill Symbols ([Fill Symbols])
-    """
     ldb = target_path[:-6] + ".ldb" if target_path.endswith(".style") else target_path + ".ldb"
     if os.path.isfile(ldb):
         try: os.remove(ldb)
@@ -163,14 +241,39 @@ def build_element_style(target_path, style_list, element_label):
         classes_map = s.get("classes", {})
         sorted_tier_keys = sorted([int(k) for k in classes_map.keys()])
 
+        ramp_cat, color_cat, fill_cat = get_theme_for_style(s_id, safe_elem_label)
+        theme_tag = ramp_cat.replace(" Temperature Ramps", "").replace(" Precipitation Ramps", "").replace(" Ramps", "").strip()
+
+        if "Master" in safe_elem_label:
+            prefix = s_id.split("_")[0]
+            elem_tag = {
+                "Temp": "01 Temp",
+                "Precip": "02 Precip",
+                "Pres": "03 MSLP",
+                "SPres": "04 SPres",
+                "Wind": "05 Wind",
+                "RH": "06 RH",
+                "Solar": "07 Solar",
+                "UV": "08 UV",
+                "Cloud": "09 Cloud",
+                "Aridity": "10 Drought",
+                "Drought": "10 Drought",
+                "Model": "11 Model"
+            }.get(prefix, safe_elem_label)
+            ramp_prefix = u"%s [%s]" % (elem_tag, theme_tag)
+            color_cat = elem_tag + " - " + color_cat
+            fill_cat = elem_tag + " - " + fill_cat
+        else:
+            ramp_prefix = u"[%s]" % theme_tag
+
         # Color Ramps for all class tiers: [3, 4, 5, 6, 7, 8, 9, 10, 11]
+        # Must be registered under Category: 'Default Ramps' so ArcMap Symbology dropdown displays them.
         for nclass in sorted_tier_keys:
             hex_list = classes_map.get(nclass) or classes_map.get(unicode(nclass)) or classes_map.get(str(nclass))
             if not hex_list:
                 continue
 
-            # 1. Stepped Ramp (فئات مجزأة / Discrete Class Blocks)
-            stepped_name = u"%s - Stepped (%d Classes)" % (s_name_en, nclass)
+            stepped_name = u"%s %s - Stepped (%d Classes)" % (ramp_prefix, s_name_en, nclass)
             r_stepped = create_stepped_multipart_ramp(hex_list, stepped_name)
             item_s = comtypes.client.CreateObject("esriFramework.StyleGalleryItem")
             it_s = item_s.QueryInterface(m_disp.IStyleGalleryItem)
@@ -180,8 +283,7 @@ def build_element_style(target_path, style_list, element_label):
             sg.AddItem(it_s)
             ramp_count += 1
 
-            # 2. Smooth Ramp (تدرج لوني مستمر / Continuous Gradient)
-            smooth_name = u"%s - Smooth (%d Classes)" % (s_name_en, nclass)
+            smooth_name = u"%s %s - Smooth (%d Classes)" % (ramp_prefix, s_name_en, nclass)
             r_smooth = create_smooth_multipart_ramp(hex_list, smooth_name)
             item_sm = comtypes.client.CreateObject("esriFramework.StyleGalleryItem")
             it_sm = item_sm.QueryInterface(m_disp.IStyleGalleryItem)
@@ -191,7 +293,6 @@ def build_element_style(target_path, style_list, element_label):
             sg.AddItem(it_sm)
             ramp_count += 1
 
-        # Individual Colors & Fill Symbols (Using the 7-class or 5-class set)
         sample_hexes = classes_map.get("7") or classes_map.get(7) or classes_map.get("5") or classes_map.get(5)
         if sample_hexes:
             total_sample = len(sample_hexes)
@@ -210,7 +311,7 @@ def build_element_style(target_path, style_list, element_label):
                 it_col = comtypes.client.CreateObject("esriFramework.StyleGalleryItem")
                 it_c_i = it_col.QueryInterface(m_disp.IStyleGalleryItem)
                 it_c_i.Name = c_label
-                it_c_i.Category = u"Default Ramps"
+                it_c_i.Category = color_cat
                 it_c_i.Item = rgb_obj
                 sg.AddItem(it_c_i)
                 color_count += 1
@@ -220,7 +321,7 @@ def build_element_style(target_path, style_list, element_label):
                 it_f = comtypes.client.CreateObject("esriFramework.StyleGalleryItem")
                 it_f_i = it_f.QueryInterface(m_disp.IStyleGalleryItem)
                 it_f_i.Name = f_label
-                it_f_i.Category = u"Default Ramps"
+                it_f_i.Category = fill_cat
                 it_f_i.Item = fill_obj
                 sg.AddItem(it_f_i)
                 fill_count += 1

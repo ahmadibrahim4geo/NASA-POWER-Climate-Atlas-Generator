@@ -141,11 +141,10 @@ try:
     log("IDW rasters: %d" % len(reg))
     for item in reg:
         f, rp, lp = item[0], item[1], item[2]
-        log("  %s tif=%s lyr=%s json=%s" % (f, os.path.isfile(rp), os.path.isfile(lp),
-                                            os.path.isfile(lp + ".json")))
+        log("  %s tif=%s lyr=%s" % (f, os.path.isfile(rp), lp))
     assert len(reg) > 0, "no rasters"
     assert all(os.path.isfile(i[1]) for i in reg), "tif missing"
-    assert all(os.path.isfile(i[2]) for i in reg), "lyr missing"
+    assert all(i[2] is None for i in reg), "no .lyr should be produced"
     # Kriging + Spline paths on one field
     for meth in ("Ordinary Kriging", "Spline", "Natural Neighbor"):
         lyr = "pwr_smoke_pts"

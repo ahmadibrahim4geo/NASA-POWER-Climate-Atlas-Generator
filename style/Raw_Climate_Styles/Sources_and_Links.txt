@@ -167,6 +167,20 @@
 - مشروع Cynthia Brewer - جامعة ولاية بنسلفانيا (Penn State University):
   https://colorbrewer2.org/
 
+[6] مصادر رموز الأسهم ومتجهات الرياح (Wind Arrows & Markers - مطبقة في 05_Wind_Arrows.style):
+- إنشاء رموز الماركر في ArcMap (Simple/Character/Arrow/Picture) وخط ESRI Arrowhead:
+  https://desktop.arcgis.com/en/arcmap/latest/map/styles-and-symbols/creating-marker-symbols.htm
+- تدوير الرموز بحقل اتجاه مع رمز يشير للشمال (Rotation + Arrow_Angle):
+  https://doc.arcgis.com/en/arcgis-online/create-maps/use-style-options-mv.htm
+- خط meteoblue المجاني وشروح wind barbs:
+  https://content.meteoblue.com/en/research-education/specifications/standards/symbols-and-pictograms
+- رموز WMO بصيغة SVG (تصلح Picture Markers بعد تحويلها EMF):
+  https://github.com/roe-dl/weathericons
+- خط رموز الأرصاد metsymb (CTAN):
+  https://ctan.org/pkg/metsymb
+- شرح wind barbs (الاتجاه FROM والسرعة بالعقد) - هيئة الأرصاد الأمريكية:
+  https://www.weather.gov/hfo/windbarbinfo
+
 ====================================================================================================
 4. طريقة تحميل واستخدام هذه الستايلات داخل برنامج ArcGIS Desktop (ArcMap)
 ====================================================================================================

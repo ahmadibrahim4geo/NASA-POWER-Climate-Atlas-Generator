@@ -5,7 +5,7 @@ Runs on ArcMap 10.x python."""
 import os
 import sys
 
-BASE = r"C:\Users\ahmad\Desktop\NASA POWER Climate Atlas Generator"
+BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PYT = os.path.join(BASE, "POWER_Climate_Atlas_Generator_10_8.pyt")
 
 mod = type(sys)("mtm")

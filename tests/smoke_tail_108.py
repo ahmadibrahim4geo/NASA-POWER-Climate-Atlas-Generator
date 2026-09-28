@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Smoke TAIL: wind vectors + isobars + QA on existing smoke outputs
-(registry rebuilt by scanning Rasters/Layers folders; element layers read
-from Climate_Database.gdb)."""
+(registry rebuilt by scanning element folders for .tif files; element layers
+read from Climate_Database.gdb)."""
 import os
 import sys
 
@@ -27,20 +27,22 @@ out_sr = arcpy.SpatialReference(4326)
 paths = {"gdb": gdb, "vec": os.path.join(OUT, "00_Vector_Data")}
 
 reg = []
-for dp, dn, fn in os.walk(OUT):
-    if os.path.basename(dp) != "Rasters":
-        continue
-    for f in sorted(fn):
-        if not f.lower().endswith(".tif"):
+for m in modules:
+    folder = os.path.join(OUT, mod.MODULE_FOLDER[m])
+    subdirs = [os.path.join(folder, s) for s in ("Speed", "Direction")] if m == "Wind" else [folder]
+    for dp in subdirs:
+        if not os.path.isdir(dp):
             continue
-        field = os.path.splitext(f)[0]
-        if field.endswith("_cls"):
-            continue
-        module = tool._module_of_field(field)
-        lp = os.path.join(os.path.dirname(dp), "Layers", field + ".lyr")
-        reg.append((field, os.path.join(dp, f), lp, module,
-                    tool._colors_for(module, field),
-                    5 if module == "UV Index" else 7))
+        for f in sorted(os.listdir(dp)):
+            if not f.lower().endswith(".tif"):
+                continue
+            field = os.path.splitext(f)[0]
+            if field.endswith("_cls"):
+                continue
+            module = tool._module_of_field(field)
+            reg.append((field, os.path.join(dp, f), None, module,
+                        tool._colors_for(module, field),
+                        5 if module == "UV Index" else 7))
 print("registry rebuilt: %d" % len(reg))
 assert len(reg) == 36, len(reg)
 els = {}

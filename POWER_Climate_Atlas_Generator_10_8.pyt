@@ -14,16 +14,12 @@ Tool: POWER Climate Atlas Generator
 - Queries NASA POWER (Monthly/Daily) per point with retries + parallelism.
 - Computes annual/seasonal indicators with correct units.
 - Builds per-element point layers (GDB + SHP + CSV each), interpolated clipped rasters
-  (GeoTIFF), classified .lyr layer files (the ArcMap equivalent of .lyrx),
-  wind vector layers, optional PSL isobars, bilingual data dictionaries
-  and a processing log.
+  (GeoTIFF, written directly inside each element folder), wind vector layers,
+  optional PSL isobars, bilingual data dictionaries and a processing log.
 
 Field/raster names, folder layout, seasons, color ramps and units follow the
-project technical specification exactly. Because ArcMap 10.x cannot store a
-.lrx/.lyrx classified renderer programmatically, each .lyr is saved with full
-metadata (EN/AR names, unit, period, method, class breaks, colors, source,
-date) in its description/credits plus a sidecar .lyr.json classification file
-so the exact specified symbology can be applied.
+project technical specification exactly. Rasters open directly in ArcMap with
+standard stretched symbology (no intermediate layer files are produced).
 
 Only libraries available in a stock ArcGIS Desktop 10.x Python are used:
 arcpy, requests (with urllib2 fallback), json, os, math, datetime, calendar,
@@ -187,7 +183,7 @@ MODULE_FOLDER = {
     "UV Index": "08_UV_Index",
     "Cloud Cover": "09_Cloud_Cover",
     "Drought & Aridity": "10_Drought_And_Aridity",
-    "Climate_Models": "11_Climate_Models",
+    "Climate_Models": "10_Climate_Models",
 }
 
 COLOR_RAMPS = {
@@ -747,6 +743,34 @@ def safe_project_fc(in_fc, out_sr, work_gdb, tag, warn):
         except Exception:
             pass
         return in_fc
+
+
+def ensure_mask_fc(mask, mask_orig, maskp, out_sr, msg, warn):
+    """Returns a usable mask feature path, rebuilding it if necessary.
+
+    The reprojected mask (maskp.shp inside _scratch) is reused by every
+    element plus wind vectors. If it went missing (e.g. deleted by a scratch
+    purge), it is rebuilt from the original mask path. Returns None when no
+    mask was requested or when rebuild is impossible (caller must then skip
+    raster work instead of publishing unclipped surfaces)."""
+    try:
+        if mask and arcpy.Exists(mask):
+            return mask
+    except Exception:
+        pass
+    try:
+        if mask_orig and arcpy.Exists(mask_orig) and maskp:
+            try:
+                if arcpy.Exists(maskp):
+                    arcpy.management.Delete(maskp)
+            except Exception:
+                pass
+            arcpy.management.Project(mask_orig, maskp, out_sr)
+            msg("Mask restored to output SR.")
+            return maskp
+    except Exception as ex:
+        warn("Mask restore failed (%s)." % ex)
+    return None
 
 
 def thin_points_tolerance(pts, tol_m):
@@ -1898,18 +1922,17 @@ class PowerClimateAtlasGenerator(object):
          converted to mbar/hPa, wind direction by circular (vector) mean, solar
          MJ/m2/day converted to kWh (mean vs annual total distinguished), UV and
          cloud means. Missing NASA sentinels (-999) are excluded everywhere.
-      3. BUILD: per-element point layers (GDB + shapefile + CSV each), interpolated and
-         study-area-clipped raw float rasters (GeoTIFF, LZW), classified display
-         layer files with embedded metadata plus .lyr.json classification sidecars,
-         thinned wind arrow layers, optional PSL isobars, bilingual
-         (Arabic/English) data dictionaries and a full processing log with QA.
+       3. BUILD: per-element point layers (GDB + shapefile + CSV each), interpolated and
+          study-area-clipped raw float rasters (GeoTIFF, LZW, directly inside each
+          element folder), thinned wind arrow layers, optional PSL isobars, bilingual
+          (Arabic/English) data dictionaries and a full processing log with QA.
 
     DATA SOURCES: 'NASA POWER API' (gridded POWER climatology, ~0.5 deg native)
     or 'Open-Meteo Historical API (ERA5 Reanalysis)' (ERA5, ~0.25 deg native;
     daily + hourly aggregates auto-mapped to the same fields and standards).
 
-    OUTPUT LAYOUT (fixed, per-module folders 01..09 plus 00_Vector_Data,
-    10_Derived_Models and Project_Data.gdb): see the Processing_Log.txt written
+    OUTPUT LAYOUT (fixed, per-module folders 01..10 plus 00_Vector_Data,
+    Export_SHP and Project_Data.gdb): see the Processing_Log.txt written
     next to every run for the exact file list, warnings and QA results.
 
     SCIENTIFIC NOTES: source data are modelled estimates, not station
@@ -1923,14 +1946,14 @@ class PowerClimateAtlasGenerator(object):
     """
 
     def __init__(self):
-        self.label = "POWER Climate Atlas Generator (v1.1)"
+        self.label = "POWER Point Climate Atlas Generator"
+        self.category = ""
         self.description = (
             "Fetch NASA POWER climate data for point features, compute annual/seasonal "
             "indicators with correct units, and build an organized atlas package: "
             "per-element point layers (GDB/SHP/CSV each), interpolated clipped rasters (GeoTIFF), "
-            "classified .lyr layer files, wind vector layers, optional PSL isobars, bilingual "
-            "data dictionaries and a processing log. For ArcMap 10.x, .lyr files are the "
-            "equivalent of ArcGIS Pro .lyrx files. NASA POWER data are gridded/modelled "
+            "wind vector layers, optional PSL isobars, bilingual "
+            "data dictionaries and a processing log. NASA POWER data are gridded/modelled "
             "estimates, not in-situ station measurements; interpolated cell size is a "
             "cartographic choice, not native climate resolution.")
         self.canRunInBackground = True
@@ -2062,75 +2085,56 @@ class PowerClimateAtlasGenerator(object):
                           "'Custom Date Range' queries specific start/end dates via calendar or text.")
 
         p4 = arcpy.Parameter(
-            displayName="Single Year",
+            displayName="Single Year (type any year)",
             name="Single_Year",
             datatype="GPLong",
             parameterType="Optional",
             direction="Input")
-        p4.filter.type = "ValueList"
-        p4.filter.list = [str(y) for y in range(2025, 1980, -1)]
         p4.value = 2024
         p4.category = "Time Window"
-        p4.description = "Select or enter the specific year to query (1981 to 2025)."
+        p4.description = "Type any year you need (free entry, no list)."
 
         p5 = arcpy.Parameter(
-            displayName="Start Year",
+            displayName="Start Year (type any year)",
             name="Start_Year",
             datatype="GPLong",
             parameterType="Optional",
             direction="Input")
-        p5.filter.type = "ValueList"
-        p5.filter.list = [str(y) for y in range(1981, 2026)]
         p5.value = 2015
         p5.category = "Time Window"
-        p5.description = "First year of the climatology period (inclusive)."
+        p5.description = "Type the first year of the period (free entry, no list)."
 
         p6 = arcpy.Parameter(
-            displayName="End Year",
+            displayName="End Year (type any year)",
             name="End_Year",
             datatype="GPLong",
             parameterType="Optional",
             direction="Input")
-        p6.filter.type = "ValueList"
-        p6.filter.list = [str(y) for y in range(1981, 2026)]
         p6.value = 2024
         p6.category = "Time Window"
-        p6.description = "Last year of the climatology period (inclusive)."
-
-        p_picker = arcpy.Parameter(
-            displayName="Launch Visual Calendar Window (نافذة التقويم الذكية)",
-            name="Open_Calendar_Picker",
-            datatype="GPBoolean",
-            parameterType="Optional",
-            direction="Input")
-        p_picker.value = False
-        p_picker.category = "Time Window"
-        p_picker.description = ("CUSTOM DATE ONLY. Check this box to open the calm, interactive visual calendar "
-                                "dialog with month navigation arrows and quick year/month selectors.")
+        p6.description = "Type the last year of the period (free entry, no list)."
 
         p_start_date = arcpy.Parameter(
-            displayName="Start Date (DD/MM/YYYY or YYYY-MM-DD)",
+            displayName="Start Date",
             name="Start_Date",
-            datatype="GPString",
+            datatype="GPDate",
             parameterType="Optional",
             direction="Input")
         p_start_date.value = "01/01/2024"
         p_start_date.category = "Time Window"
-        p_start_date.description = ("CUSTOM DATE RANGE ONLY. Beginning date. "
-                                    "Type directly in the box (e.g. 31/3/1990 or 1990-03-31) "
-                                    "or use the Visual Calendar Window above.")
+        p_start_date.description = ("CUSTOM DATE RANGE ONLY. Pick from the built-in calendar "
+                                    "(any past or future year) or type the date directly.")
 
         p_end_date = arcpy.Parameter(
-            displayName="End Date (DD/MM/YYYY or YYYY-MM-DD)",
+            displayName="End Date",
             name="End_Date",
-            datatype="GPString",
+            datatype="GPDate",
             parameterType="Optional",
             direction="Input")
         p_end_date.value = "31/12/2024"
         p_end_date.category = "Time Window"
-        p_end_date.description = ("CUSTOM DATE RANGE ONLY. Ending date. "
-                                  "Type directly in the box (e.g. 31/12/2000 or 2000-12-31) "
-                                  "or use the Visual Calendar Window above.")
+        p_end_date.description = ("CUSTOM DATE RANGE ONLY. Pick from the built-in calendar "
+                                  "(any past or future year) or type the date directly.")
 
         p7 = arcpy.Parameter(
             displayName="Temporal Resolution",
@@ -2175,7 +2179,7 @@ class PowerClimateAtlasGenerator(object):
             parameterType="Optional",
             direction="Input")
         p_dl.value = False
-        p_dl.category = "Time Window"
+        p_dl.category = ""
         p_dl.description = ("OPTIONAL (default OFF). When checked, the tool downloads climate data and saves "
                             "complete point feature classes (GDB, SHP, CSV) for each element, but skips "
                             "surface interpolation, raster creation, contours, and layer styling.")
@@ -2199,24 +2203,9 @@ class PowerClimateAtlasGenerator(object):
         )
 
         # ═══ Variable & Field Selection ═══
-        p_sel_fields = arcpy.Parameter(
-            displayName="Variables Selection (Checklist)",
-            name="Selected_Fields",
-            datatype="GPString",
-            parameterType="Optional",
-            direction="Input")
-        p_sel_fields.multiValue = True
-        p_sel_fields.filter.type = "ValueList"
-        init_cands = get_candidate_fields(["Temperature"])
-        p_sel_fields.filter.list = [c[1] for c in init_cands]
-        p_sel_fields.value = ";".join([c[1] for c in init_cands])
-        p_sel_fields.category = "Variable & Field Selection"
-        p_sel_fields.description = (
-            "VARIABLES SELECTION. Interactive checklist of climate variables and indicators to compute. "
-            "All fields for the selected Climate Modules are included by default. "
-            "Check or uncheck individual variables as needed, or use the Filter Scope below to filter by seasons/periods."
-        )
-
+        # NOTE: Field Filter Scope comes FIRST: it drives the enabled state of
+        # the two filter boxes below it (Included Summary Periods / Seasons)
+        # and of the Variables checklist at the end of this group.
         p_filter_scope = arcpy.Parameter(
             displayName="Field Filter Scope",
             name="Field_Filter_Scope",
@@ -2235,7 +2224,25 @@ class PowerClimateAtlasGenerator(object):
             "REQUIRED. Controls which variables, seasons, and indicators are computed and exported. "
             "'All Variables & Fields (Full Suite)' (default): calculates and maps all annual, seasonal and extreme fields. "
             "'Filter by Seasons & Aggregations': quickly filter by specific season (e.g. Summer only, Winter only) or period. "
-            "'Custom Field Checklist': interactive checklist table above to select/unselect exact fields by name."
+            "'Custom Field Checklist': interactive checklist table at the end of this group to select/unselect exact fields by name."
+        )
+
+        p_sel_fields = arcpy.Parameter(
+            displayName="Variables Selection (Checklist)",
+            name="Selected_Fields",
+            datatype="GPString",
+            parameterType="Optional",
+            direction="Input")
+        p_sel_fields.multiValue = True
+        p_sel_fields.filter.type = "ValueList"
+        init_cands = get_candidate_fields(["Temperature"])
+        p_sel_fields.filter.list = [c[1] for c in init_cands]
+        p_sel_fields.value = ";".join([c[1] for c in init_cands])
+        p_sel_fields.category = "Variable & Field Selection"
+        p_sel_fields.description = (
+            "VARIABLES SELECTION. Interactive checklist of climate variables and indicators to compute. "
+            "All fields for the selected Climate Modules are included by default. "
+            "Check or uncheck individual variables as needed, or use the Filter Scope above to filter by seasons/periods."
         )
 
         p_inc_aggs = arcpy.Parameter(
@@ -2427,15 +2434,15 @@ class PowerClimateAtlasGenerator(object):
         p_sp_pts.description = "SPLINE ONLY. Number of neighbouring points used for interpolation. DEFAULT 12."
 
         p9 = arcpy.Parameter(
-            displayName="Base Cell Size (Meters)",
+            displayName="Base Cell Size (Meters) [Default: 500 Meters]",
             name="Base_Cell_Size",
             datatype="GPLinearUnit",
             parameterType="Required",
             direction="Input")
-        p9.value = "5000 Meters"
+        p9.value = "500 Meters"
         p9.category = "Interpolation Parameters"
         p9.description = ("REQUIRED. Cell size for all rasters in Meters or Kilometers. "
-                          "Default: 5000 Meters. NOTE: fine cells improve appearance only; "
+                          "Default: 500 Meters. NOTE: fine cells improve appearance only; "
                           "native NASA POWER resolution stays coarse (~0.5 deg).")
 
         p10 = arcpy.Parameter(
@@ -2609,8 +2616,8 @@ class PowerClimateAtlasGenerator(object):
         p22.description = ("OPTIONAL (default ON). Deletes intermediate products after use.")
 
         return [p_op_mode, p0, p_precalc, p1, p12, p2, p14, p_om_model,
-                p3, p4, p5, p6, p_picker, p_start_date, p_end_date, p7, p_gf, p_dl,
-                p8, p_sel_fields, p_filter_scope, p_inc_aggs, p_inc_seasons,
+                p3, p4, p5, p6, p_start_date, p_end_date, p7, p_gf, p_dl,
+                p8, p_filter_scope, p_inc_aggs, p_inc_seasons, p_sel_fields,
                 p11, p_idw_prof, p15, p16, p17, p18, p19, p20, p21,
                 p_sp_type, p_sp_weight, p_sp_pts,
                 p9, p10,
@@ -2659,32 +2666,12 @@ class PowerClimateAtlasGenerator(object):
         yr_range = bool(mode and mode.startswith("Year Range"))
         custom_range = bool(mode and "Custom Date" in mode)
 
-        # Visual Calendar Picker launch trigger
-        p_picker = pdict.get("Open_Calendar_Picker")
-        if p_picker and p_picker.value and (not is_offline) and custom_range:
-            p_sd = pdict.get("Start_Date")
-            p_ed = pdict.get("End_Date")
-            cur_s = p_sd.valueAsText if p_sd and p_sd.value else "01/01/2024"
-            cur_e = p_ed.valueAsText if p_ed and p_ed.value else "31/12/2024"
-            try:
-                res = launch_calendar_picker(cur_s, cur_e)
-                if res and res.get("applied"):
-                    if p_sd and res.get("start_date"):
-                        p_sd.value = res["start_date"]
-                    if p_ed and res.get("end_date"):
-                        p_ed.value = res["end_date"]
-            except Exception:
-                pass
-            p_picker.value = False
-
         if "Single_Year" in pdict:
             pdict["Single_Year"].enabled = (not is_offline) and single
         if "Start_Year" in pdict:
             pdict["Start_Year"].enabled = (not is_offline) and yr_range
         if "End_Year" in pdict:
             pdict["End_Year"].enabled = (not is_offline) and yr_range
-        if "Open_Calendar_Picker" in pdict:
-            pdict["Open_Calendar_Picker"].enabled = (not is_offline) and custom_range
         if "Start_Date" in pdict:
             pdict["Start_Date"].enabled = (not is_offline) and custom_range
         if "End_Date" in pdict:
@@ -2967,9 +2954,18 @@ class PowerClimateAtlasGenerator(object):
                 if mode == "Single Year":
                     p_sy = pdict.get("Single_Year")
                     y = p_sy.value if p_sy else None
-                    if y is None or int(y) < 1981 or int(y) > 2030:
+                    if y is None:
                         if p_sy:
-                            p_sy.setErrorMessage("Single Year must be 1981-2030.")
+                            p_sy.setErrorMessage("Type the year you need (free entry).")
+                    else:
+                        try:
+                            yi = int(y)
+                        except Exception:
+                            if p_sy:
+                                p_sy.setErrorMessage("Type the year as a number (e.g. 2025).")
+                        else:
+                            if yi < 1981 and p_sy:
+                                p_sy.setWarningMessage("Years before 1981 have no NASA POWER data.")
                 elif mode == "Year Range":
                     p_s = pdict.get("Start_Year")
                     p_e = pdict.get("End_Year")
@@ -2977,27 +2973,30 @@ class PowerClimateAtlasGenerator(object):
                     e = p_e.value if p_e else None
                     if s is None or e is None:
                         if p_s:
-                            p_s.setErrorMessage("Start/End Year required for Year Range.")
-                    elif int(s) > int(e):
-                        if p_e:
-                            p_e.setErrorMessage("End Year must be >= Start Year.")
-                    elif int(s) < 1981:
-                        if p_s:
-                            p_s.setErrorMessage("NASA POWER coverage starts 1981.")
+                            p_s.setErrorMessage("Type Start and End years (free entry).")
+                    else:
+                        try:
+                            si, ei = int(s), int(e)
+                        except Exception:
+                            if p_s:
+                                p_s.setErrorMessage("Type years as numbers (e.g. 1990 and 2026).")
+                        else:
+                            if si > ei and p_e:
+                                p_e.setErrorMessage("End Year must be >= Start Year.")
+                            if (si < 1981 or ei < 1981) and p_s:
+                                p_s.setWarningMessage("NASA POWER coverage starts 1981.")
                 elif mode == "Custom Date Range":
                     p_sd = pdict.get("Start_Date")
                     p_ed = pdict.get("End_Date")
                     d_start = parse_gp_date(p_sd.value if p_sd else None)
                     d_end = parse_gp_date(p_ed.value if p_ed else None)
                     if not d_start and p_sd:
-                        p_sd.setErrorMessage("Valid Start Date is required.")
+                        p_sd.setErrorMessage("Pick or type the Start Date (any year).")
                     if not d_end and p_ed:
-                        p_ed.setErrorMessage("Valid End Date is required.")
+                        p_ed.setErrorMessage("Pick or type the End Date (any year).")
                     if d_start and d_end:
                         if d_start > d_end and p_ed:
                             p_ed.setErrorMessage("End Date must be on or after Start Date.")
-                        if d_start.year < 1981 and p_sd:
-                            p_sd.setErrorMessage("Start Date must be 1981 or later.")
 
             p_mods = pdict.get("Climate_Modules")
             mods = p_mods.valueAsText if p_mods else ""
@@ -3296,27 +3295,50 @@ class PowerClimateAtlasGenerator(object):
                 "npoints": (int(p_kp.value) if p_kp and p_kp.value is not None else 12),
             }
 
+            col_data_start = "2024"
+            col_data_end = "2024"
+
             if is_offline:
-                years = [2025]
-                y0, y1 = 2000, 2025
+                years = [2024]
+                y0, y1 = 2000, 2024
                 start_date_str, end_date_str = None, None
                 time_tag = "Offline"
                 period_label = "Precalculated Data (Offline Mode)"
+                col_data_start = "Precalculated"
+                col_data_end = "Precalculated"
                 try:
-                    f_names = [f.name for f in arcpy.ListFields(in_points)]
-                    if "Data_Start" in f_names and "Data_End" in f_names:
-                        with arcpy.da.SearchCursor(in_points, ["Data_Start", "Data_End"]) as cur:
-                            for row in cur:
-                                if row[0] and row[1]:
-                                    y0, y1 = int(row[0]), int(row[1])
-                                    years = list(range(y0, y1 + 1))
-                                    if y0 == y1:
-                                        time_tag = "%d" % y0
-                                        period_label = "%d (Precalculated)" % y0
-                                    else:
-                                        time_tag = "From_%d_To_%d" % (y0, y1)
-                                        period_label = "%d-%d (Precalculated)" % (y0, y1)
-                                    break
+                    l_paths = [lp.strip().strip("'\"") for lp in (in_points or "").split(";") if lp.strip().strip("'\"")]
+                    found_dates = False
+                    for test_lyr in l_paths:
+                        try:
+                            f_names = [f.name for f in arcpy.ListFields(test_lyr)]
+                            if "Data_Start" in f_names and "Data_End" in f_names:
+                                with arcpy.da.SearchCursor(test_lyr, ["Data_Start", "Data_End"]) as cur:
+                                    for row in cur:
+                                        if row[0] is not None and row[1] is not None and str(row[0]).strip() and str(row[1]).strip():
+                                            col_data_start = str(row[0]).strip()
+                                            col_data_end = str(row[1]).strip()
+                                            import re
+                                            m0 = re.search(r'\b(19\d\d|20\d\d)\b', col_data_start)
+                                            m1 = re.search(r'\b(19\d\d|20\d\d)\b', col_data_end)
+                                            if m0 and m1:
+                                                y0, y1 = int(m0.group(1)), int(m1.group(1))
+                                                years = list(range(min(y0, y1), max(y0, y1) + 1))
+                                                if y0 == y1:
+                                                    time_tag = "%d" % y0
+                                                    period_label = "%d (Precalculated)" % y0
+                                                else:
+                                                    time_tag = "From_%d_To_%d" % (min(y0, y1), max(y0, y1))
+                                                    period_label = "%d-%d (Precalculated)" % (min(y0, y1), max(y0, y1))
+                                            else:
+                                                time_tag = "Offline"
+                                                period_label = "%s-%s (Precalculated)" % (col_data_start, col_data_end)
+                                            found_dates = True
+                                            break
+                            if found_dates:
+                                break
+                        except Exception:
+                            continue
                 except Exception:
                     pass
             elif time_mode == "Single Year":
@@ -3412,6 +3434,12 @@ class PowerClimateAtlasGenerator(object):
             wgs = arcpy.SpatialReference(4326)
             scratch_dir = os.path.join(out_ws, "_scratch")
             makedirs_ok(scratch_dir)
+            # Keep the original mask path: per-element scratch purges must never
+            # delete the reprojected mask, and if it ever goes missing it is
+            # rebuilt from the original via ensure_mask_fc().
+            mask_orig = mask
+            maskp = None
+            mask_required = bool(mask_orig)
             if mask:
                 # Reproject the mask once into the output SR so mask, extent,
                 # snap and cell size all share one unit system.
@@ -3443,18 +3471,13 @@ class PowerClimateAtlasGenerator(object):
                 _h = float(_ext.YMax - _ext.YMin)
                 if _w > 0 and _h > 0 and eff_base > 0:
                     _cells = (_w / eff_base) * (_h / eff_base)
-                    if _cells > 20000000:
-                        messages.addErrorMessage(
-                            "Cell size %.4g %s is far too fine for this extent "
-                            "(%.1f x %.1f %s ~= %.1f million cells; limit 20M). "
-                            "Increase 'Base Cell Size' (e.g. 5000 Meters for "
-                            "country-scale work)." % (
+                    if _cells > 50000000:
+                        warn(
+                            "Cell size %.4g %s produces approximately %.1f million cells. "
+                            "Processing may take longer depending on hardware." % (
                                 base_cell,
                                 ("degrees" if is_geo else "metres"),
-                                _w, _h,
-                                ("degrees" if is_geo else "metres"),
                                 _cells / 1000000.0))
-                        return
             except Exception:
                 pass
             # --- performance: multicore SA (where supported) + LZW TIFF compression ---
@@ -3523,7 +3546,7 @@ class PowerClimateAtlasGenerator(object):
                 results = []
                 element_fcs = self._merge_offline_layers(
                     in_points, gdb_path, out_sr, modules, active_submodels,
-                    wanted_fields_by_module, msg, warn)
+                    wanted_fields_by_module, msg, warn, admin_meta=admin_meta)
                 if not element_fcs:
                     raise RuntimeError("No element point layers were built from precalculated inputs.")
 
@@ -3535,6 +3558,14 @@ class PowerClimateAtlasGenerator(object):
                     self._export_shapefile(fc, os.path.join(paths["shp"], short + ".shp"), msg, warn)
                     self._export_csv(fc, os.path.join(paths["vec"], short + ".csv"), msg, warn)
                     if not download_only and sa_avail:
+                        if mask_required:
+                            mask = ensure_mask_fc(mask, mask_orig, maskp, out_sr, msg, warn)
+                            if not mask:
+                                warn("Element '%s': mask unavailable, rasters skipped "
+                                     "(no unclipped output published)." % m)
+                                msg(">>> Element [%d/%d] %s: Layer & exports ready (rasters skipped). <<<\n"
+                                    % (mi + 1, len(ordered_modules), m))
+                                continue
                         elem_rasters = self._interpolate_all(
                             None, [m], paths, eff_base, interp, mask, msg, warn,
                             iopts, kopts, is_geo, purge, scratch_dir, focal,
@@ -3545,7 +3576,10 @@ class PowerClimateAtlasGenerator(object):
                             for sf in os.listdir(scratch_dir):
                                 sfp = os.path.join(scratch_dir, sf)
                                 try:
-                                    if os.path.isfile(sfp): os.remove(sfp)
+                                    # NEVER delete the reprojected mask: it is
+                                    # reused by every element + wind vectors.
+                                    if os.path.isfile(sfp) and not sf.lower().startswith("maskp."):
+                                        os.remove(sfp)
                                 except Exception:
                                     pass
                         gc.collect()
@@ -3754,6 +3788,14 @@ class PowerClimateAtlasGenerator(object):
 
                         # Immediate Raster Interpolation
                         if not download_only and sa_avail:
+                            if mask_required:
+                                mask = ensure_mask_fc(mask, mask_orig, maskp, out_sr, msg, warn)
+                                if not mask:
+                                    warn("Element '%s': mask unavailable, rasters skipped "
+                                         "(no unclipped output published)." % m)
+                                    msg(">>> Element [%d/%d] %s completed: Point layer, Shapefile, CSV, Excel (rasters skipped). <<<\n"
+                                        % (mi + 1, len(ordered_modules), m))
+                                    continue
                             elem_rasters = self._interpolate_all(
                                 None, [m], paths, eff_base, interp, mask, msg, warn,
                                 iopts, kopts, is_geo, purge, scratch_dir, focal,
@@ -3764,7 +3806,10 @@ class PowerClimateAtlasGenerator(object):
                                 for sf in os.listdir(scratch_dir):
                                     sfp = os.path.join(scratch_dir, sf)
                                     try:
-                                        if os.path.isfile(sfp): os.remove(sfp)
+                                        # NEVER delete the reprojected mask: it is
+                                        # reused by every element + wind vectors.
+                                        if os.path.isfile(sfp) and not sf.lower().startswith("maskp."):
+                                            os.remove(sfp)
                                     except Exception:
                                         pass
                             gc.collect()
@@ -3826,12 +3871,17 @@ class PowerClimateAtlasGenerator(object):
                     has_spd = any("W_Spd" in f for f in wind_w)
                     has_dir = any("W_Dir" in f for f in wind_w)
                     if has_spd and has_dir:
-                        try:
-                            wind_fcs = self._build_wind_vectors(
-                                gdb_path, paths, raster_registry, element_fcs.get("Wind"),
-                                mask, out_sr, eff_wind, msg, warn)
-                        except Exception as ex:
-                            warn("Wind vectors failed: %s" % ex)
+                        if mask_required:
+                            mask = ensure_mask_fc(mask, mask_orig, maskp, out_sr, msg, warn)
+                        if mask_required and not mask:
+                            warn("Wind vectors skipped: mask unavailable.")
+                        else:
+                            try:
+                                wind_fcs = self._build_wind_vectors(
+                                    gdb_path, paths, raster_registry, element_fcs.get("Wind"),
+                                    mask, out_sr, eff_wind, msg, warn)
+                            except Exception as ex:
+                                warn("Wind vectors failed: %s" % ex)
 
             iso_mods = [m for m in ("Sea Level Pressure", "Surface Pressure")
                         if m in modules]
@@ -3914,7 +3964,7 @@ class PowerClimateAtlasGenerator(object):
 
     def _add_to_map(self, registry, wind_fcs, map_modules, msg, warn):
         """Add chosen elements to the CURRENT ArcMap data frame, one group layer
-        per element. Element .lyr rasters go to the bottom of each group.
+        per element. Element rasters (.tif) go to the bottom of each group.
 
         Group strategy (best effort, never fails the run):
           1. a group with the element name already exists -> add inside it,
@@ -3965,8 +4015,8 @@ class PowerClimateAtlasGenerator(object):
                 return
             df = dfs[0]
             by_module = {}
-            for (_f, _r, lp, _m, _c, _n) in registry:
-                by_module.setdefault(_m, []).append(lp)
+            for (_f, _r, _lp, _m, _c, _n) in registry:
+                by_module.setdefault(_m, []).append(_r)
             added = 0
             for module in map_modules:
                 lps = by_module.get(module, [])
@@ -4019,15 +4069,10 @@ class PowerClimateAtlasGenerator(object):
         for m in modules:
             folder = os.path.join(out_ws, MODULE_FOLDER[m])
             if m == "Wind":
-                for sub in ["Speed/Rasters", "Speed/Layers", "Direction/Rasters",
-                            "Direction/Layers", "Direction/Vector_Points"]:
+                for sub in ["Speed", "Direction"]:
                     makedirs_ok(os.path.join(folder, sub))
             else:
-                makedirs_ok(os.path.join(folder, "Rasters"))
-                makedirs_ok(os.path.join(folder, "Layers"))
-        for d in ["10_Derived_Models/Aridity_Index", "10_Derived_Models/Water_Balance",
-                  "10_Derived_Models/Thermal_Comfort", "10_Derived_Models/Other_Models"]:
-            makedirs_ok(os.path.join(out_ws, d))
+                makedirs_ok(folder)
         return gdb_path, paths
 
     def _extract_points(self, in_points, wgs, messages):
@@ -4272,16 +4317,103 @@ class PowerClimateAtlasGenerator(object):
         from arcpy.sa import NaturalNeighbor
         return NaturalNeighbor(in_points, field, cell)
 
+    def _interp_direction_uv(self, src_fc, dir_field, cell, method, iopts=None, kopts=None, warn=None):
+        """Circular (U/V) interpolation for wind direction fields.
+
+        Interpolating degrees linearly (e.g. mean of 350 and 10 = 180) is
+        mathematically wrong. Instead interpolates sin(dir) and cos(dir)
+        separately then reconstructs with atan2(sin, cos) -> 0-360.
+        Returns an arcpy.sa Raster object or raises on failure (caller falls
+        back to linear with a warning).
+        Python 2.7 / ArcMap 10.8 compatible, no numpy.
+        """
+        import math
+        tmp_fc = "in_memory/dir_uv_pts"
+        lyr_sin = "pwr_atlas_dir_sin"
+        lyr_cos = "pwr_atlas_dir_cos"
+        for o in (tmp_fc, lyr_sin, lyr_cos):
+            try:
+                arcpy.management.Delete(o)
+            except Exception:
+                pass
+        try:
+            arcpy.management.CopyFeatures(src_fc, tmp_fc)
+        except Exception as ex:
+            raise RuntimeError("dir copy failed: %s" % ex)
+        for _fn in ("TMP_SIN", "TMP_COS"):
+            try:
+                arcpy.management.AddField(tmp_fc, _fn, "DOUBLE")
+            except Exception:
+                pass
+        n_valid = 0
+        try:
+            with arcpy.da.UpdateCursor(tmp_fc, [dir_field, "TMP_SIN", "TMP_COS"]) as cur:
+                for row in cur:
+                    try:
+                        wd = row[0]
+                        if wd is None:
+                            row[1], row[2] = None, None
+                        else:
+                            a = float(wd) % 360.0
+                            r = math.radians(a)
+                            row[1] = math.sin(r)
+                            row[2] = math.cos(r)
+                            n_valid += 1
+                    except Exception:
+                        row[1], row[2] = None, None
+                    cur.updateRow(row)
+        except Exception as ex:
+            raise RuntimeError("dir sin/cos calc failed: %s" % ex)
+        if n_valid < 3:
+            raise RuntimeError("only %d valid direction points" % n_valid)
+        for o in (lyr_sin, lyr_cos):
+            try:
+                arcpy.management.Delete(o)
+            except Exception:
+                pass
+        arcpy.management.MakeFeatureLayer(
+            tmp_fc, lyr_sin, "%s IS NOT NULL" % arcpy.AddFieldDelimiters(tmp_fc, "TMP_SIN"))
+        arcpy.management.MakeFeatureLayer(
+            tmp_fc, lyr_cos, "%s IS NOT NULL" % arcpy.AddFieldDelimiters(tmp_fc, "TMP_COS"))
+        sin_r = self._interp_surface(lyr_sin, "TMP_SIN", cell, method, iopts, kopts)
+        cos_r = self._interp_surface(lyr_cos, "TMP_COS", cell, method, iopts, kopts)
+        try:
+            from arcpy.sa import ATan2, Con
+            rad = ATan2(sin_r, cos_r)
+            deg = rad * 57.29577951308232
+            circular = Con(deg < 0, deg + 360.0, deg)
+        except Exception:
+            # Fallback if ATan2 unavailable: quadrant-corrected ATan
+            from arcpy.sa import ATan, Con, Cos, Sin, Abs
+            try:
+                ratio = sin_r / (Abs(cos_r) + 1e-9)
+                base = ATan(Abs(ratio)) * 57.29577951308232
+                # quadrant logic: atan2(sin,cos)
+                q1 = Con((sin_r >= 0) & (cos_r > 0), base)
+                q2 = Con((sin_r >= 0) & (cos_r <= 0), 180.0 - base, q1)
+                q3 = Con((sin_r < 0) & (cos_r <= 0), 180.0 + base, q2)
+                circular = Con((sin_r < 0) & (cos_r > 0), 360.0 - base, q3)
+            except Exception as ex2:
+                raise RuntimeError("atan2 fallback failed: %s" % ex2)
+        finally:
+            for o in (lyr_sin, lyr_cos, tmp_fc):
+                try:
+                    arcpy.management.Delete(o)
+                except Exception:
+                    pass
+        return circular
+
     def _raster_paths(self, out_ws, module, field):
+        # Rasters are written directly inside the element folder (no Rasters/
+        # subfolder, no Layers/ subfolder, no .lyr files). The second return
+        # value is kept (None) so existing unpacking call sites keep working.
         folder = MODULE_FOLDER[module]
         if module == "Wind":
             sub = "Speed" if field.startswith("W_Spd") else "Direction"
-            rdir = os.path.join(out_ws, folder, sub, "Rasters")
-            ldir = os.path.join(out_ws, folder, sub, "Layers")
+            rdir = os.path.join(out_ws, folder, sub)
         else:
-            rdir = os.path.join(out_ws, folder, "Rasters")
-            ldir = os.path.join(out_ws, folder, "Layers")
-        return os.path.join(rdir, field + ".tif"), os.path.join(ldir, field + ".lyr")
+            rdir = os.path.join(out_ws, folder)
+        return os.path.join(rdir, field + ".tif"), None
 
     def _module_of_field(self, field):
         for m, fs in MODULE_FIELDS.items():
@@ -4311,7 +4443,7 @@ class PowerClimateAtlasGenerator(object):
         """
         from arcpy.sa import Slice
         rdir = os.path.dirname(rp)
-        ldir = rdir.replace("Rasters", "Layers")
+        ldir = rdir
         cls_rp = os.path.join(rdir, field + "_cls.tif")
         clr_path = os.path.join(ldir, field + ".clr")
         ztmp = os.path.join(rdir, field + "_z.tif")
@@ -4415,7 +4547,8 @@ class PowerClimateAtlasGenerator(object):
                  % (field, ex))
             return None, None, None
     def _merge_offline_layers(self, in_layers_text, gdb_path, out_sr, modules,
-                              active_submodels, wanted_fields_by_module, msg, warn):
+                              active_submodels, wanted_fields_by_module, msg, warn,
+                              admin_meta=None):
         """Merges one or more precalculated point layers (multi-value) offline by coordinates/Source_ID.
         Computes requested applied submodels on the fly, builds primary element layers,
         and creates a dedicated 'Climate_Models' feature class in the GDB.
@@ -4464,6 +4597,7 @@ class PowerClimateAtlasGenerator(object):
                     point_records.append(rec)
                     if ckey:
                         coord_to_idx[ckey] = idx
+                        coord_to_idx[(round(lat, 3), round(lon, 3))] = idx
                     oid_to_idx[oid_val] = idx
                     idx += 1
 
@@ -4490,6 +4624,8 @@ class PowerClimateAtlasGenerator(object):
                             pass
                         ckey = (round(l_lat, 4), round(l_lon, 4)) if (l_lat is not None and l_lon is not None) else None
                         match_idx = coord_to_idx.get(ckey)
+                        if match_idx is None and l_lat is not None and l_lon is not None:
+                            match_idx = coord_to_idx.get((round(l_lat, 3), round(l_lon, 3)))
                         if match_idx is None:
                             match_idx = oid_to_idx.get(l_oid)
 
@@ -4500,6 +4636,10 @@ class PowerClimateAtlasGenerator(object):
                                 if val is not None and not is_missing(val):
                                     if canonical not in target_fields or target_fields[canonical] is None:
                                         target_fields[canonical] = val
+                                    target_fields[fname] = val
+                                    shp_sh = SHP_FIELD_MAP.get(canonical)
+                                    if shp_sh:
+                                        target_fields[shp_sh] = val
 
             # 4. On-the-fly computation of active applied submodels if missing
             if active_submodels:
@@ -4588,13 +4728,13 @@ class PowerClimateAtlasGenerator(object):
                 for name, typ, _alias in ADMIN_FIELDS:
                     if name not in existing:
                         if typ == "TEXT":
-                            arcpy.management.AddField(fc, name, typ, field_length=255)
+                            arcpy.management.AddField(fc, name, typ, field_length=255, field_alias=name)
                         else:
-                            arcpy.management.AddField(fc, name, typ)
+                            arcpy.management.AddField(fc, name, typ, field_alias=name)
                 wanted = wanted_fields_by_module.get(m, MODULE_FIELDS.get(m, []))
                 for wf in wanted:
                     if wf not in existing:
-                        arcpy.management.AddField(fc, wf, "DOUBLE")
+                        arcpy.management.AddField(fc, wf, "DOUBLE", field_alias=wf)
                 oid_name = arcpy.Describe(fc).OIDFieldName
                 with arcpy.da.UpdateCursor(fc, [oid_name, "SHAPE@"] + admin_names + wanted) as ucur:
                     for row in ucur:
@@ -4607,31 +4747,42 @@ class PowerClimateAtlasGenerator(object):
                         except Exception:
                             pass
                         ck = (round(lat_v, 4), round(lon_v, 4)) if (lat_v is not None and lon_v is not None) else None
-                        p_idx = coord_to_idx.get(ck) if ck else oid_to_idx.get(row[0])
+                        p_idx = coord_to_idx.get(ck)
+                        if p_idx is None and lat_v is not None and lon_v is not None:
+                            p_idx = coord_to_idx.get((round(lat_v, 3), round(lon_v, 3)))
+                        if p_idx is None:
+                            p_idx = oid_to_idx.get(row[0])
                         rec_f = point_records[p_idx]["fields"] if (p_idx is not None and p_idx < len(point_records)) else {}
+                        d_start_v = rec_f.get("Data_Start") or (admin_meta.get("data_start") if admin_meta else 0)
+                        d_end_v = rec_f.get("Data_End") or (admin_meta.get("data_end") if admin_meta else 0)
                         admin_vals = [
                             rec_f.get("Source_ID", row[0]),
                             lat_v,
                             lon_v,
-                            rec_f.get("Data_Start", 0),
-                            rec_f.get("Data_End", 0),
-                            rec_f.get("Temporal", "Precalculated"),
+                            d_start_v,
+                            d_end_v,
+                            rec_f.get("Temporal", (admin_meta.get("temporal", "Precalculated") if admin_meta else "Precalculated")),
                             rec_f.get("Interp_Meth", "Offline"),
-                            rec_f.get("Cell_Size", 0.0),
-                            rec_f.get("Wind_Cell", 0.0),
+                            rec_f.get("Cell_Size", (admin_meta.get("base_cell", 0.0) if admin_meta else 0.0)),
+                            rec_f.get("Wind_Cell", (admin_meta.get("wind_cell", 0.0) if admin_meta else 0.0)),
                             rec_f.get("Status", "OK"),
                             (rec_f.get("Error_Msg", "") or "")[:255]
                         ]
                         for ai, aval in enumerate(admin_vals):
                             row[2 + ai] = aval
                         for wi, wf in enumerate(wanted):
-                            row[2 + len(admin_names) + wi] = rec_f.get(wf)
+                            val = rec_f.get(wf)
+                            if val is None and wf in SHP_FIELD_MAP:
+                                val = rec_f.get(SHP_FIELD_MAP[wf])
+                            if val is None and wf in REV_SHP_MAP:
+                                val = rec_f.get(REV_SHP_MAP[wf])
+                            row[2 + len(admin_names) + wi] = val
                         ucur.updateRow(row)
                 element_fcs[m] = fc
                 msg("Element layer '%s': %s" % (m, fc))
 
             # 6. Create dedicated Climate_Models feature class in GDB if submodels active
-            if active_submodels:
+            if active_submodels or "Climate_Models" in modules:
                 models_fc = os.path.join(gdb_path, "Climate_Models")
                 try:
                     if arcpy.Exists(models_fc):
@@ -4643,14 +4794,16 @@ class PowerClimateAtlasGenerator(object):
                 for name, typ, _alias in ADMIN_FIELDS:
                     if name not in existing_m:
                         if typ == "TEXT":
-                            arcpy.management.AddField(models_fc, name, typ, field_length=255)
+                            arcpy.management.AddField(models_fc, name, typ, field_length=255, field_alias=name)
                         else:
-                            arcpy.management.AddField(models_fc, name, typ)
+                            arcpy.management.AddField(models_fc, name, typ, field_alias=name)
                 sub_wanted = wanted_fields_by_module.get("Climate_Models", [])
+                if not sub_wanted:
+                    sub_wanted = MODULE_FIELDS.get("Climate_Models", [])
                 for sf in sub_wanted:
                     if sf not in existing_m:
                         field_type = "LONG" if sf == "Dry_Months_Count" else "DOUBLE"
-                        arcpy.management.AddField(models_fc, sf, field_type)
+                        arcpy.management.AddField(models_fc, sf, field_type, field_alias=sf)
                 oid_m = arcpy.Describe(models_fc).OIDFieldName
                 with arcpy.da.UpdateCursor(models_fc, [oid_m, "SHAPE@"] + admin_names + sub_wanted) as ucur:
                     for row in ucur:
@@ -4663,25 +4816,36 @@ class PowerClimateAtlasGenerator(object):
                         except Exception:
                             pass
                         ck = (round(lat_v, 4), round(lon_v, 4)) if (lat_v is not None and lon_v is not None) else None
-                        p_idx = coord_to_idx.get(ck) if ck else oid_to_idx.get(row[0])
+                        p_idx = coord_to_idx.get(ck)
+                        if p_idx is None and lat_v is not None and lon_v is not None:
+                            p_idx = coord_to_idx.get((round(lat_v, 3), round(lon_v, 3)))
+                        if p_idx is None:
+                            p_idx = oid_to_idx.get(row[0])
                         rec_f = point_records[p_idx]["fields"] if (p_idx is not None and p_idx < len(point_records)) else {}
+                        d_start_v = rec_f.get("Data_Start") or (admin_meta.get("data_start") if admin_meta else 0)
+                        d_end_v = rec_f.get("Data_End") or (admin_meta.get("data_end") if admin_meta else 0)
                         admin_vals = [
                             rec_f.get("Source_ID", row[0]),
                             lat_v,
                             lon_v,
-                            rec_f.get("Data_Start", 0),
-                            rec_f.get("Data_End", 0),
-                            rec_f.get("Temporal", "Precalculated"),
+                            d_start_v,
+                            d_end_v,
+                            rec_f.get("Temporal", (admin_meta.get("temporal", "Precalculated") if admin_meta else "Precalculated")),
                             rec_f.get("Interp_Meth", "Offline"),
-                            rec_f.get("Cell_Size", 0.0),
-                            rec_f.get("Wind_Cell", 0.0),
+                            rec_f.get("Cell_Size", (admin_meta.get("base_cell", 0.0) if admin_meta else 0.0)),
+                            rec_f.get("Wind_Cell", (admin_meta.get("wind_cell", 0.0) if admin_meta else 0.0)),
                             rec_f.get("Status", "OK"),
                             (rec_f.get("Error_Msg", "") or "")[:255]
                         ]
                         for ai, aval in enumerate(admin_vals):
                             row[2 + ai] = aval
                         for wi, sf in enumerate(sub_wanted):
-                            row[2 + len(admin_names) + wi] = rec_f.get(sf)
+                            val = rec_f.get(sf)
+                            if val is None and sf in SHP_FIELD_MAP:
+                                val = rec_f.get(SHP_FIELD_MAP[sf])
+                            if val is None and sf in REV_SHP_MAP:
+                                val = rec_f.get(REV_SHP_MAP[sf])
+                            row[2 + len(admin_names) + wi] = val
                         ucur.updateRow(row)
                 element_fcs["Climate_Models"] = models_fc
                 msg("Climate Models layer: %s (%d indicators)" % (models_fc, len(sub_wanted)))
@@ -4707,16 +4871,16 @@ class PowerClimateAtlasGenerator(object):
             for name, typ, _alias in ADMIN_FIELDS:
                 if name not in existing:
                     if typ == "TEXT":
-                        arcpy.management.AddField(fc, name, typ, field_length=255)
+                        arcpy.management.AddField(fc, name, typ, field_length=255, field_alias=name)
                     else:
-                        arcpy.management.AddField(fc, name, typ)
+                        arcpy.management.AddField(fc, name, typ, field_alias=name)
             if wanted_fields is not None:
                 wanted = wanted_fields
             else:
                 wanted = MODULE_FIELDS.get(m, [])
             for f in wanted:
                 if f not in existing:
-                    arcpy.management.AddField(fc, f, "DOUBLE")
+                    arcpy.management.AddField(fc, f, "DOUBLE", field_alias=f)
 
             by_oid = dict((r.get("oid"), r) for r in results if r.get("oid") is not None)
             by_coord = {}
@@ -4911,7 +5075,29 @@ class PowerClimateAtlasGenerator(object):
                         arcpy.ClearEnvironment("extent")
                 except Exception:
                     pass
-                surf = self._interp_surface(lyr, actual_field, cell, method, iopts, kopts)
+                # Circular directions must NOT be interpolated linearly
+                # (mean of 350+10=180 instead of 0). Use sin/cos U/V method.
+                is_dir = field.startswith("W_Dir")
+                if is_dir:
+                    try:
+                        try:
+                            arcpy.management.Delete(lyr)
+                        except Exception:
+                            pass
+                        surf = self._interp_direction_uv(
+                            src_fc, actual_field, cell, method, iopts, kopts, warn)
+                        msg("Raster %s: circular U/V (sin/cos + atan2) interpolation." % field)
+                    except Exception as ex_uv:
+                        warn("Direction U/V failed for %s (%s); falling back to linear." % (field, ex_uv))
+                        try:
+                            arcpy.management.Delete(lyr)
+                        except Exception:
+                            pass
+                        arcpy.management.MakeFeatureLayer(
+                            src_fc, lyr, "%s IS NOT NULL" % arcpy.AddFieldDelimiters(src_fc, actual_field))
+                        surf = self._interp_surface(lyr, actual_field, cell, method, iopts, kopts)
+                else:
+                    surf = self._interp_surface(lyr, actual_field, cell, method, iopts, kopts)
                 rp, lp = self._raster_paths(out_ws, module, field)
                 # --- staged save: unclipped surface -> scratch temp first ---
                 tmpu = os.path.join(scratch, "u_" + field + ".tif")
@@ -4942,9 +5128,21 @@ class PowerClimateAtlasGenerator(object):
                         ExtractByMask(tmpu, mask).save(tmpc)
                         src_path = tmpc
                     except Exception as ex:
-                        warn("ExtractByMask failed for %s, keeping unclipped: %s" % (field, ex))
-                        src_path = tmpu
-                        tmpc = None
+                        # Strict policy: never publish an unclipped surface as a
+                        # final result. Discard the intermediate and skip.
+                        warn("Raster %s skipped: clip to study area failed (%s). "
+                             "Unclipped surface discarded, not published." % (field, ex))
+                        for _t in (tmpu, tmpc):
+                            try:
+                                if _t and arcpy.Exists(_t):
+                                    arcpy.management.Delete(_t)
+                            except Exception:
+                                pass
+                        try:
+                            arcpy.management.Delete(lyr)
+                        except Exception:
+                            pass
+                        continue
                 else:
                     src_path = tmpu
                     tmpc = None
@@ -5012,31 +5210,37 @@ class PowerClimateAtlasGenerator(object):
                     interp_colors = interpolate_colors(colors, nclass)
                     cls_rp, clr_path, breaks = self._build_display(
                         rp, field, module, interp_colors, nclass, reclass_method, msg, warn, purge=purge)
-                    if cls_rp and arcpy.Exists(cls_rp):
-                        self._make_lyr(cls_rp, lp, field, module, interp_colors, nclass, reclass_method,
-                                       msg, warn, breaks, src_continuous=rp, is_classified=True)
-                    else:
-                        self._make_lyr(rp, lp, field, module, interp_colors, nclass, reclass_method,
-                                       msg, warn, breaks, src_continuous=rp, is_classified=False)
-                    registry.append((field, rp, lp, module, interp_colors, nclass))
+                    # No .lyr output: registry keeps the raster path only.
+                    registry.append((field, rp, None, module, interp_colors, nclass))
+                    # Remove any legacy .lyr left by previous runs.
+                    try:
+                        _legacy_lyr = os.path.join(os.path.dirname(rp), "Layers", field + ".lyr")
+                        if arcpy.Exists(_legacy_lyr):
+                            arcpy.management.Delete(_legacy_lyr)
+                    except Exception:
+                        pass
                     msg("Raster: %s [raw float, LZW] + %s [%d classes, %s]" % (
                         rp, os.path.basename(cls_rp) if cls_rp else "", nclass, reclass_method))
                 else:
                     # Reclass is DISABLED: only raw continuous float raster, no _cls.tif
                     rdir = os.path.dirname(rp)
                     old_cls = os.path.join(rdir, field + "_cls.tif")
-                    old_clr = os.path.join(rdir.replace("Rasters", "Layers"), field + ".clr")
+                    old_clr = os.path.join(rdir, field + ".clr")
                     for _old in (old_cls, old_clr):
                         try:
                             if arcpy.Exists(_old):
                                 arcpy.management.Delete(_old)
                         except Exception:
                             pass
+                    # Remove any legacy .lyr left by previous runs.
+                    try:
+                        _legacy_lyr = os.path.join(rdir, "Layers", field + ".lyr")
+                        if arcpy.Exists(_legacy_lyr):
+                            arcpy.management.Delete(_legacy_lyr)
+                    except Exception:
+                        pass
                     nclass = len(colors)
-                    breaks = [_rmin, _rmax] if (_rmin is not None and _rmax is not None) else None
-                    self._make_lyr(rp, lp, field, module, colors, nclass, method,
-                                   msg, warn, breaks, src_continuous=rp, is_classified=False)
-                    registry.append((field, rp, lp, module, colors, nclass))
+                    registry.append((field, rp, None, module, colors, nclass))
                     msg("Raster: %s [raw float, LZW, continuous]" % rp)
             except Exception as ex:
                 warn("Raster %s failed: %s" % (field, ex))
@@ -5207,6 +5411,9 @@ class PowerClimateAtlasGenerator(object):
                    ("Autumn", "W_Spd_Autumn_Mean", "W_Dir_Autumn_Mean")]
         created = []
         vdir = os.path.join(out_ws, "05_Wind", "Direction", "Vector_Points")
+        # Created lazily: the folder appears only when vector shapefiles are
+        # actually written, never as an empty leftover.
+        makedirs_ok(vdir)
         for suffix, fs, fd in periods:
             if fs not in spd or fd not in drc:
                 continue
@@ -5424,8 +5631,8 @@ class PowerClimateAtlasGenerator(object):
              os.path.isfile(os.path.join(paths["vec"], "Metadata_Dictionary.csv")))
         _add("Field_Dictionary_Arabic.csv",
              os.path.isfile(os.path.join(paths["vec"], "Field_Dictionary_Arabic.csv")))
-        missing = [item[0] for item in registry if not os.path.isfile(item[2])]
-        _add("lyr per raster", len(missing) == 0,
+        missing = [item[0] for item in registry if not os.path.isfile(item[1])]
+        _add("tif per raster", len(missing) == 0,
              "(%d/%d, missing=%s)" % (len(registry) - len(missing), len(registry), missing[:5]))
         mods_with_r = set(item[3] for item in registry)
         _add("outputs match selected modules", not (mods_with_r - set(modules)),
@@ -5490,7 +5697,7 @@ class PowerClimateAtlasGenerator(object):
                     fh.write(u"  %s: %s\n" % (oid, err))
             fh.write(u"\nRasters:\n")
             for item in info["rasters"]:
-                fh.write(u"  [%s] %s -> %s\n" % (item[3], item[1], item[2]))
+                fh.write(u"  [%s] %s\n" % (item[3], item[1]))
             if info.get("element_layers"):
                 fh.write(u"\nElement point layers:\n")
                 for _m in sorted(info["element_layers"]):
@@ -5512,8 +5719,9 @@ class PowerClimateAtlasGenerator(object):
                 u"PSL (sea-level) and PS (surface) are different products.",
                 u"Sol_Annual_Mean (kWh/m2/day) differs from Sol_Annual_Total (kWh/m2/year).",
                 u"Winter = months 12,1,2 of the same year(s); -999 excluded; NoData where insufficient valid values.",
-                u".lyr files open with embedded colormap colors from classified display "
-                u"rasters (<field>_cls.tif); raw float GeoTIFFs stay alongside for analysis.",
+                u"Rasters are raw float GeoTIFFs clipped to the study area, written "
+                u"directly inside each element folder; classified display rasters "
+                u"(<field>_cls.tif) are written alongside only when enabled.",
             ]:
                 fh.write(u"  - %s\n" % n)
             if info["warnings"]:

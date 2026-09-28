@@ -667,8 +667,8 @@
    `c:\Users\ahmad\Desktop\NASA POWER Climate Atlas Generator\style\01_Temperature\CLR\`
 4. اضغط **OK**؛ سيتم فوراً تطبيق الألوان الكارتوجرافية بدقة 100%.
 
-### ب. التطبيق التلقائي عبر أداة الأطلس (Atlas Generator):
-* تقوم أداة الأطلس `POWER_Climate_Atlas_Generator_10_8.pyt` تلقائياً بقراءة ملفات الستايل هذه وتطبيق تدرجات الألوان وإنشاء ملفات `.lyr` و `.lyr.json` متطابقة مع هذه المعايير.
+### ب. ملاحظة حول أداة الأطلس (Atlas Generator):
+* لا تُنتج أداة الأطلس `POWER_Climate_Atlas_Generator_10_8.pyt` أي ملفات `.lyr` أو `.lyr.json` — مخرجاتها رواستر `GeoTIFF` خام تُفتح مباشرة في ArcMap، ولتطبيق تدرجات الألوان المعتمدة في هذا الدليل استخدم الطريقة (أ) أعلاه عبر ملفات `.style` أو `.clr`.
 
 ### ج. التطبيق في QGIS:
 * انقر بزر الفأرة الأيمن على طبقة الراستر $\rightarrow$ **Properties** $\rightarrow$ **Symbology** $\rightarrow$ اضغط زر **Style** بالأسفل $\rightarrow$ **Load Style...** واختر ملف `.qml` من مجلد `QML/`.

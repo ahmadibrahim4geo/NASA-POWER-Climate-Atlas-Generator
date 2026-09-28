@@ -64,6 +64,14 @@
 ### هـ. المرجع الأكاديمي لتصميم التدرجات (ColorBrewer 2.0)
 * [ColorBrewer 2.0 - Penn State University](https://colorbrewer2.org/) — تدرجات Cynthia Brewer القياسية للتدرجات المتتابعة (Sequential) وثنائية الاتجاه (Diverging) والفئوية (Qualitative).
 
+### و. مصادر رموز الأسهم ومتجهات الرياح (Wind Arrows & Markers)
+* [Creating marker symbols — ArcMap Documentation](https://desktop.arcgis.com/en/arcmap/latest/map/styles-and-symbols/creating-marker-symbols.htm) — الدليل الرسمي لرموز الماركر (Simple/Character/Arrow/Picture) والتوصية باستخدام خط ESRI Arrowhead للأسهم المركبة.
+* [Use style options — Rotate symbols by angle](https://doc.arcgis.com/en/arcgis-online/create-maps/use-style-options-mv.htm) — قاعدة تدوير الرموز بحقل اتجاه مع اختيار رمز يشير للشمال (مطبقة في `05_Wind_Arrows.style` مع حقل `Arrow_Angle`).
+* [meteoblue Symbols & Pictograms + Pictofont](https://content.meteoblue.com/en/research-education/specifications/standards/symbols-and-pictograms) — خط الأيقونات المجاني وشروح wind barbs للسرعة والاتجاه.
+* [WMO Weather Icons (SVG) — GitHub](https://github.com/roe-dl/weathericons) — رموز WMO بصيغة SVG تصلح كـ Picture Markers بعد تحويلها لـ EMF.
+* [metsymb — Meteorological Symbols Font (CTAN)](https://ctan.org/pkg/metsymb) — خط رموز الأرصاد (oktas والسحب) بصيغة OpenType.
+* [NWS Information about wind barbs](https://www.weather.gov/hfo/windbarbinfo) — شرح رموز wind barbs (الاتجاه FROM والسرعة بالعقد).
+
 ---
 
 ## 4. خطوات تحميل الستايل داخل ArcMap 10.8

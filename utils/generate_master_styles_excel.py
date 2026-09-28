@@ -22,7 +22,7 @@ import openpyxl
 from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 
-BASE_DIR = r"C:\Users\ahmad\Desktop\NASA POWER Climate Atlas Generator"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STYLE_DIR = os.path.join(BASE_DIR, "style")
 EXCEL_OUT_STYLE = os.path.join(STYLE_DIR, "NASA_POWER_Climate_Atlas_Master_Styles.xlsx")
 EXCEL_OUT_CONSOLIDATED = os.path.join(STYLE_DIR, "All_ArcMap_Styles_Consolidated", "NASA_POWER_Climate_Atlas_Master_Styles.xlsx")

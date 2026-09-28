@@ -143,9 +143,10 @@ check("Toolbox+Tool", hasattr(mod, "Toolbox") and hasattr(mod, "PowerClimateAtla
 # toolbox-level helpers that do not need arcpy execution
 tool = mod.PowerClimateAtlasGenerator()
 rp, lp = tool._raster_paths("C:/out", "Temperature", "T_Annual_Mean")
-check("raster path tif+lyr", rp.endswith("01_Temperature/Rasters/T_Annual_Mean.tif".replace("/", os.sep)) and lp.endswith(".lyr"), (rp, lp))
+check("raster path flat tif, no lyr", rp.endswith("01_Temperature/T_Annual_Mean.tif".replace("/", os.sep)) and lp is None, (rp, lp))
 rp2, lp2 = tool._raster_paths("C:/out", "Wind", "W_Dir_Annual_Mean")
-check("wind dir lyr path", "Direction" in lp2 and lp2.endswith("W_Dir_Annual_Mean.lyr"), lp2)
+check("wind dir flat path, no lyr", "Direction" in rp2 and "Rasters" not in rp2 and lp2 is None, (rp2, lp2))
+check("mask helper present", hasattr(mod, "ensure_mask_fc"))
 check("module of field", tool._module_of_field("PSL_Winter_Mean") == "Sea Level Pressure" and tool._module_of_field("Sol_Annual_Total") == "Solar Radiation")
 check("colors uv", tool._colors_for("UV Index", "UV_Summer_Mean") == mod.COLOR_RAMPS["UV Index"])
 check("now_str", len(mod.now_str()) == 19, mod.now_str())

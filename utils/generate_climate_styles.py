@@ -47,85 +47,49 @@ def write_clr(path, hex_colors, start_val=1):
 
 TEMPERATURE_STYLES = [
   {
-    "category": "Sequential",
-    "name_ar": "تدرج أصفر برتقالي أحمر كلاسيكي",
-    "name_en": "ColorBrewer YlOrRd Classic",
-    "id": "Temp_Seq_YlOrRd",
-    "source": "ColorBrewer YlOrRd",
-    "classes": {
-      "3": ["#FFEDA0", "#FEB24C", "#F03B20"],
-      "4": ["#FFFFB2", "#FECC5C", "#FD8D3C", "#E31A1C"],
-      "5": ["#FFFFB2", "#FECC5C", "#FD8D3C", "#F03B20", "#BD0026"],
-      "6": ["#FFFFB2", "#FED976", "#FEB24C", "#FD8D3C", "#F03B20", "#BD0026"],
-      "7": ["#FFFFB2", "#FED976", "#FEB24C", "#FD8D3C", "#FC4E2A", "#E31A1C", "#B10026"],
-      "8": ["#FFFFCC", "#FFEDA0", "#FED976", "#FEB24C", "#FD8D3C", "#FC4E2A", "#E31A1C", "#B10026"],
-      "9": ["#FFFFCC", "#FFEDA0", "#FED976", "#FEB24C", "#FD8D3C", "#FC4E2A", "#E31A1C", "#BD0026", "#800026"],
-      "10": ["#FFFFCC", "#FFF0A3", "#FED976", "#FEC157", "#FEA144", "#FD7B36", "#F54826", "#E31A1C", "#BD0026", "#800026"],
-      "11": ["#FFFFCC", "#FFF2A8", "#FFE187", "#FECB67", "#FEAC4A", "#FD8D3C", "#FD632F", "#F03722", "#D71321", "#B10026", "#800026"]
-    }
-  },
-  {
-    "category": "Sequential",
-    "name_ar": "تدرج برتقالي أحمر متتابع",
-    "name_en": "ColorBrewer OrRd Classic",
-    "id": "Temp_Seq_OrRd",
-    "source": "ColorBrewer OrRd",
-    "classes": {
-      "3": ["#FEE8C8", "#FDBB84", "#E34A33"],
-      "4": ["#FEF0D9", "#FDCC8A", "#FC8D59", "#D7301F"],
-      "5": ["#FEF0D9", "#FDBB84", "#FC8D59", "#E34A33", "#B30000"],
-      "6": ["#FEF0D9", "#FDD49E", "#FDBB84", "#FC8D59", "#E34A33", "#B30000"],
-      "7": ["#FEF0D9", "#FDD49E", "#FDBB84", "#FC8D59", "#EF6548", "#D7301F", "#990000"],
-      "8": ["#FFF7EC", "#FEE8C8", "#FDD49E", "#FDBB84", "#FC8D59", "#EF6548", "#D7301F", "#990000"],
-      "9": ["#FFF7EC", "#FEE8C8", "#FDD49E", "#FDBB84", "#FC8D59", "#EF6548", "#D7301F", "#B30000", "#7F0000"],
-      "10": ["#FFF7EC", "#FEF0D9", "#FEE0B6", "#FDC590", "#FCA76E", "#F57D4F", "#E65239", "#CE261B", "#A80000", "#7F0000"],
-      "11": ["#FFF7EC", "#FEF0D9", "#FEE3BE", "#FDCFA0", "#FDBB84", "#FC9F67", "#F78051", "#EA593C", "#D7301F", "#B10000", "#7F0000"]
-    }
-  },
-  {
     "category": "Sequential", 
     "name_ar": "تدرج أحمر دافئ متتابع", 
     "source": "ColorBrewer Reds", 
     "classes": {
       "3": [
-        "#FEE5D9", 
+        "#FCBBA1", 
         "#ED4E38", 
         "#67000D"
       ], 
       "4": [
-        "#FEE5D9", 
-        "#FD8261", 
+        "#FCBBA1", 
+        "#FC7857", 
         "#CB2420", 
         "#67000D"
       ], 
       "5": [
-        "#FEE5D9", 
-        "#FD9E7F", 
+        "#FCBBA1", 
+        "#FC8868", 
         "#ED4E38", 
         "#B31719", 
         "#67000D"
       ], 
       "6": [
-        "#FEE5D9", 
-        "#FCAE91", 
+        "#FCBBA1", 
+        "#FC9272", 
         "#FB6A4A", 
         "#DE2D26", 
         "#A50F15", 
         "#67000D"
       ], 
       "7": [
-        "#FEE5D9", 
-        "#FDB79D", 
-        "#FD8261", 
+        "#FCBBA1", 
+        "#FC997A", 
+        "#FC7857", 
         "#ED4E38", 
         "#CB2420", 
         "#9A0C14", 
         "#67000D"
       ], 
       "8": [
-        "#FEE5D9", 
-        "#FEBEA5", 
-        "#FD9272", 
+        "#FCBBA1", 
+        "#FD9E7F", 
+        "#FC8261", 
         "#F76245", 
         "#E2382B", 
         "#BD1D1C", 
@@ -133,10 +97,10 @@ TEMPERATURE_STYLES = [
         "#67000D"
       ], 
       "9": [
-        "#FEE5D9", 
-        "#FEC3AC", 
-        "#FD9E7F", 
-        "#FC7353", 
+        "#FCBBA1", 
+        "#FDA283", 
+        "#FC8868", 
+        "#FB6F4F", 
         "#ED4E38", 
         "#D72A24", 
         "#B31719", 
@@ -144,10 +108,10 @@ TEMPERATURE_STYLES = [
         "#67000D"
       ], 
       "10": [
-        "#FEE5D9", 
-        "#FEC6B1", 
-        "#FDA789", 
-        "#FD8261", 
+        "#FCBBA1", 
+        "#FDA487", 
+        "#FC8E6D", 
+        "#FC7857", 
         "#F55E42", 
         "#E53D2E", 
         "#CB2420", 
@@ -156,10 +120,10 @@ TEMPERATURE_STYLES = [
         "#67000D"
       ], 
       "11": [
-        "#FEE5D9", 
-        "#FFCAB5", 
-        "#FCAE91", 
-        "#FD8D6D", 
+        "#FCBBA1", 
+        "#FDA789", 
+        "#FC9272", 
+        "#FC7F5E", 
         "#FB6A4A", 
         "#ED4E38", 
         "#DE2D26", 
@@ -178,44 +142,44 @@ TEMPERATURE_STYLES = [
     "source": "ColorBrewer Oranges", 
     "classes": {
       "3": [
-        "#FFF5EB", 
+        "#FDD0A2", 
         "#F98D43", 
         "#7F2704"
       ], 
       "4": [
-        "#FFF5EB", 
-        "#FEB97D", 
+        "#FDD0A2", 
+        "#FDB273", 
         "#E95E0D", 
         "#7F2704"
       ], 
       "5": [
-        "#FFF5EB", 
-        "#FEC894", 
+        "#FDD0A2", 
+        "#FDB87E", 
         "#F98D43", 
         "#DF5105", 
         "#7F2704"
       ], 
       "6": [
-        "#FFF5EB", 
         "#FDD0A2", 
+        "#FDBB84", 
         "#FDAE6B", 
         "#F16913", 
         "#D94801", 
         "#7F2704"
       ], 
       "7": [
-        "#FFF5EB", 
-        "#FED6AE", 
-        "#FEB97D", 
+        "#FDD0A2", 
+        "#FDBF89", 
+        "#FDB273", 
         "#F98D43", 
         "#E95E0D", 
         "#C94202", 
         "#7F2704"
       ], 
       "8": [
-        "#FFF5EB", 
-        "#FFDAB7", 
-        "#FEC18A", 
+        "#FDD0A2", 
+        "#FDC18D", 
+        "#FDB579", 
         "#FCA560", 
         "#F37423", 
         "#E35708", 
@@ -223,10 +187,10 @@ TEMPERATURE_STYLES = [
         "#7F2704"
       ], 
       "9": [
-        "#FFF5EB", 
-        "#FFDEBD", 
-        "#FEC894", 
-        "#FDB272", 
+        "#FDD0A2", 
+        "#FDC38F", 
+        "#FDB87E", 
+        "#FDB06E", 
         "#F98D43", 
         "#EE6511", 
         "#DF5105", 
@@ -234,10 +198,10 @@ TEMPERATURE_STYLES = [
         "#7F2704"
       ], 
       "10": [
-        "#FFF5EB", 
-        "#FFE0C2", 
-        "#FDCC9C", 
-        "#FEB97D", 
+        "#FDD0A2", 
+        "#FDC491", 
+        "#FDBA81", 
+        "#FDB273", 
         "#FC9F59", 
         "#F5792B", 
         "#E95E0D", 
@@ -246,10 +210,10 @@ TEMPERATURE_STYLES = [
         "#7F2704"
       ], 
       "11": [
-        "#FFF5EB", 
-        "#FFE2C6", 
         "#FDD0A2", 
-        "#FEBF86", 
+        "#FDC693", 
+        "#FDBB84", 
+        "#FDB578", 
         "#FDAE6B", 
         "#F98D43", 
         "#F16913", 
@@ -268,44 +232,44 @@ TEMPERATURE_STYLES = [
     "source": "ColorBrewer Blues", 
     "classes": {
       "3": [
-        "#F7FBFF", 
+        "#BDD7E7", 
         "#5198C9", 
         "#08306B"
       ], 
       "4": [
-        "#F7FBFF", 
-        "#8CBDDE", 
+        "#BDD7E7", 
+        "#7DB7DA", 
         "#2771B2", 
         "#08306B"
       ], 
       "5": [
-        "#F7FBFF", 
-        "#B1D0E9", 
+        "#BDD7E7", 
+        "#92C3DE", 
         "#5198C9", 
         "#175DA4", 
         "#08306B"
       ], 
       "6": [
-        "#F7FBFF", 
-        "#C6DBEF", 
+        "#BDD7E7", 
+        "#9ECAE1", 
         "#6BAED6", 
         "#3182BD", 
         "#08519C", 
         "#08306B"
       ], 
       "7": [
-        "#F7FBFF", 
-        "#CEE0F2", 
-        "#8CBDDE", 
+        "#BDD7E7", 
+        "#A3CCE2", 
+        "#7DB7DA", 
         "#5198C9", 
         "#2771B2", 
         "#084B94", 
         "#08306B"
       ], 
       "8": [
-        "#F7FBFF", 
-        "#D4E4F4", 
-        "#A1C8E4", 
+        "#BDD7E7", 
+        "#A7CEE3", 
+        "#89BEDC", 
         "#64A8D2", 
         "#3B88C1", 
         "#1F66AA", 
@@ -313,10 +277,10 @@ TEMPERATURE_STYLES = [
         "#08306B"
       ], 
       "9": [
-        "#F7FBFF", 
-        "#D8E7F5", 
-        "#B1D0E9", 
-        "#78B4D9", 
+        "#BDD7E7", 
+        "#AACFE3", 
+        "#92C3DE", 
+        "#72B1D7", 
         "#5198C9", 
         "#2D7CB9", 
         "#175DA4", 
@@ -324,10 +288,10 @@ TEMPERATURE_STYLES = [
         "#08306B"
       ], 
       "10": [
-        "#F7FBFF", 
-        "#DCE9F6", 
-        "#BDD6EC", 
-        "#8CBDDE", 
+        "#BDD7E7", 
+        "#ACD0E4", 
+        "#99C7E0", 
+        "#7DB7DA", 
         "#60A4D0", 
         "#408CC3", 
         "#2771B2", 
@@ -336,10 +300,10 @@ TEMPERATURE_STYLES = [
         "#08306B"
       ], 
       "11": [
-        "#F7FBFF", 
-        "#DFEBF7", 
-        "#C6DBEF", 
-        "#9BC4E3", 
+        "#BDD7E7", 
+        "#AED0E4", 
+        "#9ECAE1", 
+        "#86BCDC", 
         "#6BAED6", 
         "#5198C9", 
         "#3182BD", 
@@ -358,44 +322,44 @@ TEMPERATURE_STYLES = [
     "source": "ColorBrewer Purples", 
     "classes": {
       "3": [
-        "#FCFBFD", 
+        "#DADAEB", 
         "#8A82BD", 
         "#3F007D"
       ], 
       "4": [
-        "#FCFBFD", 
-        "#B2AFD4", 
+        "#DADAEB", 
+        "#A8A6CF", 
         "#6B55A6", 
         "#3F007D"
       ], 
       "5": [
-        "#FCFBFD", 
-        "#CBCAE2", 
+        "#DADAEB", 
+        "#B4B4D7", 
         "#8A82BD", 
         "#5D3997", 
         "#3F007D"
       ], 
       "6": [
-        "#FCFBFD", 
         "#DADAEB", 
+        "#BCBDDC", 
         "#9E9AC8", 
         "#756BB1", 
         "#54278F", 
         "#3F007D"
       ], 
       "7": [
-        "#FCFBFD", 
-        "#E0DFEE", 
-        "#B2AFD4", 
+        "#DADAEB", 
+        "#C1C2DF", 
+        "#A8A6CF", 
         "#8A82BD", 
         "#6B55A6", 
         "#51228C", 
         "#3F007D"
       ], 
       "8": [
-        "#FCFBFD", 
-        "#E4E3F0", 
-        "#C0BEDC", 
+        "#DADAEB", 
+        "#C5C5E0", 
+        "#AFAED3", 
         "#9893C5", 
         "#7B72B4", 
         "#63459E", 
@@ -403,10 +367,10 @@ TEMPERATURE_STYLES = [
         "#3F007D"
       ], 
       "9": [
-        "#FCFBFD", 
-        "#E7E6F2", 
-        "#CBCAE2", 
-        "#A5A2CC", 
+        "#DADAEB", 
+        "#C7C8E2", 
+        "#B4B4D7", 
+        "#A29ECA", 
         "#8A82BD", 
         "#7163AD", 
         "#5D3997", 
@@ -414,10 +378,10 @@ TEMPERATURE_STYLES = [
         "#3F007D"
       ], 
       "10": [
-        "#FCFBFD", 
-        "#E9E9F3", 
-        "#D3D3E7", 
-        "#B2AFD4", 
+        "#DADAEB", 
+        "#C9CAE3", 
+        "#B9B9DA", 
+        "#A8A6CF", 
         "#958FC3", 
         "#7E75B6", 
         "#6B55A6", 
@@ -426,10 +390,10 @@ TEMPERATURE_STYLES = [
         "#3F007D"
       ], 
       "11": [
-        "#FCFBFD", 
-        "#EBEAF4", 
         "#DADAEB", 
-        "#BCB9D9", 
+        "#CBCBE4", 
+        "#BCBDDC", 
+        "#ADABD2", 
         "#9E9AC8", 
         "#8A82BD", 
         "#756BB1", 
@@ -449,7 +413,7 @@ TEMPERATURE_STYLES = [
     "classes": {
       "3": [
         "#4393C3", 
-        "#F7F7F7", 
+        "#FFFFBF", 
         "#B2182B"
       ], 
       "4": [
@@ -461,7 +425,7 @@ TEMPERATURE_STYLES = [
       "5": [
         "#053061", 
         "#92C5DE", 
-        "#F7F7F7", 
+        "#FFFFBF", 
         "#F4A582", 
         "#67001F"
       ], 
@@ -477,7 +441,7 @@ TEMPERATURE_STYLES = [
         "#053061", 
         "#347CB8", 
         "#92C5DE", 
-        "#F7F7F7", 
+        "#FFFFBF", 
         "#F4A582", 
         "#C4413C", 
         "#67001F"
@@ -497,7 +461,7 @@ TEMPERATURE_STYLES = [
         "#2166AC", 
         "#4393C3", 
         "#92C5DE", 
-        "#F7F7F7", 
+        "#FFFFBF", 
         "#F4A582", 
         "#D6604D", 
         "#B2182B", 
@@ -521,7 +485,7 @@ TEMPERATURE_STYLES = [
         "#347CB8", 
         "#5A9FCA", 
         "#92C5DE", 
-        "#F7F7F7", 
+        "#FFFFBF", 
         "#F4A582", 
         "#DE725A", 
         "#C4413C", 
@@ -719,7 +683,7 @@ TEMPERATURE_STYLES = [
     "classes": {
       "3": [
         "#48D1CC", 
-        "#F5F5F5", 
+        "#FFF2CE", 
         "#FF5722"
       ], 
       "4": [
@@ -731,7 +695,7 @@ TEMPERATURE_STYLES = [
       "5": [
         "#006666", 
         "#B2EBF2", 
-        "#F5F5F5", 
+        "#FFF2CE", 
         "#FFCCBC", 
         "#D84315"
       ], 
@@ -747,7 +711,7 @@ TEMPERATURE_STYLES = [
         "#006666", 
         "#2BADAB", 
         "#B2EBF2", 
-        "#F5F5F5", 
+        "#FFF2CE", 
         "#FFCCBC", 
         "#FF7245", 
         "#D84315"
@@ -767,7 +731,7 @@ TEMPERATURE_STYLES = [
         "#008B8B", 
         "#48D1CC", 
         "#B2EBF2", 
-        "#F5F5F5", 
+        "#FFF2CE", 
         "#FFCCBC", 
         "#FF8A65", 
         "#FF5722", 
@@ -791,7 +755,7 @@ TEMPERATURE_STYLES = [
         "#2BADAB", 
         "#69D8D5", 
         "#B2EBF2", 
-        "#F5F5F5", 
+        "#FFF2CE", 
         "#FFCCBC", 
         "#FF9B7A", 
         "#FF7245", 
@@ -809,7 +773,7 @@ TEMPERATURE_STYLES = [
     "classes": {
       "3": [
         "#8073AC", 
-        "#F7F7F7", 
+        "#FEE0B6", 
         "#B35806"
       ], 
       "4": [
@@ -821,7 +785,7 @@ TEMPERATURE_STYLES = [
       "5": [
         "#2D004B", 
         "#B2ABD2", 
-        "#F7F7F7", 
+        "#FEE0B6", 
         "#FDB863", 
         "#7F3B08"
       ], 
@@ -837,7 +801,7 @@ TEMPERATURE_STYLES = [
         "#2D004B", 
         "#6B4E9A", 
         "#B2ABD2", 
-        "#F7F7F7", 
+        "#FEE0B6", 
         "#FDB863", 
         "#C96D0D", 
         "#7F3B08"
@@ -857,7 +821,7 @@ TEMPERATURE_STYLES = [
         "#542788", 
         "#8073AC", 
         "#B2ABD2", 
-        "#F7F7F7", 
+        "#FEE0B6", 
         "#FDB863", 
         "#E08214", 
         "#B35806", 
@@ -881,7 +845,7 @@ TEMPERATURE_STYLES = [
         "#6B4E9A", 
         "#8C81B5", 
         "#B2ABD2", 
-        "#F7F7F7", 
+        "#FEE0B6", 
         "#FDB863", 
         "#E88F2C", 
         "#C96D0D", 
@@ -898,85 +862,85 @@ TEMPERATURE_STYLES = [
     "source": "Fabio Crameri Scientific Colour Maps", 
     "classes": {
       "3": [
-        "#000000", 
-        "#7EB124", 
-        "#FFFFFF"
+        "#001030", 
+        "#9ABA1B", 
+        "#F6D94E"
       ], 
       "4": [
-        "#000000", 
-        "#007F66", 
-        "#FFCC00", 
-        "#FFFFFF"
+        "#001030", 
+        "#369055", 
+        "#F7B800", 
+        "#F6D94E"
       ], 
       "5": [
-        "#000000", 
-        "#0D5F7A", 
-        "#7EB124", 
-        "#FF8300", 
-        "#FFFFFF"
+        "#001030", 
+        "#1F796A", 
+        "#9ABA1B", 
+        "#FE8900", 
+        "#F6D94E"
       ], 
       "6": [
-        "#000000", 
-        "#104A7B", 
-        "#42944B", 
-        "#C9C500", 
-        "#FF5A00", 
-        "#FFFFFF"
+        "#001030", 
+        "#136B72", 
+        "#63A33E", 
+        "#D2BF00", 
+        "#FC6F0C", 
+        "#F6D94E"
       ], 
       "7": [
-        "#000000", 
-        "#1A3A73", 
-        "#007F66", 
-        "#7EB124", 
-        "#FFCC00", 
-        "#FF4600", 
-        "#FFFFFF"
+        "#001030", 
+        "#156075", 
+        "#369055", 
+        "#9ABA1B", 
+        "#F7B800", 
+        "#F86017", 
+        "#F6D94E"
       ], 
       "8": [
-        "#000000", 
-        "#1D2E6D", 
-        "#116D72", 
-        "#4F9E3C", 
-        "#B1C100", 
-        "#FFA300", 
-        "#FF3400", 
-        "#FFFFFF"
+        "#001030", 
+        "#145877", 
+        "#2C8361", 
+        "#72AB31", 
+        "#C2C200", 
+        "#FB9E00", 
+        "#F4551D", 
+        "#F6D94E"
       ], 
       "9": [
-        "#000000", 
-        "#1E2569", 
-        "#0D5F7A", 
-        "#348C56", 
-        "#7EB124", 
-        "#DDC800", 
-        "#FF8300", 
-        "#FF2000", 
-        "#FFFFFF"
+        "#001030", 
+        "#125279", 
+        "#1F796A", 
+        "#549C47", 
+        "#9ABA1B", 
+        "#E0BD00", 
+        "#FE8900", 
+        "#F24C20", 
+        "#F6D94E"
       ], 
       "10": [
-        "#000000", 
-        "#1E1E66", 
-        "#005580", 
-        "#007F66", 
-        "#55A333", 
-        "#A3BF00", 
-        "#FFCC00", 
-        "#FF6600", 
-        "#FF0000", 
-        "#FFFFFF"
+        "#001030", 
+        "#0F4E7A", 
+        "#0E7270", 
+        "#369055", 
+        "#7AB028", 
+        "#B8C300", 
+        "#F7B800", 
+        "#FF7800", 
+        "#F04422", 
+        "#F6D94E"
       ], 
       "11": [
-        "#000000", 
-        "#1D1C5C", 
-        "#104A7B", 
-        "#0F726E", 
-        "#42944B", 
-        "#7EB124", 
-        "#C9C500", 
-        "#FFB000", 
-        "#FF5A00", 
-        "#FF3E22", 
-        "#FFFFFF"
+        "#001030", 
+        "#0D4772", 
+        "#136B72", 
+        "#2F875E", 
+        "#63A33E", 
+        "#9ABA1B", 
+        "#D2BF00", 
+        "#FAA600", 
+        "#FC6F0C", 
+        "#F25826", 
+        "#F6D94E"
       ]
     }, 
     "name_en": "Crameri Batlow Scientific", 
@@ -1439,7 +1403,7 @@ TEMPERATURE_STYLES = [
     "classes": {
       "3": [
         "#73B3D8", 
-        "#FFFFFF", 
+        "#FFFFBF", 
         "#C51B17"
       ], 
       "4": [
@@ -1451,7 +1415,7 @@ TEMPERATURE_STYLES = [
       "5": [
         "#08306B", 
         "#C6DBEF", 
-        "#FFFFFF", 
+        "#FFFFBF", 
         "#FDD0A2", 
         "#67000D"
       ], 
@@ -1467,7 +1431,7 @@ TEMPERATURE_STYLES = [
         "#08306B", 
         "#5295C9", 
         "#C6DBEF", 
-        "#FFFFFF", 
+        "#FFFFBF", 
         "#FDD0A2", 
         "#DB4716", 
         "#67000D"
@@ -1487,7 +1451,7 @@ TEMPERATURE_STYLES = [
         "#2879B9", 
         "#73B3D8", 
         "#C6DBEF", 
-        "#FFFFFF", 
+        "#FFFFBF", 
         "#FDD0A2", 
         "#F16913", 
         "#C51B17", 
@@ -1511,7 +1475,7 @@ TEMPERATURE_STYLES = [
         "#5295C9", 
         "#89BDDE", 
         "#C6DBEF", 
-        "#FFFFFF", 
+        "#FFFFBF", 
         "#FDD0A2", 
         "#F7843C", 
         "#DB4716", 
@@ -1709,7 +1673,7 @@ TEMPERATURE_STYLES = [
     "classes": {
       "3": [
         "#3A7EB0", 
-        "#F7F7F7", 
+        "#FFFFBF", 
         "#DF5842"
       ], 
       "4": [
@@ -1721,7 +1685,7 @@ TEMPERATURE_STYLES = [
       "5": [
         "#0D253A", 
         "#B5DBF2", 
-        "#F7F7F7", 
+        "#FFFFBF", 
         "#FAD3BD", 
         "#610012"
       ], 
@@ -1737,7 +1701,7 @@ TEMPERATURE_STYLES = [
         "#0D253A", 
         "#3A7EB0", 
         "#B5DBF2", 
-        "#F7F7F7", 
+        "#FFFFBF", 
         "#FAD3BD", 
         "#DF5842", 
         "#610012"
@@ -1757,7 +1721,7 @@ TEMPERATURE_STYLES = [
         "#265E88", 
         "#639ECC", 
         "#B5DBF2", 
-        "#F7F7F7", 
+        "#FFFFBF", 
         "#FAD3BD", 
         "#EF8765", 
         "#BD332E", 
@@ -1781,7 +1745,7 @@ TEMPERATURE_STYLES = [
         "#3A7EB0", 
         "#76AFDA", 
         "#B5DBF2", 
-        "#F7F7F7", 
+        "#FFFFBF", 
         "#FAD3BD", 
         "#F59D77", 
         "#DF5842", 
@@ -1979,7 +1943,7 @@ TEMPERATURE_STYLES = [
     "classes": {
       "3": [
         "#6BAED6", 
-        "#F0F0F0", 
+        "#FFFFBF", 
         "#DE2D26"
       ], 
       "4": [
@@ -1991,7 +1955,7 @@ TEMPERATURE_STYLES = [
       "5": [
         "#08519C", 
         "#BDD7E7", 
-        "#F0F0F0", 
+        "#FFFFBF", 
         "#FCAE91", 
         "#A50F15"
       ], 
@@ -2007,7 +1971,7 @@ TEMPERATURE_STYLES = [
         "#08519C", 
         "#5198C9", 
         "#BDD7E7", 
-        "#F0F0F0", 
+        "#FFFFBF", 
         "#FCAE91", 
         "#ED4E38", 
         "#A50F15"
@@ -2027,7 +1991,7 @@ TEMPERATURE_STYLES = [
         "#3182BD", 
         "#6BAED6", 
         "#BDD7E7", 
-        "#F0F0F0", 
+        "#FFFFBF", 
         "#FCAE91", 
         "#FB6A4A", 
         "#DE2D26", 
@@ -2051,7 +2015,7 @@ TEMPERATURE_STYLES = [
         "#5198C9", 
         "#82B8DA", 
         "#BDD7E7", 
-        "#F0F0F0", 
+        "#FFFFBF", 
         "#FCAE91", 
         "#FD7C5B", 
         "#ED4E38", 
@@ -2159,7 +2123,7 @@ TEMPERATURE_STYLES = [
     "classes": {
       "3": [
         "#78A3C8", 
-        "#FFFFE0", 
+        "#FFFFBF", 
         "#FC8D59"
       ], 
       "4": [
@@ -2171,7 +2135,7 @@ TEMPERATURE_STYLES = [
       "5": [
         "#1B385C", 
         "#B8D4E8", 
-        "#FFFFE0", 
+        "#FFFFBF", 
         "#FDD49E", 
         "#B30000"
       ], 
@@ -2187,7 +2151,7 @@ TEMPERATURE_STYLES = [
         "#1B385C", 
         "#5A85B0", 
         "#B8D4E8", 
-        "#FFFFE0", 
+        "#FFFFBF", 
         "#FDD49E", 
         "#FC8D59", 
         "#B30000"
@@ -2207,7 +2171,7 @@ TEMPERATURE_STYLES = [
         "#3B6998", 
         "#78A3C8", 
         "#B8D4E8", 
-        "#FFFFE0", 
+        "#FFFFBF", 
         "#FDD49E", 
         "#FDAC75", 
         "#EC623F", 
@@ -2231,7 +2195,7 @@ TEMPERATURE_STYLES = [
         "#5A85B0", 
         "#88AFD0", 
         "#B8D4E8", 
-        "#FFFFE0", 
+        "#FFFFBF", 
         "#FDD49E", 
         "#FDBB84", 
         "#FC8D59", 
@@ -2344,54 +2308,33 @@ OTHER_ELEMENTS = [
         "source": "ColorBrewer Blues", 
         "classes": {
           "3": [
-            "#F7FBFF", 
-            "#6BAED6", 
+            "#BDD7E7", 
+            "#4292C6", 
             "#08306B"
           ], 
           "4": [
-            "#F7FBFF", 
-            "#ACD0E6", 
-            "#3987C0", 
-            "#08306B"
-          ], 
-          "5": [
-            "#F7FBFF", 
-            "#C6DBEF", 
+            "#BDD7E7", 
             "#6BAED6", 
             "#2171B5", 
             "#08306B"
           ], 
+          "5": [
+            "#BDD7E7", 
+            "#86BCDC", 
+            "#4292C6", 
+            "#1761A8", 
+            "#08306B"
+          ], 
           "6": [
-            "#F7FBFF", 
-            "#D0E1F2", 
+            "#BDD7E7", 
             "#94C4DF", 
-            "#4B98C9", 
-            "#1964AB", 
+            "#5CA3D0", 
+            "#307EBC", 
+            "#0F57A1", 
             "#08306B"
           ], 
           "7": [
-            "#F7FBFF", 
-            "#D6E6F4", 
-            "#ACD0E6", 
-            "#6BAED6", 
-            "#3987C0", 
-            "#135BA4", 
-            "#08306B"
-          ], 
-          "8": [
-            "#F7FBFF", 
-            "#DBE9F6", 
-            "#BBD6EB", 
-            "#89BEDC", 
-            "#559ECD", 
-            "#2C7ABA", 
-            "#0D55A0", 
-            "#08306B"
-          ], 
-          "9": [
-            "#F7FBFF", 
-            "#DEEBF7", 
-            "#C6DBEF", 
+            "#BDD7E7", 
             "#9ECAE1", 
             "#6BAED6", 
             "#4292C6", 
@@ -2399,29 +2342,50 @@ OTHER_ELEMENTS = [
             "#08519C", 
             "#08306B"
           ], 
+          "8": [
+            "#BDD7E7", 
+            "#A3CCE2", 
+            "#7BB6D9", 
+            "#559ECD", 
+            "#3684BF", 
+            "#1C68AE", 
+            "#084C95", 
+            "#08306B"
+          ], 
+          "9": [
+            "#BDD7E7", 
+            "#A6CDE3", 
+            "#86BCDC", 
+            "#62A7D2", 
+            "#4292C6", 
+            "#2B79B9", 
+            "#1761A8", 
+            "#09498F", 
+            "#08306B"
+          ], 
           "10": [
-            "#F7FBFF", 
-            "#E1EDF8", 
-            "#CBDFF1", 
-            "#ACD0E6", 
-            "#83BADB", 
-            "#5AA1CF", 
+            "#BDD7E7", 
+            "#A9CEE3", 
+            "#8EC1DD", 
+            "#6BAED6", 
+            "#519BCB", 
             "#3987C0", 
-            "#1D6AAF", 
-            "#084D96", 
+            "#2171B5", 
+            "#135BA4", 
+            "#09468B", 
             "#08306B"
           ], 
           "11": [
-            "#F7FBFF", 
-            "#E3EEF9", 
-            "#D0E1F2", 
-            "#B6D4E9", 
+            "#BDD7E7", 
+            "#ABCFE3", 
             "#94C4DF", 
-            "#6BAED6", 
-            "#4B98C9", 
+            "#76B4D8", 
+            "#5CA3D0", 
+            "#4292C6", 
             "#307EBC", 
-            "#1964AB", 
-            "#084A92", 
+            "#1D6AB0", 
+            "#0F57A1", 
+            "#094388", 
             "#08306B"
           ]
         }, 
@@ -2524,53 +2488,32 @@ OTHER_ELEMENTS = [
         "source": "ColorBrewer BuPu", 
         "classes": {
           "3": [
-            "#F7FCFD", 
-            "#8C96C6", 
+            "#BFD3E6", 
+            "#8C6BB1", 
             "#4D004B"
           ], 
           "4": [
-            "#F7FCFD", 
-            "#A9C4DE", 
-            "#8B5EAA", 
-            "#4D004B"
-          ], 
-          "5": [
-            "#F7FCFD", 
             "#BFD3E6", 
             "#8C96C6", 
             "#88419D", 
             "#4D004B"
           ], 
+          "5": [
+            "#BFD3E6", 
+            "#95A9D0", 
+            "#8C6BB1", 
+            "#852C8C", 
+            "#4D004B"
+          ], 
           "6": [
-            "#F7FCFD", 
-            "#CCDDEC", 
+            "#BFD3E6", 
             "#9AB4D6", 
-            "#8C74B5", 
-            "#863190", 
+            "#8D85BE", 
+            "#8A53A5", 
+            "#831D82", 
             "#4D004B"
           ], 
           "7": [
-            "#F7FCFD", 
-            "#D5E4EF", 
-            "#A9C4DE", 
-            "#8C96C6", 
-            "#8B5EAA", 
-            "#842487", 
-            "#4D004B"
-          ], 
-          "8": [
-            "#F7FCFD", 
-            "#DBE8F2", 
-            "#B6CCE3", 
-            "#96ACD1", 
-            "#8D7EBA", 
-            "#8A4EA3", 
-            "#821A81", 
-            "#4D004B"
-          ], 
-          "9": [
-            "#F7FCFD", 
-            "#E0ECF4", 
             "#BFD3E6", 
             "#9EBCDA", 
             "#8C96C6", 
@@ -2579,29 +2522,50 @@ OTHER_ELEMENTS = [
             "#810F7C", 
             "#4D004B"
           ], 
+          "8": [
+            "#BFD3E6", 
+            "#A3BFDC", 
+            "#91A1CC", 
+            "#8D7EBA", 
+            "#8B5AA8", 
+            "#863693", 
+            "#790C75", 
+            "#4D004B"
+          ], 
+          "9": [
+            "#BFD3E6", 
+            "#A6C2DD", 
+            "#95A9D0", 
+            "#8D8BC1", 
+            "#8C6BB1", 
+            "#894CA2", 
+            "#852C8C", 
+            "#740A6F", 
+            "#4D004B"
+          ], 
           "10": [
-            "#F7FCFD", 
-            "#E3EEF5", 
-            "#C6D9E9", 
+            "#BFD3E6", 
             "#A9C4DE", 
-            "#94A7CF", 
-            "#8D83BD", 
+            "#98AFD3", 
+            "#8C96C6", 
+            "#8D7AB8", 
             "#8B5EAA", 
-            "#873896", 
-            "#7B0D76", 
+            "#88419D", 
+            "#842487", 
+            "#6F086B", 
             "#4D004B"
           ], 
           "11": [
-            "#F7FCFD", 
-            "#E5EFF6", 
-            "#CCDDEC", 
-            "#B2CAE1", 
+            "#BFD3E6", 
+            "#ABC5DF", 
             "#9AB4D6", 
-            "#8C96C6", 
-            "#8C74B5", 
+            "#909ECA", 
+            "#8D85BE", 
+            "#8C6BB1", 
             "#8A53A5", 
-            "#863190", 
-            "#760B72", 
+            "#873996", 
+            "#831D82", 
+            "#6C0768", 
             "#4D004B"
           ]
         }, 
@@ -2615,7 +2579,7 @@ OTHER_ELEMENTS = [
         "classes": {
           "3": [
             "#BF812D", 
-            "#F5F5F5", 
+            "#F6E8C3", 
             "#01665E"
           ], 
           "4": [
@@ -2627,7 +2591,7 @@ OTHER_ELEMENTS = [
           "5": [
             "#543005", 
             "#DFC27D", 
-            "#F5F5F5", 
+            "#F6E8C3", 
             "#80CDC1", 
             "#003C30"
           ], 
@@ -2643,7 +2607,7 @@ OTHER_ELEMENTS = [
             "#543005", 
             "#A5691C", 
             "#DFC27D", 
-            "#F5F5F5", 
+            "#F6E8C3", 
             "#80CDC1", 
             "#1F7E76", 
             "#003C30"
@@ -2663,7 +2627,7 @@ OTHER_ELEMENTS = [
             "#8C510A", 
             "#BF812D", 
             "#DFC27D", 
-            "#F5F5F5", 
+            "#F6E8C3", 
             "#80CDC1", 
             "#35978F", 
             "#01665E", 
@@ -2687,7 +2651,7 @@ OTHER_ELEMENTS = [
             "#A5691C", 
             "#C89142", 
             "#DFC27D", 
-            "#F5F5F5", 
+            "#F6E8C3", 
             "#80CDC1", 
             "#4AA49B", 
             "#1F7E76", 
@@ -2705,7 +2669,7 @@ OTHER_ELEMENTS = [
         "classes": {
           "3": [
             "#FFAA00", 
-            "#FFFFFF", 
+            "#F6E8C3", 
             "#0070FF"
           ], 
           "4": [
@@ -2717,7 +2681,7 @@ OTHER_ELEMENTS = [
           "5": [
             "#730000", 
             "#FFFF00", 
-            "#FFFFFF", 
+            "#F6E8C3", 
             "#A6F28F", 
             "#002673"
           ], 
@@ -2733,7 +2697,7 @@ OTHER_ELEMENTS = [
             "#730000", 
             "#F56E00", 
             "#FFFF00", 
-            "#FFFFFF", 
+            "#F6E8C3", 
             "#A6F28F", 
             "#5F8D92", 
             "#002673"
@@ -2753,7 +2717,7 @@ OTHER_ELEMENTS = [
             "#E60000", 
             "#FFAA00", 
             "#FFFF00", 
-            "#FFFFFF", 
+            "#F6E8C3", 
             "#A6F28F", 
             "#38A800", 
             "#0070FF", 
@@ -2777,7 +2741,7 @@ OTHER_ELEMENTS = [
             "#F56E00", 
             "#FFC000", 
             "#FFFF00", 
-            "#FFFFFF", 
+            "#F6E8C3", 
             "#A6F28F", 
             "#58BA33", 
             "#5F8D92", 
@@ -2796,20 +2760,20 @@ OTHER_ELEMENTS = [
           "3": [
             "#04E9E7", 
             "#E5BC00", 
-            "#FFFFFF"
+            "#4A0072"
           ], 
           "4": [
             "#04E9E7", 
             "#00A000", 
             "#EF0000", 
-            "#FFFFFF"
+            "#4A0072"
           ], 
           "5": [
             "#04E9E7", 
             "#01E101", 
             "#E5BC00", 
             "#C80000", 
-            "#FFFFFF"
+            "#4A0072"
           ], 
           "6": [
             "#04E9E7", 
@@ -2817,7 +2781,7 @@ OTHER_ELEMENTS = [
             "#A9CE00", 
             "#FF6F00", 
             "#CE0038", 
-            "#FFFFFF"
+            "#4A0072"
           ], 
           "7": [
             "#04E9E7", 
@@ -2826,7 +2790,7 @@ OTHER_ELEMENTS = [
             "#E5BC00", 
             "#EF0000", 
             "#EE00A7", 
-            "#FFFFFF"
+            "#4A0072"
           ], 
           "8": [
             "#04E9E7", 
@@ -2836,7 +2800,7 @@ OTHER_ELEMENTS = [
             "#FD9500", 
             "#D40000", 
             "#F800FD", 
-            "#FFFFFF"
+            "#4A0072"
           ], 
           "9": [
             "#04E9E7", 
@@ -2847,7 +2811,7 @@ OTHER_ELEMENTS = [
             "#FE4500", 
             "#C80000", 
             "#E031EF", 
-            "#FFFFFF"
+            "#4A0072"
           ], 
           "10": [
             "#04E9E7", 
@@ -2859,7 +2823,7 @@ OTHER_ELEMENTS = [
             "#EF0000", 
             "#BF0000", 
             "#CE3FE4", 
-            "#FFFFFF"
+            "#4A0072"
           ], 
           "11": [
             "#04E9E7", 
@@ -2872,7 +2836,7 @@ OTHER_ELEMENTS = [
             "#DC0000", 
             "#CE0038", 
             "#BF47DC", 
-            "#FFFFFF"
+            "#4A0072"
           ]
         }, 
         "name_en": "Doppler Radar Reflectivity dBZ", 
@@ -2884,52 +2848,41 @@ OTHER_ELEMENTS = [
         "source": "NOAA National Water Center (NWC)", 
         "classes": {
           "3": [
-            "#EDF8FB", 
-            "#006D2C", 
+            "#B2E2E2", 
+            "#90A330", 
             "#7F0000"
           ], 
           "4": [
-            "#EDF8FB", 
-            "#43AD76", 
-            "#FBBF6E", 
+            "#B2E2E2", 
+            "#20904E", 
+            "#F4A59B", 
             "#7F0000"
           ], 
           "5": [
-            "#EDF8FB", 
-            "#66C2A4", 
-            "#006D2C", 
-            "#E78AC3", 
+            "#B2E2E2", 
+            "#3DAA70", 
+            "#90A330", 
+            "#EC7498", 
             "#7F0000"
           ], 
           "6": [
-            "#EDF8FB", 
-            "#86CFBC", 
-            "#259755", 
-            "#D2C330", 
-            "#ED667F", 
+            "#B2E2E2", 
+            "#52B588", 
+            "#0B7736", 
+            "#FDC959", 
+            "#EC525E", 
             "#7F0000"
           ], 
           "7": [
-            "#EDF8FB", 
-            "#9AD7CD", 
-            "#43AD76", 
-            "#006D2C", 
-            "#FBBF6E", 
-            "#EB4B54", 
+            "#B2E2E2", 
+            "#5EBD98", 
+            "#20904E", 
+            "#90A330", 
+            "#F4A59B", 
+            "#E83739", 
             "#7F0000"
           ], 
           "8": [
-            "#EDF8FB", 
-            "#A8DDD9", 
-            "#58B990", 
-            "#1C8B49", 
-            "#A0AB31", 
-            "#F2A1A1", 
-            "#E83335", 
-            "#7F0000"
-          ], 
-          "9": [
-            "#EDF8FB", 
             "#B2E2E2", 
             "#66C2A4", 
             "#2CA25F", 
@@ -2939,29 +2892,40 @@ OTHER_ELEMENTS = [
             "#E41A1C", 
             "#7F0000"
           ], 
+          "9": [
+            "#B2E2E2", 
+            "#70C6AC", 
+            "#3DAA70", 
+            "#14803F", 
+            "#90A330", 
+            "#FBBC74", 
+            "#EC7498", 
+            "#D71619", 
+            "#7F0000"
+          ], 
           "10": [
-            "#EDF8FB", 
-            "#B9E4E5", 
+            "#B2E2E2", 
             "#78C9B2", 
-            "#43AD76", 
-            "#178442", 
-            "#849D30", 
-            "#FBBF6E", 
-            "#EC769D", 
-            "#D81719", 
+            "#49B07D", 
+            "#20904E", 
+            "#34792D", 
+            "#E6CD30", 
+            "#F4A59B", 
+            "#ED6278", 
+            "#CD1416", 
             "#7F0000"
           ], 
           "11": [
-            "#EDF8FB", 
-            "#BEE6E7", 
-            "#86CFBC", 
+            "#B2E2E2", 
+            "#7ECCB6", 
             "#52B588", 
-            "#259755", 
-            "#006D2C", 
-            "#D2C330", 
-            "#F6AA92", 
-            "#ED667F", 
-            "#CF1417", 
+            "#289D5A", 
+            "#0B7736", 
+            "#90A330", 
+            "#FDC959", 
+            "#EB92B7", 
+            "#EC525E", 
+            "#C51114", 
             "#7F0000"
           ]
         }, 
@@ -2974,43 +2938,33 @@ OTHER_ELEMENTS = [
         "source": "National Snow and Ice Data Center (NSIDC)", 
         "classes": {
           "3": [
-            "#FFFFFF", 
-            "#63B7C7", 
+            "#C6E8F8", 
+            "#43A2CA", 
             "#1F1A3A"
           ], 
           "4": [
-            "#FFFFFF", 
-            "#A7DCBF", 
-            "#257BB6", 
+            "#C6E8F8", 
+            "#7BCCC4", 
+            "#0868AC", 
             "#1F1A3A"
           ], 
           "5": [
-            "#FFFFFF", 
-            "#C4E8CB", 
-            "#63B7C7", 
-            "#095EA1", 
+            "#C6E8F8", 
+            "#9CD8C0", 
+            "#43A2CA", 
+            "#0A5496", 
             "#1F1A3A"
           ], 
           "6": [
-            "#FFFFFF", 
-            "#D1EDE0", 
-            "#89D1C2", 
-            "#3B96C4", 
-            "#095092", 
+            "#C6E8F8", 
+            "#AFDFBE", 
+            "#68BBC7", 
+            "#287FB8", 
+            "#094889", 
             "#1F1A3A"
           ], 
           "7": [
-            "#FFFFFF", 
-            "#DAF1EE", 
-            "#A7DCBF", 
-            "#63B7C7", 
-            "#257BB6", 
-            "#094688", 
-            "#1F1A3A"
-          ], 
-          "8": [
-            "#FFFFFF", 
-            "#E0F3F8", 
+            "#C6E8F8", 
             "#BAE4BC", 
             "#7BCCC4", 
             "#43A2CA", 
@@ -3018,40 +2972,50 @@ OTHER_ELEMENTS = [
             "#084081", 
             "#1F1A3A"
           ], 
+          "8": [
+            "#C6E8F8", 
+            "#BCE5C5", 
+            "#8FD3C2", 
+            "#5FB4C8", 
+            "#3189BD", 
+            "#095CA0", 
+            "#133A76", 
+            "#1F1A3A"
+          ], 
           "9": [
-            "#FFFFFF", 
-            "#E4F5F9", 
-            "#C4E8CB", 
-            "#95D5C1", 
-            "#63B7C7", 
-            "#348CBF", 
-            "#095EA1", 
-            "#123B78", 
+            "#C6E8F8", 
+            "#BEE5CB", 
+            "#9CD8C0", 
+            "#6FC1C6", 
+            "#43A2CA", 
+            "#1F76B4", 
+            "#0A5496", 
+            "#17366E", 
             "#1F1A3A"
           ], 
           "10": [
-            "#FFFFFF", 
-            "#E7F6FA", 
-            "#CBEBD7", 
+            "#C6E8F8", 
+            "#BFE5D0", 
             "#A7DCBF", 
-            "#76C7C5", 
-            "#4BA7C9", 
-            "#257BB6", 
-            "#0A5699", 
-            "#163770", 
+            "#7BCCC4", 
+            "#59B0C8", 
+            "#358EC0", 
+            "#0868AC", 
+            "#094D8F", 
+            "#1A3368", 
             "#1F1A3A"
           ], 
           "11": [
-            "#FFFFFF", 
-            "#E9F7FA", 
-            "#D1EDE0", 
-            "#B4E2BD", 
+            "#C6E8F8", 
+            "#C0E6D4", 
+            "#AFDFBE", 
             "#89D1C2", 
-            "#63B7C7", 
-            "#3B96C4", 
-            "#146EAF", 
-            "#095092", 
-            "#19346B", 
+            "#68BBC7", 
+            "#43A2CA", 
+            "#287FB8", 
+            "#0960A3", 
+            "#094889", 
+            "#1B3063", 
             "#1F1A3A"
           ]
         }, 
@@ -3064,43 +3028,33 @@ OTHER_ELEMENTS = [
         "source": "NASA Global Precipitation Measurement (GPM)", 
         "classes": {
           "3": [
-            "#FFFFFF", 
-            "#163E89", 
+            "#A8E6F5", 
+            "#03045E", 
             "#3A0CA3"
           ], 
           "4": [
-            "#FFFFFF", 
-            "#079FCD", 
-            "#AE1279", 
+            "#A8E6F5", 
+            "#0077B6", 
+            "#F72585", 
             "#3A0CA3"
           ], 
           "5": [
-            "#FFFFFF", 
-            "#42BFDE", 
-            "#163E89", 
-            "#DA1A92", 
+            "#A8E6F5", 
+            "#0795C7", 
+            "#03045E", 
+            "#BC109E", 
             "#3A0CA3"
           ], 
           "6": [
-            "#FFFFFF", 
-            "#6BCEE6", 
-            "#0483BD", 
-            "#480366", 
-            "#AF0CA3", 
+            "#A8E6F5", 
+            "#05A7D1", 
+            "#164992", 
+            "#A00E76", 
+            "#9308AD", 
             "#3A0CA3"
           ], 
           "7": [
-            "#FFFFFF", 
-            "#81D9EB", 
-            "#079FCD", 
-            "#163E89", 
-            "#AE1279", 
-            "#8E08AF", 
-            "#3A0CA3"
-          ], 
-          "8": [
-            "#FFFFFF", 
-            "#90E0EF", 
+            "#A8E6F5", 
             "#00B4D8", 
             "#0077B6", 
             "#03045E", 
@@ -3108,40 +3062,50 @@ OTHER_ELEMENTS = [
             "#7209B7", 
             "#3A0CA3"
           ], 
+          "8": [
+            "#A8E6F5", 
+            "#38BBDC", 
+            "#0688C0", 
+            "#153683", 
+            "#7B076F", 
+            "#D61894", 
+            "#6B09B4", 
+            "#3A0CA3"
+          ], 
           "9": [
-            "#FFFFFF", 
-            "#A0E4F1", 
-            "#42BFDE", 
-            "#078DC3", 
-            "#163E89", 
-            "#70056D", 
-            "#DA1A92", 
-            "#6C09B4", 
+            "#A8E6F5", 
+            "#4DC0DF", 
+            "#0795C7", 
+            "#145A9F", 
+            "#03045E", 
+            "#C0177C", 
+            "#BC109E", 
+            "#650AB2", 
             "#3A0CA3"
           ], 
           "10": [
-            "#FFFFFF", 
-            "#ABE7F3", 
-            "#5BC7E2", 
+            "#A8E6F5", 
+            "#5AC4E2", 
             "#079FCD", 
-            "#0D6AAC", 
-            "#0A1367", 
-            "#AE1279", 
-            "#C3129C", 
-            "#670AB3", 
+            "#0077B6", 
+            "#132C7A", 
+            "#67046C", 
+            "#F72585", 
+            "#A60BA7", 
+            "#610AB0", 
             "#3A0CA3"
           ], 
           "11": [
-            "#FFFFFF", 
-            "#B5E9F4", 
-            "#6BCEE6", 
-            "#03AED5", 
+            "#A8E6F5", 
+            "#63C8E4", 
+            "#05A7D1", 
             "#0483BD", 
-            "#163E89", 
-            "#480366", 
-            "#E11F81", 
-            "#AF0CA3", 
-            "#630AB1", 
+            "#164992", 
+            "#03045E", 
+            "#A00E76", 
+            "#E01C8F", 
+            "#9308AD", 
+            "#5D0AAF", 
             "#3A0CA3"
           ]
         }, 
@@ -3154,42 +3118,32 @@ OTHER_ELEMENTS = [
         "source": "Climate Hazards Center / UCSB", 
         "classes": {
           "3": [
-            "#E8F6F3", 
-            "#31A991", 
+            "#A2D9CE", 
+            "#16A085", 
             "#0B4C3F"
           ], 
           "4": [
-            "#E8F6F3", 
-            "#65C0AE", 
-            "#13856F", 
+            "#A2D9CE", 
+            "#45B39D", 
+            "#117864", 
             "#0B4C3F"
           ], 
           "5": [
-            "#E8F6F3", 
-            "#7FCBBC", 
-            "#31A991", 
-            "#10725F", 
+            "#A2D9CE", 
+            "#5DBDA9", 
+            "#16A085", 
+            "#106D5A", 
             "#0B4C3F"
           ], 
           "6": [
-            "#E8F6F3", 
-            "#90D1C4", 
-            "#4FB7A2", 
-            "#15987E", 
-            "#0F6B59", 
+            "#A2D9CE", 
+            "#6BC2B1", 
+            "#36AB93", 
+            "#138871", 
+            "#0F6655", 
             "#0B4C3F"
           ], 
           "7": [
-            "#E8F6F3", 
-            "#9AD6CA", 
-            "#65C0AE", 
-            "#31A991", 
-            "#13856F", 
-            "#0F6654", 
-            "#0B4C3F"
-          ], 
-          "8": [
-            "#E8F6F3", 
             "#A2D9CE", 
             "#73C6B6", 
             "#45B39D", 
@@ -3198,40 +3152,50 @@ OTHER_ELEMENTS = [
             "#0E6251", 
             "#0B4C3F"
           ], 
-          "9": [
-            "#E8F6F3", 
-            "#ABDDD3", 
-            "#7FCBBC", 
-            "#58BAA6", 
-            "#31A991", 
-            "#149178", 
+          "8": [
+            "#A2D9CE", 
+            "#7AC9B9", 
+            "#53B8A4", 
+            "#2EA88F", 
+            "#148F77", 
             "#10725F", 
-            "#0E5F4F", 
+            "#0E5F4E", 
+            "#0B4C3F"
+          ], 
+          "9": [
+            "#A2D9CE", 
+            "#7FCBBC", 
+            "#5DBDA9", 
+            "#3CAE97", 
+            "#16A085", 
+            "#12826C", 
+            "#106D5A", 
+            "#0D5C4C", 
             "#0B4C3F"
           ], 
           "10": [
-            "#E8F6F3", 
-            "#B2DFD6", 
-            "#89CEC1", 
+            "#A2D9CE", 
+            "#83CCBE", 
             "#65C0AE", 
-            "#41B19A", 
-            "#1EA288", 
-            "#13856F", 
-            "#106E5B", 
-            "#0D5D4D", 
+            "#45B39D", 
+            "#2AA68D", 
+            "#14927A", 
+            "#117864", 
+            "#0F6957", 
+            "#0D5B4B", 
             "#0B4C3F"
           ], 
           "11": [
-            "#E8F6F3", 
-            "#B7E2D9", 
-            "#90D1C4", 
-            "#6FC4B3", 
+            "#A2D9CE", 
+            "#86CEC0", 
+            "#6BC2B1", 
             "#4FB7A2", 
-            "#31A991", 
-            "#15987E", 
-            "#127C67", 
-            "#0F6B59", 
-            "#0D5B4C", 
+            "#36AB93", 
+            "#16A085", 
+            "#138871", 
+            "#107460", 
+            "#0F6655", 
+            "#0D594A", 
             "#0B4C3F"
           ]
         }, 
@@ -3244,43 +3208,33 @@ OTHER_ELEMENTS = [
         "source": "ECMWF Copernicus Climate Change Service", 
         "classes": {
           "3": [
-            "#FFFFFF", 
-            "#347CB8", 
+            "#B5D9F0", 
+            "#2166AC", 
             "#49006A"
           ], 
           "4": [
-            "#FFFFFF", 
-            "#7AB4D5", 
-            "#0E4179", 
+            "#B5D9F0", 
+            "#4393C3", 
+            "#053061", 
             "#49006A"
           ], 
           "5": [
-            "#FFFFFF", 
-            "#A2CDE3", 
-            "#347CB8", 
-            "#19275B", 
+            "#B5D9F0", 
+            "#6EACD1", 
+            "#2166AC", 
+            "#231C56", 
             "#49006A"
           ], 
           "6": [
-            "#FFFFFF", 
-            "#B8D8E9", 
-            "#569DC8", 
-            "#1B5B9C", 
-            "#261854", 
+            "#B5D9F0", 
+            "#84BBD9", 
+            "#3781BA", 
+            "#10457E", 
+            "#2A0D4F", 
             "#49006A"
           ], 
           "7": [
-            "#FFFFFF", 
-            "#C7E0ED", 
-            "#7AB4D5", 
-            "#347CB8", 
-            "#0E4179", 
-            "#2A0B4F", 
-            "#49006A"
-          ], 
-          "8": [
-            "#FFFFFF", 
-            "#D1E5F0", 
+            "#B5D9F0", 
             "#92C5DE", 
             "#4393C3", 
             "#2166AC", 
@@ -3288,40 +3242,50 @@ OTHER_ELEMENTS = [
             "#2D004B", 
             "#49006A"
           ], 
+          "8": [
+            "#B5D9F0", 
+            "#97C8E1", 
+            "#5DA1CB", 
+            "#3279B6", 
+            "#154E8B", 
+            "#1B255B", 
+            "#31004F", 
+            "#49006A"
+          ], 
           "9": [
-            "#FFFFFF", 
-            "#D7E8F2", 
-            "#A2CDE3", 
-            "#64A5CD", 
-            "#347CB8", 
-            "#17518F", 
-            "#19275B", 
-            "#30004F", 
+            "#B5D9F0", 
+            "#9BCAE2", 
+            "#6EACD1", 
+            "#3C88BD", 
+            "#2166AC", 
+            "#0C3D73", 
+            "#231C56", 
+            "#340053", 
             "#49006A"
           ], 
           "10": [
-            "#FFFFFF", 
-            "#DBEBF3", 
-            "#AFD3E6", 
+            "#B5D9F0", 
+            "#9ECCE4", 
             "#7AB4D5", 
-            "#408EC0", 
-            "#266BAF", 
-            "#0E4179", 
-            "#211F57", 
-            "#330052", 
+            "#4393C3", 
+            "#2E75B4", 
+            "#185392", 
+            "#053061", 
+            "#271552", 
+            "#360055", 
             "#49006A"
           ], 
           "11": [
-            "#FFFFFF", 
-            "#DFEDF4", 
-            "#B8D8E9", 
-            "#8BC0DB", 
+            "#B5D9F0", 
+            "#A0CDE5", 
+            "#84BBD9", 
             "#569DC8", 
-            "#347CB8", 
-            "#1B5B9C", 
-            "#073568", 
-            "#261854", 
-            "#350054", 
+            "#3781BA", 
+            "#2166AC", 
+            "#10457E", 
+            "#17295D", 
+            "#2A0D4F", 
+            "#380057", 
             "#49006A"
           ]
         }, 
@@ -3424,84 +3388,84 @@ OTHER_ELEMENTS = [
         "source": "Vicente-Serrano et al. (SPEI Global)", 
         "classes": {
           "3": [
-            "#DFC27D", 
-            "#F5F5F5", 
+            "#BF812D", 
+            "#F6E8C3", 
             "#35978F"
           ], 
           "4": [
             "#8C510A", 
-            "#F6E8C3", 
-            "#C7EAE5", 
+            "#DFC27D", 
+            "#80CDC1", 
             "#01665E"
           ], 
           "5": [
             "#8C510A", 
+            "#DFC27D", 
             "#F6E8C3", 
-            "#F5F5F5", 
-            "#C7EAE5", 
+            "#80CDC1", 
             "#01665E"
           ], 
           "6": [
             "#8C510A", 
-            "#D0A155", 
-            "#F6E8C3", 
-            "#C7EAE5", 
-            "#5CB2A8", 
+            "#BF812D", 
+            "#DFC27D", 
+            "#80CDC1", 
+            "#35978F", 
             "#01665E"
           ], 
           "7": [
             "#8C510A", 
-            "#D0A155", 
+            "#BF812D", 
+            "#DFC27D", 
             "#F6E8C3", 
-            "#F5F5F5", 
-            "#C7EAE5", 
-            "#5CB2A8", 
+            "#80CDC1", 
+            "#35978F", 
             "#01665E"
           ], 
           "8": [
             "#8C510A", 
-            "#BF812D", 
+            "#AE7122", 
+            "#CB9648", 
             "#DFC27D", 
-            "#F6E8C3", 
-            "#C7EAE5", 
             "#80CDC1", 
-            "#35978F", 
+            "#50A99F", 
+            "#27867E", 
             "#01665E"
           ], 
           "9": [
             "#8C510A", 
-            "#BF812D", 
+            "#AE7122", 
+            "#CB9648", 
             "#DFC27D", 
             "#F6E8C3", 
-            "#F5F5F5", 
-            "#C7EAE5", 
             "#80CDC1", 
-            "#35978F", 
+            "#50A99F", 
+            "#27867E", 
             "#01665E"
           ], 
           "10": [
             "#8C510A", 
-            "#B27525", 
+            "#A5691C", 
+            "#BF812D", 
             "#D0A155", 
-            "#E5CB8E", 
-            "#F6E8C3", 
-            "#C7EAE5", 
-            "#93D4CA", 
+            "#DFC27D", 
+            "#80CDC1", 
             "#5CB2A8", 
-            "#2A8A82", 
+            "#35978F", 
+            "#1F7E76", 
             "#01665E"
           ], 
           "11": [
             "#8C510A", 
-            "#B27525", 
+            "#A5691C", 
+            "#BF812D", 
             "#D0A155", 
-            "#E5CB8E", 
+            "#DFC27D", 
             "#F6E8C3", 
-            "#F5F5F5", 
-            "#C7EAE5", 
-            "#93D4CA", 
+            "#80CDC1", 
             "#5CB2A8", 
-            "#2A8A82", 
+            "#35978F", 
+            "#1F7E76", 
             "#01665E"
           ]
         }, 
@@ -3514,84 +3478,84 @@ OTHER_ELEMENTS = [
         "source": "USDA NRCS SNOTEL / NASA SnowEx", 
         "classes": {
           "3": [
-            "#F7FBFF", 
-            "#86BCDC", 
+            "#BDD7E7", 
+            "#58A0CE", 
             "#084594"
           ], 
           "4": [
-            "#F7FBFF", 
-            "#B9D5EA", 
-            "#519BCB", 
+            "#BDD7E7", 
+            "#7DB7DA", 
+            "#3987C0", 
             "#084594"
           ], 
           "5": [
-            "#F7FBFF", 
-            "#CCDFF1", 
-            "#86BCDC", 
-            "#3B8AC2", 
+            "#BDD7E7", 
+            "#92C3DE", 
+            "#58A0CE", 
+            "#2B79B9", 
             "#084594"
           ], 
           "6": [
-            "#F7FBFF", 
-            "#D4E5F4", 
-            "#A6CDE4", 
-            "#63A8D3", 
-            "#307EBC", 
-            "#084594"
-          ], 
-          "7": [
-            "#F7FBFF", 
-            "#DAE8F6", 
-            "#B9D5EA", 
-            "#86BCDC", 
-            "#519BCB", 
-            "#2876B8", 
-            "#084594"
-          ], 
-          "8": [
-            "#F7FBFF", 
-            "#DEEBF7", 
-            "#C6DBEF", 
+            "#BDD7E7", 
             "#9ECAE1", 
             "#6BAED6", 
             "#4292C6", 
             "#2171B5", 
             "#084594"
           ], 
+          "7": [
+            "#BDD7E7", 
+            "#A3CCE2", 
+            "#7DB7DA", 
+            "#58A0CE", 
+            "#3987C0", 
+            "#1E69AF", 
+            "#084594"
+          ], 
+          "8": [
+            "#BDD7E7", 
+            "#A7CEE3", 
+            "#89BEDC", 
+            "#66AAD4", 
+            "#4996C8", 
+            "#317FBC", 
+            "#1C64AB", 
+            "#084594"
+          ], 
           "9": [
-            "#F7FBFF", 
-            "#E1EDF8", 
-            "#CCDFF1", 
-            "#ADD0E6", 
-            "#86BCDC", 
-            "#5DA3D0", 
-            "#3B8AC2", 
-            "#1F6BB1", 
+            "#BDD7E7", 
+            "#AACFE3", 
+            "#92C3DE", 
+            "#72B1D7", 
+            "#58A0CE", 
+            "#3F8EC4", 
+            "#2B79B9", 
+            "#1A60A9", 
             "#084594"
           ], 
           "10": [
-            "#F7FBFF", 
-            "#E4EFF9", 
-            "#D1E2F3", 
-            "#B9D5EA", 
+            "#BDD7E7", 
+            "#ACD0E4", 
             "#99C7E0", 
-            "#71B1D7", 
-            "#519BCB", 
-            "#3583BE", 
-            "#1D67AE", 
+            "#7DB7DA", 
+            "#63A8D2", 
+            "#4C98CA", 
+            "#3987C0", 
+            "#2675B7", 
+            "#195DA6", 
             "#084594"
           ], 
           "11": [
-            "#F7FBFF", 
-            "#E6F0F9", 
-            "#D4E5F4", 
-            "#C2D9EE", 
-            "#A6CDE4", 
+            "#BDD7E7", 
+            "#AED0E4", 
+            "#9ECAE1", 
             "#86BCDC", 
-            "#63A8D3", 
-            "#4795C8", 
-            "#307EBC", 
-            "#1C64AB", 
+            "#6BAED6", 
+            "#58A0CE", 
+            "#4292C6", 
+            "#3381BE", 
+            "#2171B5", 
+            "#185BA4", 
             "#084594"
           ]
         }, 
@@ -3695,7 +3659,7 @@ OTHER_ELEMENTS = [
         "classes": {
           "3": [
             "#DFC27D", 
-            "#F5F5F5", 
+            "#F6E8C3", 
             "#018571"
           ], 
           "4": [
@@ -3707,7 +3671,7 @@ OTHER_ELEMENTS = [
           "5": [
             "#A6611A", 
             "#DFC27D", 
-            "#F5F5F5", 
+            "#F6E8C3", 
             "#80CDC1", 
             "#018571"
           ], 
@@ -3723,7 +3687,7 @@ OTHER_ELEMENTS = [
             "#A6611A", 
             "#C4914C", 
             "#DFC27D", 
-            "#F5F5F5", 
+            "#F6E8C3", 
             "#80CDC1", 
             "#4EA898", 
             "#018571"
@@ -3743,7 +3707,7 @@ OTHER_ELEMENTS = [
             "#BA813B", 
             "#CDA15C", 
             "#DFC27D", 
-            "#F5F5F5", 
+            "#F6E8C3", 
             "#80CDC1", 
             "#5FB5A5", 
             "#3C9D8B", 
@@ -3767,7 +3731,7 @@ OTHER_ELEMENTS = [
             "#C4914C", 
             "#D2A964", 
             "#DFC27D", 
-            "#F5F5F5", 
+            "#F6E8C3", 
             "#80CDC1", 
             "#67BBAC", 
             "#4EA898", 
@@ -3792,7 +3756,7 @@ OTHER_ELEMENTS = [
         "classes": {
           "3": [
             "#D6604D", 
-            "#F7F7F7", 
+            "#FFFFBF", 
             "#2166AC"
           ], 
           "4": [
@@ -3804,7 +3768,7 @@ OTHER_ELEMENTS = [
           "5": [
             "#67001F", 
             "#F4A582", 
-            "#F7F7F7", 
+            "#FFFFBF", 
             "#92C5DE", 
             "#053061"
           ], 
@@ -3820,7 +3784,7 @@ OTHER_ELEMENTS = [
             "#67001F", 
             "#C4413C", 
             "#F4A582", 
-            "#F7F7F7", 
+            "#FFFFBF", 
             "#92C5DE", 
             "#347CB8", 
             "#053061"
@@ -3840,7 +3804,7 @@ OTHER_ELEMENTS = [
             "#B2182B", 
             "#D6604D", 
             "#F4A582", 
-            "#F7F7F7", 
+            "#FFFFBF", 
             "#92C5DE", 
             "#4393C3", 
             "#2166AC", 
@@ -3864,7 +3828,7 @@ OTHER_ELEMENTS = [
             "#C4413C", 
             "#DE725A", 
             "#F4A582", 
-            "#F7F7F7", 
+            "#FFFFBF", 
             "#92C5DE", 
             "#5A9FCA", 
             "#347CB8", 
@@ -3972,50 +3936,40 @@ OTHER_ELEMENTS = [
         "classes": {
           "3": [
             "#49006A", 
-            "#F768A1", 
-            "#FFFFFF"
+            "#EA509C", 
+            "#F49AC2"
           ], 
           "4": [
             "#49006A", 
-            "#CD278F", 
-            "#FBACB9", 
-            "#FFFFFF"
+            "#BD1886", 
+            "#F98EAE", 
+            "#F49AC2"
           ], 
           "5": [
             "#49006A", 
-            "#AE017E", 
-            "#F768A1", 
-            "#FCC5C0", 
-            "#FFFFFF"
+            "#A1017C", 
+            "#EA509C", 
+            "#FBA9B8", 
+            "#F49AC2"
           ], 
           "6": [
             "#49006A", 
-            "#99017B", 
-            "#E24099", 
-            "#FA95B1", 
-            "#FDD0CC", 
-            "#FFFFFF"
+            "#8F017A", 
+            "#D32C92", 
+            "#F874A5", 
+            "#FBB6BC", 
+            "#F49AC2"
           ], 
           "7": [
             "#49006A", 
-            "#8B0179", 
-            "#CD278F", 
-            "#F768A1", 
-            "#FBACB9", 
-            "#FDD7D3", 
-            "#FFFFFF"
+            "#830178", 
+            "#BD1886", 
+            "#EA509C", 
+            "#F98EAE", 
+            "#FCBFBE", 
+            "#F49AC2"
           ], 
           "8": [
-            "#49006A", 
-            "#820178", 
-            "#BB1585", 
-            "#E84D9B", 
-            "#F989AC", 
-            "#FCBABD", 
-            "#FDDCD9", 
-            "#FFFFFF"
-          ], 
-          "9": [
             "#49006A", 
             "#7A0177", 
             "#AE017E", 
@@ -4023,33 +3977,43 @@ OTHER_ELEMENTS = [
             "#F768A1", 
             "#FA9FB5", 
             "#FCC5C0", 
-            "#FDE0DD", 
-            "#FFFFFF"
+            "#F49AC2"
+          ], 
+          "9": [
+            "#49006A", 
+            "#740175", 
+            "#A1017C", 
+            "#CB258E", 
+            "#EA509C", 
+            "#F97EA8", 
+            "#FBA9B8", 
+            "#FBC0C0", 
+            "#F49AC2"
           ], 
           "10": [
             "#49006A", 
-            "#750176", 
-            "#A3017C", 
-            "#CD278F", 
-            "#EC539D", 
-            "#F982AA", 
-            "#FBACB9", 
-            "#FCCBC6", 
-            "#FDE3E1", 
-            "#FFFFFF"
+            "#6F0074", 
+            "#97007B", 
+            "#BD1886", 
+            "#E03B98", 
+            "#F463A0", 
+            "#F98EAE", 
+            "#FBB0BA", 
+            "#FABCC1", 
+            "#F49AC2"
           ], 
           "11": [
             "#49006A", 
-            "#700074", 
-            "#99017B", 
-            "#C11B88", 
-            "#E24099", 
-            "#F768A1", 
-            "#FA95B1", 
+            "#6C0073", 
+            "#8F017A", 
+            "#B30980", 
+            "#D32C92", 
+            "#EA509C", 
+            "#F874A5", 
+            "#FA9AB3", 
             "#FBB6BC", 
-            "#FDD0CC", 
-            "#FEE6E4", 
-            "#FFFFFF"
+            "#FAB8C1", 
+            "#F49AC2"
           ]
         }, 
         "name_en": "Tropical Cyclones & Depressions", 
@@ -4061,52 +4025,41 @@ OTHER_ELEMENTS = [
         "source": "CPT-City Isobaric Archive", 
         "classes": {
           "3": [
-            "#FFF7EC", 
-            "#FC8D59", 
+            "#FEE8C8", 
+            "#F67A50", 
             "#7F0000"
           ], 
           "4": [
-            "#FFF7EC", 
-            "#FDC38D", 
-            "#E7553A", 
+            "#FEE8C8", 
+            "#FDAC75", 
+            "#DF442D", 
             "#7F0000"
           ], 
           "5": [
-            "#FFF7EC", 
-            "#FDD49E", 
-            "#FC8D59", 
-            "#D7301F", 
+            "#FEE8C8", 
+            "#FDC18A", 
+            "#F67A50", 
+            "#CE2718", 
             "#7F0000"
           ], 
           "6": [
-            "#FFF7EC", 
-            "#FEDCAF", 
-            "#FDB27B", 
-            "#F26D4B", 
-            "#C92113", 
+            "#FEE8C8", 
+            "#FDCA94", 
+            "#FD9661", 
+            "#EA5C40", 
+            "#C1190C", 
             "#7F0000"
           ], 
           "7": [
-            "#FFF7EC", 
-            "#FEE1BA", 
-            "#FDC38D", 
-            "#FC8D59", 
-            "#E7553A", 
-            "#BF160A", 
+            "#FEE8C8", 
+            "#FDD09A", 
+            "#FDAC75", 
+            "#F67A50", 
+            "#DF442D", 
+            "#B90C05", 
             "#7F0000"
           ], 
           "8": [
-            "#FFF7EC", 
-            "#FEE5C2", 
-            "#FDCD97", 
-            "#FDA871", 
-            "#F5774F", 
-            "#DE412B", 
-            "#B80A04", 
-            "#7F0000"
-          ], 
-          "9": [
-            "#FFF7EC", 
             "#FEE8C8", 
             "#FDD49E", 
             "#FDBB84", 
@@ -4116,29 +4069,40 @@ OTHER_ELEMENTS = [
             "#B30000", 
             "#7F0000"
           ], 
+          "9": [
+            "#FEE8C8", 
+            "#FDD6A3", 
+            "#FDC18A", 
+            "#FD9F69", 
+            "#F67A50", 
+            "#E65339", 
+            "#CE2718", 
+            "#AC0000", 
+            "#7F0000"
+          ], 
           "10": [
-            "#FFF7EC", 
-            "#FEEACC", 
+            "#FEE8C8", 
             "#FDD8A7", 
-            "#FDC38D", 
-            "#FDA26C", 
-            "#F67C51", 
-            "#E7553A", 
-            "#CF2818", 
-            "#AD0000", 
+            "#FDC68F", 
+            "#FDAC75", 
+            "#FB8957", 
+            "#F16A4A", 
+            "#DF442D", 
+            "#C72012", 
+            "#A70001", 
             "#7F0000"
           ], 
           "11": [
-            "#FFF7EC", 
-            "#FEEBCF", 
-            "#FEDCAF", 
+            "#FEE8C8", 
+            "#FEDAAB", 
             "#FDCA94", 
-            "#FDB27B", 
-            "#FC8D59", 
-            "#F26D4B", 
-            "#E1472F", 
-            "#C92113", 
-            "#A80001", 
+            "#FDB780", 
+            "#FD9661", 
+            "#F67A50", 
+            "#EA5C40", 
+            "#DA3623", 
+            "#C1190C", 
+            "#A30001", 
             "#7F0000"
           ]
         }, 
@@ -4152,7 +4116,7 @@ OTHER_ELEMENTS = [
         "classes": {
           "3": [
             "#998EC3", 
-            "#F7F7F7", 
+            "#FFFFBF", 
             "#F1A340"
           ], 
           "4": [
@@ -4164,7 +4128,7 @@ OTHER_ELEMENTS = [
           "5": [
             "#542788", 
             "#D8DAEB", 
-            "#F7F7F7", 
+            "#FFFFBF", 
             "#FEE0B6", 
             "#B35806"
           ], 
@@ -4180,7 +4144,7 @@ OTHER_ELEMENTS = [
             "#542788", 
             "#998EC3", 
             "#D8DAEB", 
-            "#F7F7F7", 
+            "#FFFFBF", 
             "#FEE0B6", 
             "#F1A340", 
             "#B35806"
@@ -4200,7 +4164,7 @@ OTHER_ELEMENTS = [
             "#836CAF", 
             "#AEA7D0", 
             "#D8DAEB", 
-            "#F7F7F7", 
+            "#FFFFBF", 
             "#FEE0B6", 
             "#F8B769", 
             "#DC8A2E", 
@@ -4224,7 +4188,7 @@ OTHER_ELEMENTS = [
             "#998EC3", 
             "#B9B3D7", 
             "#D8DAEB", 
-            "#F7F7F7", 
+            "#FFFFBF", 
             "#FEE0B6", 
             "#FAC17C", 
             "#F1A340", 
@@ -4241,53 +4205,32 @@ OTHER_ELEMENTS = [
         "source": "Hadley Circulation Pressure Climatology", 
         "classes": {
           "3": [
-            "#EDF8FB", 
-            "#8C96C6", 
+            "#B3CDE3", 
+            "#8B77B6", 
             "#810F7C"
           ], 
           "4": [
-            "#EDF8FB", 
-            "#A6BAD9", 
-            "#8B6CB1", 
-            "#810F7C"
-          ], 
-          "5": [
-            "#EDF8FB", 
             "#B3CDE3", 
             "#8C96C6", 
             "#8856A7", 
             "#810F7C"
           ], 
+          "5": [
+            "#B3CDE3", 
+            "#96A3CD", 
+            "#8B77B6", 
+            "#87489C", 
+            "#810F7C"
+          ], 
           "6": [
-            "#EDF8FB", 
-            "#BFD5E8", 
+            "#B3CDE3", 
             "#9CACD2", 
-            "#8C7DBA", 
-            "#874B9E", 
+            "#8C89C0", 
+            "#8A63AD", 
+            "#863F96", 
             "#810F7C"
           ], 
           "7": [
-            "#EDF8FB", 
-            "#C6DBEB", 
-            "#A6BAD9", 
-            "#8C96C6", 
-            "#8B6CB1", 
-            "#874398", 
-            "#810F7C"
-          ], 
-          "8": [
-            "#EDF8FB", 
-            "#CCDFED", 
-            "#ADC5DF", 
-            "#97A5CE", 
-            "#8C84BD", 
-            "#8960AB", 
-            "#863D94", 
-            "#810F7C"
-          ], 
-          "9": [
-            "#EDF8FB", 
-            "#D0E2EF", 
             "#B3CDE3", 
             "#A0B1D4", 
             "#8C96C6", 
@@ -4296,29 +4239,50 @@ OTHER_ELEMENTS = [
             "#863991", 
             "#810F7C"
           ], 
+          "8": [
+            "#B3CDE3", 
+            "#A2B5D7", 
+            "#929ECA", 
+            "#8C84BD", 
+            "#8A69B0", 
+            "#884EA1", 
+            "#85348E", 
+            "#810F7C"
+          ], 
+          "9": [
+            "#B3CDE3", 
+            "#A4B8D8", 
+            "#96A3CD", 
+            "#8C8EC2", 
+            "#8B77B6", 
+            "#895EAB", 
+            "#87489C", 
+            "#85318C", 
+            "#810F7C"
+          ], 
           "10": [
-            "#EDF8FB", 
-            "#D3E5F0", 
-            "#B9D2E6", 
+            "#B3CDE3", 
             "#A6BAD9", 
-            "#95A2CC", 
-            "#8C88BF", 
+            "#99A8D0", 
+            "#8C96C6", 
+            "#8C81BC", 
             "#8B6CB1", 
-            "#8850A2", 
-            "#85358F", 
+            "#8856A7", 
+            "#874398", 
+            "#842E8A", 
             "#810F7C"
           ], 
           "11": [
-            "#EDF8FB", 
-            "#D6E7F1", 
-            "#BFD5E8", 
-            "#ABC2DD", 
+            "#B3CDE3", 
+            "#A7BCDA", 
             "#9CACD2", 
-            "#8C96C6", 
-            "#8C7DBA", 
+            "#909BC9", 
+            "#8C89C0", 
+            "#8B77B6", 
             "#8A63AD", 
-            "#874B9E", 
-            "#85328D", 
+            "#8850A3", 
+            "#863F96", 
+            "#842C89", 
             "#810F7C"
           ]
         }, 
@@ -4699,7 +4663,7 @@ OTHER_ELEMENTS = [
         "classes": {
           "3": [
             "#67A9CF", 
-            "#F7F7F7", 
+            "#FFFFBF", 
             "#EF6548"
           ], 
           "4": [
@@ -4711,7 +4675,7 @@ OTHER_ELEMENTS = [
           "5": [
             "#2166AC", 
             "#BDC9E1", 
-            "#F7F7F7", 
+            "#FFFFBF", 
             "#FDBB84", 
             "#B30000"
           ], 
@@ -4727,7 +4691,7 @@ OTHER_ELEMENTS = [
             "#2166AC", 
             "#67A9CF", 
             "#BDC9E1", 
-            "#F7F7F7", 
+            "#FFFFBF", 
             "#FDBB84", 
             "#EF6548", 
             "#B30000"
@@ -4747,7 +4711,7 @@ OTHER_ELEMENTS = [
             "#5392C3", 
             "#86B4D5", 
             "#BDC9E1", 
-            "#F7F7F7", 
+            "#FFFFBF", 
             "#FDBB84", 
             "#F5835B", 
             "#DB4C31", 
@@ -4771,7 +4735,7 @@ OTHER_ELEMENTS = [
             "#67A9CF", 
             "#95B9D8", 
             "#BDC9E1", 
-            "#F7F7F7", 
+            "#FFFFBF", 
             "#FDBB84", 
             "#F89265", 
             "#EF6548", 
@@ -4788,53 +4752,32 @@ OTHER_ELEMENTS = [
         "source": "Federal Aviation Administration (FAA)", 
         "classes": {
           "3": [
-            "#F7FCF5", 
-            "#74C476", 
+            "#C7E9C0", 
+            "#41AB5D", 
             "#00441B"
           ], 
           "4": [
-            "#F7FCF5", 
-            "#AEDEA7", 
-            "#37A055", 
-            "#00441B"
-          ], 
-          "5": [
-            "#F7FCF5", 
             "#C7E9C0", 
             "#74C476", 
             "#238B45", 
             "#00441B"
           ], 
+          "5": [
+            "#C7E9C0", 
+            "#8BCF88", 
+            "#41AB5D", 
+            "#147C38", 
+            "#00441B"
+          ], 
           "6": [
-            "#F7FCF5", 
-            "#D3EECD", 
+            "#C7E9C0", 
             "#98D594", 
-            "#4CB062", 
-            "#177F3B", 
+            "#61BA6C", 
+            "#30984E", 
+            "#087331", 
             "#00441B"
           ], 
           "7": [
-            "#F7FCF5", 
-            "#DBF1D5", 
-            "#AEDEA7", 
-            "#74C476", 
-            "#37A055", 
-            "#0E7734", 
-            "#00441B"
-          ], 
-          "8": [
-            "#F7FCF5", 
-            "#E1F3DB", 
-            "#BCE4B5", 
-            "#8ED08B", 
-            "#58B668", 
-            "#2C944C", 
-            "#067130", 
-            "#00441B"
-          ], 
-          "9": [
-            "#F7FCF5", 
-            "#E5F5E0", 
             "#C7E9C0", 
             "#A1D99B", 
             "#74C476", 
@@ -4843,29 +4786,50 @@ OTHER_ELEMENTS = [
             "#006D2C", 
             "#00441B"
           ], 
+          "8": [
+            "#C7E9C0", 
+            "#A7DBA0", 
+            "#81CA80", 
+            "#58B668", 
+            "#359D53", 
+            "#1B823E", 
+            "#00672A", 
+            "#00441B"
+          ], 
+          "9": [
+            "#C7E9C0", 
+            "#ABDDA4", 
+            "#8BCF88", 
+            "#68BE70", 
+            "#41AB5D", 
+            "#2B934B", 
+            "#147C38", 
+            "#006228", 
+            "#00441B"
+          ], 
           "10": [
-            "#F7FCF5", 
-            "#E7F6E2", 
-            "#CEECC7", 
+            "#C7E9C0", 
             "#AEDEA7", 
-            "#88CD86", 
-            "#5FB96B", 
+            "#92D28F", 
+            "#74C476", 
+            "#53B365", 
             "#37A055", 
-            "#1D843F", 
-            "#00682A", 
+            "#238B45", 
+            "#0E7734", 
+            "#005F26", 
             "#00441B"
           ], 
           "11": [
-            "#F7FCF5", 
-            "#E9F6E4", 
-            "#D3EECD", 
-            "#B8E3B1", 
+            "#C7E9C0", 
+            "#B0DFAA", 
             "#98D594", 
-            "#74C476", 
-            "#4CB062", 
+            "#7DC87D", 
+            "#61BA6C", 
+            "#41AB5D", 
             "#30984E", 
-            "#177F3B", 
-            "#006529", 
+            "#1D8540", 
+            "#087331", 
+            "#005C25", 
             "#00441B"
           ]
         }, 
@@ -5059,7 +5023,7 @@ OTHER_ELEMENTS = [
         "classes": {
           "3": [
             "#2166AC", 
-            "#F7F7F7", 
+            "#FFFFBF", 
             "#D6604D"
           ], 
           "4": [
@@ -5071,7 +5035,7 @@ OTHER_ELEMENTS = [
           "5": [
             "#053061", 
             "#4393C3", 
-            "#F7F7F7", 
+            "#FFFFBF", 
             "#F4A582", 
             "#67001F"
           ], 
@@ -5087,7 +5051,7 @@ OTHER_ELEMENTS = [
             "#053061", 
             "#2166AC", 
             "#4393C3", 
-            "#F7F7F7", 
+            "#FFFFBF", 
             "#F4A582", 
             "#D6604D", 
             "#67001F"
@@ -5107,7 +5071,7 @@ OTHER_ELEMENTS = [
             "#185392", 
             "#2E75B4", 
             "#4393C3", 
-            "#F7F7F7", 
+            "#FFFFBF", 
             "#F4A582", 
             "#E1785E", 
             "#B0433D", 
@@ -5131,7 +5095,7 @@ OTHER_ELEMENTS = [
             "#2166AC", 
             "#347CB8", 
             "#4393C3", 
-            "#F7F7F7", 
+            "#FFFFBF", 
             "#F4A582", 
             "#E68367", 
             "#D6604D", 
@@ -5245,64 +5209,52 @@ OTHER_ELEMENTS = [
         "source": "WMO-No. 306 Beaufort Scale", 
         "classes": {
           "3": [
-            "#FFFFFF", 
-            "#FFD78F", 
+            "#BEE3F8", 
+            "#FDAE61", 
             "#49006A"
           ], 
           "4": [
-            "#FFFFFF", 
-            "#1A9641", 
-            "#F46D43", 
+            "#BEE3F8", 
+            "#BBDC93", 
+            "#EB5736", 
             "#49006A"
           ], 
           "5": [
-            "#FFFFFF", 
-            "#88C85F", 
-            "#FFD78F", 
-            "#DF3625", 
+            "#BEE3F8", 
+            "#1A9641", 
+            "#FDAE61", 
+            "#D7191C", 
             "#49006A"
           ], 
           "6": [
-            "#FFFFFF", 
-            "#B4DE87", 
-            "#ADD58B", 
-            "#FA9555", 
-            "#C71132", 
+            "#BEE3F8", 
+            "#5DB151", 
+            "#FFEFAC", 
+            "#F67B49", 
+            "#B60844", 
             "#49006A"
           ], 
           "7": [
-            "#FFFFFF", 
-            "#C6E6B2", 
-            "#1A9641", 
-            "#FFD78F", 
-            "#F46D43", 
-            "#AD054D", 
+            "#BEE3F8", 
+            "#7EC35C", 
+            "#BBDC93", 
+            "#FDAE61", 
+            "#EB5736", 
+            "#9E015B", 
             "#49006A"
           ], 
           "8": [
-            "#FFFFFF", 
-            "#D2ECD0", 
-            "#61B352", 
-            "#E2F0AC", 
-            "#FCA55D", 
-            "#E85032", 
-            "#99005F", 
+            "#BEE3F8", 
+            "#95CF64", 
+            "#6BB463", 
+            "#FFDC96", 
+            "#F98A50", 
+            "#E03927", 
+            "#8A006B", 
             "#49006A"
           ], 
           "9": [
-            "#FFFFFF", 
-            "#DAF0E6", 
-            "#88C85F", 
-            "#7EBE6E", 
-            "#FFD78F", 
-            "#F8874E", 
-            "#DF3625", 
-            "#89006D", 
-            "#49006A"
-          ], 
-          "10": [
-            "#FFFFFF", 
-            "#E0F3F8", 
+            "#BEE3F8", 
             "#A6D96A", 
             "#1A9641", 
             "#FFFFBF", 
@@ -5312,17 +5264,29 @@ OTHER_ELEMENTS = [
             "#7A0177", 
             "#49006A"
           ], 
-          "11": [
-            "#FFFFFF", 
-            "#E3F4F9", 
-            "#B4DE87", 
-            "#50AA4D", 
-            "#ADD58B", 
-            "#FFD78F", 
-            "#FA9555", 
-            "#EC5937", 
-            "#C71132", 
+          "10": [
+            "#BEE3F8", 
+            "#AADA7B", 
+            "#44A54A", 
+            "#BBDC93", 
+            "#FFD28A", 
+            "#FA9253", 
+            "#EB5736", 
+            "#C51034", 
             "#750176", 
+            "#49006A"
+          ], 
+          "11": [
+            "#BEE3F8", 
+            "#AEDB88", 
+            "#5DB151", 
+            "#83C072", 
+            "#FFEFAC", 
+            "#FDAE61", 
+            "#F67B49", 
+            "#E3432B", 
+            "#B60844", 
+            "#700074", 
             "#49006A"
           ]
         }, 
@@ -5336,7 +5300,7 @@ OTHER_ELEMENTS = [
         "classes": {
           "3": [
             "#008000", 
-            "#FFFFFF", 
+            "#C5C5C5", 
             "#CC0000"
           ], 
           "4": [
@@ -5348,7 +5312,7 @@ OTHER_ELEMENTS = [
           "5": [
             "#00FF00", 
             "#004000", 
-            "#FFFFFF", 
+            "#C5C5C5", 
             "#660000", 
             "#FF0000"
           ], 
@@ -5364,7 +5328,7 @@ OTHER_ELEMENTS = [
             "#00FF00", 
             "#009F00", 
             "#004000", 
-            "#FFFFFF", 
+            "#C5C5C5", 
             "#660000", 
             "#B20001", 
             "#FF0000"
@@ -5384,7 +5348,7 @@ OTHER_ELEMENTS = [
             "#00BF00", 
             "#008000", 
             "#004000", 
-            "#FFFFFF", 
+            "#C5C5C5", 
             "#660000", 
             "#990000", 
             "#CC0000", 
@@ -5408,7 +5372,7 @@ OTHER_ELEMENTS = [
             "#009F00", 
             "#006F01", 
             "#004000", 
-            "#FFFFFF", 
+            "#C5C5C5", 
             "#660000", 
             "#8C0001", 
             "#B20001", 
@@ -5605,53 +5569,32 @@ OTHER_ELEMENTS = [
         "source": "National Data Buoy Center (NDBC)", 
         "classes": {
           "3": [
-            "#EDF8FB", 
-            "#66C2A4", 
+            "#B2E2E2", 
+            "#4CB281", 
             "#006D2C"
           ], 
           "4": [
-            "#EDF8FB", 
-            "#9AD7CD", 
-            "#43AD76", 
-            "#006D2C"
-          ], 
-          "5": [
-            "#EDF8FB", 
             "#B2E2E2", 
             "#66C2A4", 
             "#2CA25F", 
             "#006D2C"
           ], 
+          "5": [
+            "#B2E2E2", 
+            "#7ACAB3", 
+            "#4CB281", 
+            "#239452", 
+            "#006D2C"
+          ], 
           "6": [
-            "#EDF8FB", 
-            "#BEE6E7", 
+            "#B2E2E2", 
             "#86CFBC", 
-            "#52B588", 
-            "#259755", 
+            "#5CBC96", 
+            "#3AA86D", 
+            "#1D8C4A", 
             "#006D2C"
           ], 
           "7": [
-            "#EDF8FB", 
-            "#C6E9EA", 
-            "#9AD7CD", 
-            "#66C2A4", 
-            "#43AD76", 
-            "#20904E", 
-            "#006D2C"
-          ], 
-          "8": [
-            "#EDF8FB", 
-            "#CCEBED", 
-            "#A8DDD9", 
-            "#7DCBB5", 
-            "#58B990", 
-            "#36A769", 
-            "#1C8B49", 
-            "#006D2C"
-          ], 
-          "9": [
-            "#EDF8FB", 
-            "#D0EDEE", 
             "#B2E2E2", 
             "#8DD2C3", 
             "#66C2A4", 
@@ -5660,29 +5603,50 @@ OTHER_ELEMENTS = [
             "#198745", 
             "#006D2C"
           ], 
+          "8": [
+            "#B2E2E2", 
+            "#93D4C7", 
+            "#72C7AD", 
+            "#58B990", 
+            "#40AB73", 
+            "#279A58", 
+            "#168341", 
+            "#006D2C"
+          ], 
+          "9": [
+            "#B2E2E2", 
+            "#97D6CA", 
+            "#7ACAB3", 
+            "#60BE9B", 
+            "#4CB281", 
+            "#35A668", 
+            "#239452", 
+            "#14803F", 
+            "#006D2C"
+          ], 
           "10": [
-            "#EDF8FB", 
-            "#D3EEF0", 
-            "#B9E4E5", 
+            "#B2E2E2", 
             "#9AD7CD", 
-            "#78C9B2", 
-            "#5BBB94", 
+            "#81CDB8", 
+            "#66C2A4", 
+            "#55B78D", 
             "#43AD76", 
-            "#289C59", 
-            "#178442", 
+            "#2CA25F", 
+            "#20904E", 
+            "#127E3D", 
             "#006D2C"
           ], 
           "11": [
-            "#EDF8FB", 
-            "#D6EFF1", 
-            "#BEE6E7", 
-            "#A3DCD5", 
+            "#B2E2E2", 
+            "#9CD9CF", 
             "#86CFBC", 
-            "#66C2A4", 
-            "#52B588", 
+            "#6EC5AA", 
+            "#5CBC96", 
+            "#4CB281", 
             "#3AA86D", 
-            "#259755", 
-            "#158240", 
+            "#289D5A", 
+            "#1D8C4A", 
+            "#107D3B", 
             "#006D2C"
           ]
         }, 
@@ -5785,84 +5749,84 @@ OTHER_ELEMENTS = [
         "source": "NOAA National Weather Service (Wind Chill)", 
         "classes": {
           "3": [
-            "#FFFFFF", 
-            "#4292C6", 
+            "#A5D8F7", 
+            "#2C71B1", 
             "#67001F"
           ], 
           "4": [
-            "#FFFFFF", 
-            "#9ECAE1", 
-            "#08519C", 
+            "#A5D8F7", 
+            "#65A4CF", 
+            "#2C3D92", 
             "#67001F"
           ], 
           "5": [
-            "#FFFFFF", 
-            "#BEDAEC", 
-            "#4292C6", 
-            "#33328C", 
+            "#A5D8F7", 
+            "#8ABCDA", 
+            "#2C71B1", 
+            "#3B1F85", 
             "#67001F"
           ], 
           "6": [
-            "#FFFFFF", 
-            "#D1E4F3", 
-            "#7DB3D6", 
-            "#276AAD", 
-            "#3C1A83", 
-            "#67001F"
-          ], 
-          "7": [
-            "#FFFFFF", 
-            "#DEEBF7", 
+            "#A5D8F7", 
             "#9ECAE1", 
             "#4292C6", 
             "#08519C", 
             "#3F007D", 
             "#67001F"
           ], 
+          "7": [
+            "#A5D8F7", 
+            "#9FCCE5", 
+            "#65A4CF", 
+            "#2C71B1", 
+            "#2C3D92", 
+            "#4D006C", 
+            "#67001F"
+          ], 
           "8": [
-            "#FFFFFF", 
-            "#E3EEF8", 
-            "#B1D3E7", 
-            "#6EAAD2", 
-            "#3075B4", 
-            "#294093", 
-            "#4B006F", 
+            "#A5D8F7", 
+            "#A0CEE7", 
+            "#7BB2D5", 
+            "#3C88C0", 
+            "#175AA2", 
+            "#362D8A", 
+            "#540061", 
             "#67001F"
           ], 
           "9": [
-            "#FFFFFF", 
-            "#E6F0F9", 
-            "#BEDAEC", 
+            "#A5D8F7", 
+            "#A1CFE9", 
             "#8ABCDA", 
-            "#4292C6", 
-            "#1E61A6", 
-            "#33328C", 
-            "#520064", 
+            "#5099C9", 
+            "#2C71B1", 
+            "#1C4A98", 
+            "#3B1F85", 
+            "#580058", 
             "#67001F"
           ], 
           "10": [
-            "#FFFFFF", 
-            "#E9F2FA", 
-            "#C9E0F0", 
-            "#9ECAE1", 
+            "#A5D8F7", 
+            "#A1D0EB", 
+            "#95C4DE", 
             "#65A4CF", 
-            "#347CB8", 
-            "#08519C", 
-            "#392687", 
-            "#57005C", 
+            "#3983BD", 
+            "#1C5FA5", 
+            "#2C3D92", 
+            "#3D1180", 
+            "#5B0052", 
             "#67001F"
           ], 
           "11": [
-            "#FFFFFF", 
-            "#EBF3FA", 
-            "#D1E4F3", 
-            "#ABD1E5", 
-            "#7DB3D6", 
+            "#A5D8F7", 
+            "#A2D1EC", 
+            "#9ECAE1", 
+            "#74AED4", 
             "#4292C6", 
-            "#276AAD", 
-            "#234596", 
-            "#3C1A83", 
-            "#590056", 
+            "#2C71B1", 
+            "#08519C", 
+            "#33328C", 
+            "#3F007D", 
+            "#5D004D", 
             "#67001F"
           ]
         }, 
@@ -5875,53 +5839,32 @@ OTHER_ELEMENTS = [
         "source": "Global Wind Atlas / DTU Wind Energy", 
         "classes": {
           "3": [
-            "#F7FCF0", 
-            "#7BCCC4", 
+            "#CCEBC5", 
+            "#4EB3D3", 
             "#084081"
           ], 
           "4": [
-            "#F7FCF0", 
-            "#B4E2BA", 
-            "#44A6CC", 
-            "#084081"
-          ], 
-          "5": [
-            "#F7FCF0", 
             "#CCEBC5", 
             "#7BCCC4", 
             "#2B8CBE", 
             "#084081"
           ], 
+          "5": [
+            "#CCEBC5", 
+            "#93D4BD", 
+            "#4EB3D3", 
+            "#1E7AB5", 
+            "#084081"
+          ], 
           "6": [
-            "#F7FCF0", 
-            "#D4EECE", 
+            "#CCEBC5", 
             "#A0DAB8", 
-            "#59B8D0", 
-            "#217DB7", 
+            "#6CC2CA", 
+            "#3B9BC6", 
+            "#136FB0", 
             "#084081"
           ], 
           "7": [
-            "#F7FCF0", 
-            "#D9F0D4", 
-            "#B4E2BA", 
-            "#7BCCC4", 
-            "#44A6CC", 
-            "#1974B2", 
-            "#084081"
-          ], 
-          "8": [
-            "#F7FCF0", 
-            "#DDF2D8", 
-            "#C2E7C0", 
-            "#96D6BC", 
-            "#64BECD", 
-            "#3697C4", 
-            "#116DAF", 
-            "#084081"
-          ], 
-          "9": [
-            "#F7FCF0", 
-            "#E0F3DB", 
             "#CCEBC5", 
             "#A8DDB5", 
             "#7BCCC4", 
@@ -5930,29 +5873,50 @@ OTHER_ELEMENTS = [
             "#0868AC", 
             "#084081"
           ], 
+          "8": [
+            "#CCEBC5", 
+            "#ADDFB7", 
+            "#89D1C0", 
+            "#64BECD", 
+            "#40A2CA", 
+            "#2482B9", 
+            "#0962A6", 
+            "#084081"
+          ], 
+          "9": [
+            "#CCEBC5", 
+            "#B1E1B9", 
+            "#93D4BD", 
+            "#72C6C8", 
+            "#4EB3D3", 
+            "#3596C3", 
+            "#1E7AB5", 
+            "#095EA1", 
+            "#084081"
+          ], 
           "10": [
-            "#F7FCF0", 
-            "#E3F4DD", 
-            "#D0EDCA", 
+            "#CCEBC5", 
             "#B4E2BA", 
-            "#90D4BD", 
-            "#6AC1CB", 
+            "#9AD7BA", 
+            "#7BCCC4", 
+            "#60BBCE", 
             "#44A6CC", 
-            "#2684BA", 
-            "#0963A7", 
+            "#2B8CBE", 
+            "#1974B2", 
+            "#095A9D", 
             "#084081"
           ], 
           "11": [
-            "#F7FCF0", 
-            "#E5F5DF", 
-            "#D4EECE", 
-            "#BEE5BF", 
+            "#CCEBC5", 
+            "#B7E3BB", 
             "#A0DAB8", 
-            "#7BCCC4", 
-            "#59B8D0", 
+            "#85CFC1", 
+            "#6CC2CA", 
+            "#4EB3D3", 
             "#3B9BC6", 
-            "#217DB7", 
-            "#0960A3", 
+            "#2685BA", 
+            "#136FB0", 
+            "#0A589B", 
             "#084081"
           ]
         }, 
@@ -6145,55 +6109,55 @@ OTHER_ELEMENTS = [
         "source": "Coastal Boundary Layer Meteorology", 
         "classes": {
           "3": [
-            "#EFF3FF", 
+            "#BDD7E7", 
             "#6BAED6", 
             "#08519C"
           ], 
           "4": [
-            "#EFF3FF", 
-            "#A4C9E1", 
+            "#BDD7E7", 
+            "#8EC1DD", 
             "#4790C5", 
             "#08519C"
           ], 
           "5": [
-            "#EFF3FF", 
             "#BDD7E7", 
+            "#9ECAE1", 
             "#6BAED6", 
             "#3182BD", 
             "#08519C"
           ], 
           "6": [
-            "#EFF3FF", 
-            "#C7DDEC", 
-            "#8EBEDD", 
+            "#BDD7E7", 
+            "#A4CDE2", 
+            "#81B9DA", 
             "#569CCC", 
             "#2B78B6", 
             "#08519C"
           ], 
           "7": [
-            "#EFF3FF", 
-            "#CEE0EF", 
-            "#A4C9E1", 
+            "#BDD7E7", 
+            "#A9CEE3", 
+            "#8EC1DD", 
             "#6BAED6", 
             "#4790C5", 
             "#2771B2", 
             "#08519C"
           ], 
           "8": [
-            "#EFF3FF", 
-            "#D2E3F1", 
-            "#B2D1E5", 
-            "#85BADB", 
+            "#BDD7E7", 
+            "#ACD0E4", 
+            "#97C6DF", 
+            "#7BB6D9", 
             "#5CA1CF", 
             "#3B88C1", 
             "#246DAF", 
             "#08519C"
           ], 
           "9": [
-            "#EFF3FF", 
-            "#D6E5F3", 
             "#BDD7E7", 
-            "#96C2DF", 
+            "#AED0E4", 
+            "#9ECAE1", 
+            "#86BCDC", 
             "#6BAED6", 
             "#5198C9", 
             "#3182BD", 
@@ -6201,11 +6165,11 @@ OTHER_ELEMENTS = [
             "#08519C"
           ], 
           "10": [
-            "#EFF3FF", 
-            "#D9E7F4", 
-            "#C3DAEA", 
-            "#A4C9E1", 
-            "#7FB7DA", 
+            "#BDD7E7", 
+            "#AFD1E4", 
+            "#A2CBE2", 
+            "#8EC1DD", 
+            "#77B4D8", 
             "#60A4D0", 
             "#4790C5", 
             "#2E7CB9", 
@@ -6213,11 +6177,11 @@ OTHER_ELEMENTS = [
             "#08519C"
           ], 
           "11": [
-            "#EFF3FF", 
-            "#DBE8F5", 
-            "#C7DDEC", 
-            "#AECFE4", 
-            "#8EBEDD", 
+            "#BDD7E7", 
+            "#B1D2E5", 
+            "#A4CDE2", 
+            "#94C4DF", 
+            "#81B9DA", 
             "#6BAED6", 
             "#569CCC", 
             "#3F8BC2", 
@@ -6423,84 +6387,84 @@ OTHER_ELEMENTS = [
         "classes": {
           "3": [
             "#000000", 
-            "#7E7E7E", 
-            "#FFFFFF"
+            "#787878", 
+            "#5B0082"
           ], 
           "4": [
             "#000000", 
-            "#545454", 
-            "#A8A8A8", 
-            "#FFFFFF"
+            "#505050", 
+            "#A0A0A0", 
+            "#5B0082"
           ], 
           "5": [
             "#000000", 
-            "#3F3F3F", 
-            "#7E7E7E", 
-            "#BDBDBD", 
-            "#FFFFFF"
+            "#3B3B3B", 
+            "#787878", 
+            "#B4B4B4", 
+            "#5B0082"
           ], 
           "6": [
             "#000000", 
-            "#323232", 
-            "#656565", 
-            "#979797", 
-            "#CACACA", 
-            "#FFFFFF"
+            "#303030", 
+            "#606060", 
+            "#909090", 
+            "#C0C0C0", 
+            "#5B0082"
           ], 
           "7": [
             "#000000", 
-            "#2A2A2A", 
-            "#545454", 
-            "#7E7E7E", 
-            "#A8A8A8", 
-            "#D2D2D2", 
-            "#FFFFFF"
+            "#282828", 
+            "#505050", 
+            "#787878", 
+            "#A0A0A0", 
+            "#C8C8C8", 
+            "#5B0082"
           ], 
           "8": [
             "#000000", 
-            "#242424", 
-            "#484848", 
-            "#6C6C6C", 
-            "#909090", 
-            "#B4B4B4", 
-            "#D8D8D8", 
-            "#FFFFFF"
+            "#232323", 
+            "#444444", 
+            "#676767", 
+            "#898989", 
+            "#ABABAB", 
+            "#BAADBE", 
+            "#5B0082"
           ], 
           "9": [
             "#000000", 
-            "#1F1F1F", 
-            "#3F3F3F", 
-            "#5E5E5E", 
-            "#7E7E7E", 
-            "#9D9D9D", 
-            "#BDBDBD", 
-            "#DCDCDC", 
-            "#FFFFFF"
+            "#202020", 
+            "#3B3B3B", 
+            "#5A5A5A", 
+            "#787878", 
+            "#969696", 
+            "#B4B4B4", 
+            "#AF9AB7", 
+            "#5B0082"
           ], 
           "10": [
             "#000000", 
-            "#1C1C1C", 
-            "#383838", 
-            "#545454", 
-            "#707070", 
-            "#8C8C8C", 
-            "#A8A8A8", 
-            "#C4C4C4", 
-            "#E0E0E0", 
-            "#FFFFFF"
+            "#1D1D1D", 
+            "#353535", 
+            "#505050", 
+            "#6A6A6A", 
+            "#858585", 
+            "#A0A0A0", 
+            "#BABABA", 
+            "#A78BB1", 
+            "#5B0082"
           ], 
           "11": [
             "#000000", 
-            "#1A1A1A", 
-            "#323232", 
-            "#4B4B4B", 
-            "#656565", 
-            "#7E7E7E", 
-            "#979797", 
-            "#B0B0B0", 
-            "#CACACA", 
-            "#E3E3E3", 
-            "#FFFFFF"
+            "#1B1B1B", 
+            "#303030", 
+            "#484848", 
+            "#606060", 
+            "#787878", 
+            "#909090", 
+            "#A8A8A8", 
+            "#C0C0C0", 
+            "#A07FAD", 
+            "#5B0082"
           ]
         }, 
         "name_en": "Satellite Water Vapor IR", 
@@ -6513,7 +6477,7 @@ OTHER_ELEMENTS = [
         "classes": {
           "3": [
             "#5AAE61", 
-            "#F7F7F7", 
+            "#F6E8C3", 
             "#B35806"
           ], 
           "4": [
@@ -6525,7 +6489,7 @@ OTHER_ELEMENTS = [
           "5": [
             "#00441B", 
             "#A6DBA0", 
-            "#F7F7F7", 
+            "#F6E8C3", 
             "#FDB863", 
             "#7F3B08"
           ], 
@@ -6541,7 +6505,7 @@ OTHER_ELEMENTS = [
             "#00441B", 
             "#3D934C", 
             "#A6DBA0", 
-            "#F7F7F7", 
+            "#F6E8C3", 
             "#FDB863", 
             "#C96D0D", 
             "#7F3B08"
@@ -6561,7 +6525,7 @@ OTHER_ELEMENTS = [
             "#1B7837", 
             "#5AAE61", 
             "#A6DBA0", 
-            "#F7F7F7", 
+            "#F6E8C3", 
             "#FDB863", 
             "#E08214", 
             "#B35806", 
@@ -6585,7 +6549,7 @@ OTHER_ELEMENTS = [
             "#3D934C", 
             "#6EB970", 
             "#A6DBA0", 
-            "#F7F7F7", 
+            "#F6E8C3", 
             "#FDB863", 
             "#E88F2C", 
             "#C96D0D", 
@@ -6602,54 +6566,33 @@ OTHER_ELEMENTS = [
         "source": "Aviation Surface Weather Observation (Fog/Mist)", 
         "classes": {
           "3": [
-            "#F7FBFF", 
-            "#6BAED6", 
+            "#BDD7E7", 
+            "#4292C6", 
             "#08306B"
           ], 
           "4": [
-            "#F7FBFF", 
-            "#ACD0E6", 
-            "#3987C0", 
-            "#08306B"
-          ], 
-          "5": [
-            "#F7FBFF", 
-            "#C6DBEF", 
+            "#BDD7E7", 
             "#6BAED6", 
             "#2171B5", 
             "#08306B"
           ], 
+          "5": [
+            "#BDD7E7", 
+            "#86BCDC", 
+            "#4292C6", 
+            "#1761A8", 
+            "#08306B"
+          ], 
           "6": [
-            "#F7FBFF", 
-            "#D0E1F2", 
+            "#BDD7E7", 
             "#94C4DF", 
-            "#4B98C9", 
-            "#1964AB", 
+            "#5CA3D0", 
+            "#307EBC", 
+            "#0F57A1", 
             "#08306B"
           ], 
           "7": [
-            "#F7FBFF", 
-            "#D6E6F4", 
-            "#ACD0E6", 
-            "#6BAED6", 
-            "#3987C0", 
-            "#135BA4", 
-            "#08306B"
-          ], 
-          "8": [
-            "#F7FBFF", 
-            "#DBE9F6", 
-            "#BBD6EB", 
-            "#89BEDC", 
-            "#559ECD", 
-            "#2C7ABA", 
-            "#0D55A0", 
-            "#08306B"
-          ], 
-          "9": [
-            "#F7FBFF", 
-            "#DEEBF7", 
-            "#C6DBEF", 
+            "#BDD7E7", 
             "#9ECAE1", 
             "#6BAED6", 
             "#4292C6", 
@@ -6657,29 +6600,50 @@ OTHER_ELEMENTS = [
             "#08519C", 
             "#08306B"
           ], 
+          "8": [
+            "#BDD7E7", 
+            "#A3CCE2", 
+            "#7BB6D9", 
+            "#559ECD", 
+            "#3684BF", 
+            "#1C68AE", 
+            "#084C95", 
+            "#08306B"
+          ], 
+          "9": [
+            "#BDD7E7", 
+            "#A6CDE3", 
+            "#86BCDC", 
+            "#62A7D2", 
+            "#4292C6", 
+            "#2B79B9", 
+            "#1761A8", 
+            "#09498F", 
+            "#08306B"
+          ], 
           "10": [
-            "#F7FBFF", 
-            "#E1EDF8", 
-            "#CBDFF1", 
-            "#ACD0E6", 
-            "#83BADB", 
-            "#5AA1CF", 
+            "#BDD7E7", 
+            "#A9CEE3", 
+            "#8EC1DD", 
+            "#6BAED6", 
+            "#519BCB", 
             "#3987C0", 
-            "#1D6AAF", 
-            "#084D96", 
+            "#2171B5", 
+            "#135BA4", 
+            "#09468B", 
             "#08306B"
           ], 
           "11": [
-            "#F7FBFF", 
-            "#E3EEF9", 
-            "#D0E1F2", 
-            "#B6D4E9", 
+            "#BDD7E7", 
+            "#ABCFE3", 
             "#94C4DF", 
-            "#6BAED6", 
-            "#4B98C9", 
+            "#76B4D8", 
+            "#5CA3D0", 
+            "#4292C6", 
             "#307EBC", 
-            "#1964AB", 
-            "#084A92", 
+            "#1D6AB0", 
+            "#0F57A1", 
+            "#094388", 
             "#08306B"
           ]
         }, 
@@ -6692,53 +6656,32 @@ OTHER_ELEMENTS = [
         "source": "FAO-56 Irrigation / Agriculture & Forest Fire", 
         "classes": {
           "3": [
-            "#F7FCF5", 
-            "#74C476", 
+            "#C7E9C0", 
+            "#FEB24C", 
             "#B10026"
           ], 
           "4": [
-            "#F7FCF5", 
-            "#AEDEA7", 
-            "#FEA647", 
-            "#B10026"
-          ], 
-          "5": [
-            "#F7FCF5", 
             "#C7E9C0", 
             "#74C476", 
             "#FD8D3C", 
             "#B10026"
           ], 
+          "5": [
+            "#C7E9C0", 
+            "#8BCF88", 
+            "#FEB24C", 
+            "#FD7033", 
+            "#B10026"
+          ], 
           "6": [
-            "#F7FCF5", 
-            "#D3EECD", 
+            "#C7E9C0", 
             "#98D594", 
-            "#E7B755", 
-            "#FD7634", 
+            "#B4BF66", 
+            "#FE9C42", 
+            "#FD5D2D", 
             "#B10026"
           ], 
           "7": [
-            "#F7FCF5", 
-            "#DBF1D5", 
-            "#AEDEA7", 
-            "#74C476", 
-            "#FEA647", 
-            "#FD6630", 
-            "#B10026"
-          ], 
-          "8": [
-            "#F7FCF5", 
-            "#E1F3DB", 
-            "#BCE4B5", 
-            "#8ED08B", 
-            "#CBBC5F", 
-            "#FE9840", 
-            "#FC592C", 
-            "#B10026"
-          ], 
-          "9": [
-            "#F7FCF5", 
-            "#E5F5E0", 
             "#C7E9C0", 
             "#A1D99B", 
             "#74C476", 
@@ -6747,29 +6690,50 @@ OTHER_ELEMENTS = [
             "#FC4E2A", 
             "#B10026"
           ], 
+          "8": [
+            "#C7E9C0", 
+            "#A7DBA0", 
+            "#81CA80", 
+            "#CBBC5F", 
+            "#FEA245", 
+            "#FD7D37", 
+            "#F1462A", 
+            "#B10026"
+          ], 
+          "9": [
+            "#C7E9C0", 
+            "#ABDDA4", 
+            "#8BCF88", 
+            "#9FC16C", 
+            "#FEB24C", 
+            "#FD9740", 
+            "#FD7033", 
+            "#E93F2A", 
+            "#B10026"
+          ], 
           "10": [
-            "#F7FCF5", 
-            "#E7F6E2", 
-            "#CEECC7", 
+            "#C7E9C0", 
             "#AEDEA7", 
-            "#88CD86", 
-            "#BABE64", 
+            "#92D28F", 
+            "#74C476", 
+            "#D7BA5B", 
             "#FEA647", 
-            "#FD8138", 
-            "#F3472A", 
+            "#FD8D3C", 
+            "#FD6630", 
+            "#E33A29", 
             "#B10026"
           ], 
           "11": [
-            "#F7FCF5", 
-            "#E9F6E4", 
-            "#D3EECD", 
-            "#B8E3B1", 
+            "#C7E9C0", 
+            "#B0DFAA", 
             "#98D594", 
-            "#74C476", 
-            "#E7B755", 
+            "#7DC87D", 
+            "#B4BF66", 
+            "#FEB24C", 
             "#FE9C42", 
-            "#FD7634", 
-            "#ED422A", 
+            "#FD8238", 
+            "#FD5D2D", 
+            "#DE3629", 
             "#B10026"
           ]
         }, 
@@ -6872,53 +6836,32 @@ OTHER_ELEMENTS = [
         "source": "Atmospheric Boundary Layer Thermodynamics", 
         "classes": {
           "3": [
-            "#FFF7FB", 
-            "#74A9CF", 
+            "#D0D1E6", 
+            "#3690C0", 
             "#023858"
           ], 
           "4": [
-            "#FFF7FB", 
-            "#B4C4DF", 
-            "#2B85BB", 
-            "#023858"
-          ], 
-          "5": [
-            "#FFF7FB", 
             "#D0D1E6", 
             "#74A9CF", 
             "#0570B0", 
             "#023858"
           ], 
+          "5": [
+            "#D0D1E6", 
+            "#8EB3D5", 
+            "#3690C0", 
+            "#05659E", 
+            "#023858"
+          ], 
           "6": [
-            "#FFF7FB", 
-            "#DBDAEB", 
+            "#D0D1E6", 
             "#9DB9D9", 
-            "#4595C3", 
-            "#0567A2", 
+            "#5E9FC9", 
+            "#207DB6", 
+            "#045E94", 
             "#023858"
           ], 
           "7": [
-            "#FFF7FB", 
-            "#E3E0EE", 
-            "#B4C4DF", 
-            "#74A9CF", 
-            "#2B85BB", 
-            "#046199", 
-            "#023858"
-          ], 
-          "8": [
-            "#FFF7FB", 
-            "#E8E4F0", 
-            "#C4CBE3", 
-            "#91B4D6", 
-            "#549BC6", 
-            "#1B79B5", 
-            "#045D92", 
-            "#023858"
-          ], 
-          "9": [
-            "#FFF7FB", 
-            "#ECE7F2", 
             "#D0D1E6", 
             "#A6BDDB", 
             "#74A9CF", 
@@ -6927,29 +6870,50 @@ OTHER_ELEMENTS = [
             "#045A8D", 
             "#023858"
           ], 
+          "8": [
+            "#D0D1E6", 
+            "#ACC0DD", 
+            "#83AFD2", 
+            "#549BC6", 
+            "#2782B9", 
+            "#056AA6", 
+            "#045585", 
+            "#023858"
+          ], 
+          "9": [
+            "#D0D1E6", 
+            "#B1C2DE", 
+            "#8EB3D5", 
+            "#67A3CB", 
+            "#3690C0", 
+            "#1978B4", 
+            "#05659E", 
+            "#03517F", 
+            "#023858"
+          ], 
           "10": [
-            "#FFF7FB", 
-            "#EEE9F3", 
-            "#D6D6E9", 
+            "#D0D1E6", 
             "#B4C4DF", 
-            "#8BB2D4", 
-            "#5C9EC8", 
+            "#96B6D7", 
+            "#74A9CF", 
+            "#4E98C5", 
             "#2B85BB", 
-            "#056BA8", 
-            "#045687", 
+            "#0570B0", 
+            "#046199", 
+            "#034E7B", 
             "#023858"
           ], 
           "11": [
-            "#FFF7FB", 
-            "#F0EAF4", 
-            "#DBDAEB", 
-            "#BFC9E2", 
+            "#D0D1E6", 
+            "#B7C5DF", 
             "#9DB9D9", 
-            "#74A9CF", 
-            "#4595C3", 
+            "#7FADD1", 
+            "#5E9FC9", 
+            "#3690C0", 
             "#207DB6", 
-            "#0567A2", 
-            "#045382", 
+            "#056CA9", 
+            "#045E94", 
+            "#034C77", 
             "#023858"
           ]
         }, 
@@ -7052,84 +7016,84 @@ OTHER_ELEMENTS = [
         "source": "NASA AIRS / NOAA Atmospheric Rivers", 
         "classes": {
           "3": [
-            "#FFFFFF", 
-            "#4393C3", 
+            "#B3E5FC", 
+            "#347CB8", 
             "#49006A"
           ], 
           "4": [
-            "#FFFFFF", 
-            "#92C5DE", 
-            "#2166AC", 
+            "#B3E5FC", 
+            "#61A3CC", 
+            "#185392", 
             "#49006A"
           ], 
           "5": [
-            "#FFFFFF", 
-            "#BADCEB", 
-            "#4393C3", 
-            "#134A86", 
+            "#B3E5FC", 
+            "#80B8D7", 
+            "#347CB8", 
+            "#0C3D73", 
             "#49006A"
           ], 
           "6": [
-            "#FFFFFF", 
-            "#D1EAF3", 
-            "#75B1D3", 
-            "#3178B5", 
-            "#0A3A6F", 
-            "#49006A"
-          ], 
-          "7": [
-            "#FFFFFF", 
-            "#E0F3F8", 
+            "#B3E5FC", 
             "#92C5DE", 
             "#4393C3", 
             "#2166AC", 
             "#053061", 
             "#49006A"
           ], 
+          "7": [
+            "#B3E5FC", 
+            "#97CAE3", 
+            "#61A3CC", 
+            "#347CB8", 
+            "#185392", 
+            "#1B2C63", 
+            "#49006A"
+          ], 
           "8": [
-            "#FFFFFF", 
-            "#E4F5F9", 
-            "#A9D2E5", 
-            "#68A8CF", 
-            "#367FB9", 
-            "#195696", 
-            "#192C62", 
+            "#B3E5FC", 
+            "#9BCEE7", 
+            "#73AFD2", 
+            "#3F8CC0", 
+            "#276CAF", 
+            "#114680", 
+            "#252864", 
             "#49006A"
           ], 
           "9": [
-            "#FFFFFF", 
-            "#E8F6FA", 
-            "#BADCEB", 
+            "#B3E5FC", 
+            "#9ED1E9", 
             "#80B8D7", 
-            "#4393C3", 
-            "#2B71B2", 
-            "#134A86", 
-            "#222963", 
+            "#4F99C6", 
+            "#347CB8", 
+            "#1E5FA2", 
+            "#0C3D73", 
+            "#2B2664", 
             "#49006A"
           ], 
           "10": [
-            "#FFFFFF", 
-            "#EAF7FA", 
-            "#C7E3EF", 
-            "#92C5DE", 
+            "#B3E5FC", 
+            "#A1D3EB", 
+            "#8ABFDB", 
             "#61A3CC", 
-            "#3984BB", 
-            "#2166AC", 
-            "#0E4179", 
-            "#282764", 
+            "#3D89BE", 
+            "#2A70B1", 
+            "#185392", 
+            "#083669", 
+            "#2F2365", 
             "#49006A"
           ], 
           "11": [
-            "#FFFFFF", 
-            "#ECF8FB", 
-            "#D1EAF3", 
-            "#A2CEE3", 
-            "#75B1D3", 
+            "#B3E5FC", 
+            "#A2D5ED", 
+            "#92C5DE", 
+            "#6EACD1", 
             "#4393C3", 
-            "#3178B5", 
-            "#1B5B9C", 
-            "#0A3A6F", 
-            "#2C2565", 
+            "#347CB8", 
+            "#2166AC", 
+            "#134A86", 
+            "#053061", 
+            "#322165", 
             "#49006A"
           ]
         }, 
@@ -7143,7 +7107,7 @@ OTHER_ELEMENTS = [
         "classes": {
           "3": [
             "#DFC27D", 
-            "#F5F5F5", 
+            "#F6E8C3", 
             "#01665E"
           ], 
           "4": [
@@ -7155,7 +7119,7 @@ OTHER_ELEMENTS = [
           "5": [
             "#8C510A", 
             "#DFC27D", 
-            "#F5F5F5", 
+            "#F6E8C3", 
             "#80CDC1", 
             "#01665E"
           ], 
@@ -7171,7 +7135,7 @@ OTHER_ELEMENTS = [
             "#8C510A", 
             "#B78845", 
             "#DFC27D", 
-            "#F5F5F5", 
+            "#F6E8C3", 
             "#80CDC1", 
             "#49988E", 
             "#01665E"
@@ -7191,7 +7155,7 @@ OTHER_ELEMENTS = [
             "#A97532", 
             "#C49B57", 
             "#DFC27D", 
-            "#F5F5F5", 
+            "#F6E8C3", 
             "#80CDC1", 
             "#5BA99F", 
             "#36877E", 
@@ -7215,7 +7179,7 @@ OTHER_ELEMENTS = [
             "#B78845", 
             "#CBA560", 
             "#DFC27D", 
-            "#F5F5F5", 
+            "#F6E8C3", 
             "#80CDC1", 
             "#65B2A7", 
             "#49988E", 
@@ -7689,65 +7653,32 @@ OTHER_ELEMENTS = [
         "source": "Solar Energy Engineering Diffuse Radiation", 
         "classes": {
           "3": [
-            "#F7FCF0", 
-            "#A8DDB5", 
-            "#2B8CBE"
-          ], 
-          "4": [
-            "#F7FCF0", 
             "#CCEBC5", 
             "#7BCCC4", 
             "#2B8CBE"
           ], 
+          "4": [
+            "#CCEBC5", 
+            "#9AD7BA", 
+            "#60BBCE", 
+            "#2B8CBE"
+          ], 
           "5": [
-            "#F7FCF0", 
-            "#D6EFD0", 
-            "#A8DDB5", 
-            "#67BFCC", 
-            "#2B8CBE"
-          ], 
-          "6": [
-            "#F7FCF0", 
-            "#DCF1D7", 
-            "#BEE5BF", 
-            "#8ED3BE", 
-            "#59B8D0", 
-            "#2B8CBE"
-          ], 
-          "7": [
-            "#F7FCF0", 
-            "#E0F3DB", 
             "#CCEBC5", 
             "#A8DDB5", 
             "#7BCCC4", 
             "#4EB3D3", 
             "#2B8CBE"
           ], 
-          "8": [
-            "#F7FCF0", 
-            "#E3F4DE", 
-            "#D2EDCB", 
-            "#B8E3BC", 
-            "#96D6BC", 
-            "#70C5C8", 
-            "#4AADD0", 
+          "6": [
+            "#CCEBC5", 
+            "#AFE0B8", 
+            "#8ED3BE", 
+            "#6CC2CA", 
+            "#48ABCF", 
             "#2B8CBE"
           ], 
-          "9": [
-            "#F7FCF0", 
-            "#E6F5E0", 
-            "#D6EFD0", 
-            "#C3E8C1", 
-            "#A8DDB5", 
-            "#87D0C0", 
-            "#67BFCC", 
-            "#46A9CE", 
-            "#2B8CBE"
-          ], 
-          "10": [
-            "#F7FCF0", 
-            "#E8F6E2", 
-            "#D9F0D4", 
+          "7": [
             "#CCEBC5", 
             "#B4E2BA", 
             "#9AD7BA", 
@@ -7756,17 +7687,50 @@ OTHER_ELEMENTS = [
             "#44A6CC", 
             "#2B8CBE"
           ], 
-          "11": [
-            "#F7FCF0", 
-            "#E9F7E3", 
-            "#DCF1D7", 
-            "#D0EDC9", 
-            "#BEE5BF", 
+          "8": [
+            "#CCEBC5", 
+            "#B8E3BC", 
+            "#A2DBB7", 
+            "#89D1C0", 
+            "#70C5C8", 
+            "#56B7D1", 
+            "#40A2CA", 
+            "#2B8CBE"
+          ], 
+          "9": [
+            "#CCEBC5", 
+            "#BAE4BD", 
             "#A8DDB5", 
+            "#93D4BD", 
+            "#7BCCC4", 
+            "#67BFCC", 
+            "#4EB3D3", 
+            "#3E9FC8", 
+            "#2B8CBE"
+          ], 
+          "10": [
+            "#CCEBC5", 
+            "#BCE5BE", 
+            "#ACDFB7", 
+            "#9AD7BA", 
+            "#86D0C1", 
+            "#73C6C7", 
+            "#60BBCE", 
+            "#4BAFD1", 
+            "#3C9DC7", 
+            "#2B8CBE"
+          ], 
+          "11": [
+            "#CCEBC5", 
+            "#BEE5BF", 
+            "#AFE0B8", 
+            "#A0DAB8", 
             "#8ED3BE", 
-            "#74C7C7", 
+            "#7BCCC4", 
+            "#6CC2CA", 
             "#59B8D0", 
-            "#41A3CB", 
+            "#48ABCF", 
+            "#3B9BC6", 
             "#2B8CBE"
           ]
         }, 
@@ -7869,65 +7833,32 @@ OTHER_ELEMENTS = [
         "source": "Agrometeorology Crop Photosynthesis Scale", 
         "classes": {
           "3": [
-            "#F7FCF5", 
-            "#A1D99B", 
-            "#006D2C"
-          ], 
-          "4": [
-            "#F7FCF5", 
             "#C7E9C0", 
             "#74C476", 
             "#006D2C"
           ], 
+          "4": [
+            "#C7E9C0", 
+            "#92D28F", 
+            "#4AAE5F", 
+            "#006D2C"
+          ], 
           "5": [
-            "#F7FCF5", 
-            "#D6EFD0", 
-            "#A1D99B", 
-            "#55B365", 
-            "#006D2C"
-          ], 
-          "6": [
-            "#F7FCF5", 
-            "#DFF3DA", 
-            "#B8E3B1", 
-            "#86CC85", 
-            "#41AA5B", 
-            "#006D2C"
-          ], 
-          "7": [
-            "#F7FCF5", 
-            "#E5F5E0", 
             "#C7E9C0", 
             "#A1D99B", 
             "#74C476", 
             "#31A354", 
             "#006D2C"
           ], 
-          "8": [
-            "#F7FCF5", 
-            "#E8F6E3", 
-            "#D0ECC9", 
-            "#B1E0AB", 
-            "#8ED08B", 
-            "#63BB6C", 
-            "#2B9B4E", 
+          "6": [
+            "#C7E9C0", 
+            "#A9DCA2", 
+            "#86CC85", 
+            "#5CB768", 
+            "#29984C", 
             "#006D2C"
           ], 
-          "9": [
-            "#F7FCF5", 
-            "#EAF7E5", 
-            "#D6EFD0", 
-            "#BEE5B7", 
-            "#A1D99B", 
-            "#80C97F", 
-            "#55B365", 
-            "#27954A", 
-            "#006D2C"
-          ], 
-          "10": [
-            "#F7FCF5", 
-            "#EBF7E7", 
-            "#DBF1D5", 
+          "7": [
             "#C7E9C0", 
             "#AEDEA7", 
             "#92D28F", 
@@ -7936,17 +7867,50 @@ OTHER_ELEMENTS = [
             "#239146", 
             "#006D2C"
           ], 
-          "11": [
-            "#F7FCF5", 
-            "#ECF8E8", 
-            "#DFF3DA", 
-            "#CDEBC6", 
-            "#B8E3B1", 
+          "8": [
+            "#C7E9C0", 
+            "#B1E0AB", 
+            "#9BD696", 
+            "#81CA80", 
+            "#63BB6C", 
+            "#3DA859", 
+            "#1F8B42", 
+            "#006D2C"
+          ], 
+          "9": [
+            "#C7E9C0", 
+            "#B4E1AD", 
             "#A1D99B", 
+            "#8BCF88", 
+            "#74C476", 
+            "#55B365", 
+            "#31A354", 
+            "#1C8840", 
+            "#006D2C"
+          ], 
+          "10": [
+            "#C7E9C0", 
+            "#B6E2AF", 
+            "#A5DB9F", 
+            "#92D28F", 
+            "#7EC97E", 
+            "#67BD6E", 
+            "#4AAE5F", 
+            "#2D9D4F", 
+            "#19853D", 
+            "#006D2C"
+          ], 
+          "11": [
+            "#C7E9C0", 
+            "#B8E3B1", 
+            "#A9DCA2", 
+            "#98D594", 
             "#86CC85", 
-            "#68BD6F", 
+            "#74C476", 
+            "#5CB768", 
             "#41AA5B", 
-            "#208D44", 
+            "#29984C", 
+            "#17823C", 
             "#006D2C"
           ]
         }, 
@@ -7959,53 +7923,32 @@ OTHER_ELEMENTS = [
         "source": "Solar Radiation Clearness Index Modeling", 
         "classes": {
           "3": [
-            "#EDF8FB", 
-            "#8C96C6", 
+            "#B3CDE3", 
+            "#8B77B6", 
             "#810F7C"
           ], 
           "4": [
-            "#EDF8FB", 
-            "#A6BAD9", 
-            "#8B6CB1", 
-            "#810F7C"
-          ], 
-          "5": [
-            "#EDF8FB", 
             "#B3CDE3", 
             "#8C96C6", 
             "#8856A7", 
             "#810F7C"
           ], 
+          "5": [
+            "#B3CDE3", 
+            "#96A3CD", 
+            "#8B77B6", 
+            "#87489C", 
+            "#810F7C"
+          ], 
           "6": [
-            "#EDF8FB", 
-            "#BFD5E8", 
+            "#B3CDE3", 
             "#9CACD2", 
-            "#8C7DBA", 
-            "#874B9E", 
+            "#8C89C0", 
+            "#8A63AD", 
+            "#863F96", 
             "#810F7C"
           ], 
           "7": [
-            "#EDF8FB", 
-            "#C6DBEB", 
-            "#A6BAD9", 
-            "#8C96C6", 
-            "#8B6CB1", 
-            "#874398", 
-            "#810F7C"
-          ], 
-          "8": [
-            "#EDF8FB", 
-            "#CCDFED", 
-            "#ADC5DF", 
-            "#97A5CE", 
-            "#8C84BD", 
-            "#8960AB", 
-            "#863D94", 
-            "#810F7C"
-          ], 
-          "9": [
-            "#EDF8FB", 
-            "#D0E2EF", 
             "#B3CDE3", 
             "#A0B1D4", 
             "#8C96C6", 
@@ -8014,29 +7957,50 @@ OTHER_ELEMENTS = [
             "#863991", 
             "#810F7C"
           ], 
+          "8": [
+            "#B3CDE3", 
+            "#A2B5D7", 
+            "#929ECA", 
+            "#8C84BD", 
+            "#8A69B0", 
+            "#884EA1", 
+            "#85348E", 
+            "#810F7C"
+          ], 
+          "9": [
+            "#B3CDE3", 
+            "#A4B8D8", 
+            "#96A3CD", 
+            "#8C8EC2", 
+            "#8B77B6", 
+            "#895EAB", 
+            "#87489C", 
+            "#85318C", 
+            "#810F7C"
+          ], 
           "10": [
-            "#EDF8FB", 
-            "#D3E5F0", 
-            "#B9D2E6", 
+            "#B3CDE3", 
             "#A6BAD9", 
-            "#95A2CC", 
-            "#8C88BF", 
+            "#99A8D0", 
+            "#8C96C6", 
+            "#8C81BC", 
             "#8B6CB1", 
-            "#8850A2", 
-            "#85358F", 
+            "#8856A7", 
+            "#874398", 
+            "#842E8A", 
             "#810F7C"
           ], 
           "11": [
-            "#EDF8FB", 
-            "#D6E7F1", 
-            "#BFD5E8", 
-            "#ABC2DD", 
+            "#B3CDE3", 
+            "#A7BCDA", 
             "#9CACD2", 
-            "#8C96C6", 
-            "#8C7DBA", 
+            "#909BC9", 
+            "#8C89C0", 
+            "#8B77B6", 
             "#8A63AD", 
-            "#874B9E", 
-            "#85328D", 
+            "#8850A3", 
+            "#863F96", 
+            "#842C89", 
             "#810F7C"
           ]
         }, 
@@ -8051,28 +8015,28 @@ OTHER_ELEMENTS = [
           "3": [
             "#000000", 
             "#999999", 
-            "#FFFFFF"
+            "#A5D5F2"
           ], 
           "4": [
             "#000000", 
             "#666666", 
             "#CCCCCC", 
-            "#FFFFFF"
+            "#A5D5F2"
           ], 
           "5": [
             "#000000", 
             "#4C4C4C", 
             "#999999", 
-            "#DDDDDD", 
-            "#FFFFFF"
+            "#D0C7BE", 
+            "#A5D5F2"
           ], 
           "6": [
             "#000000", 
             "#3D3D3D", 
             "#7A7A7A", 
             "#B7B7B7", 
-            "#E7E7E7", 
-            "#FFFFFF"
+            "#D3C4B6", 
+            "#A5D5F2"
           ], 
           "7": [
             "#000000", 
@@ -8080,8 +8044,8 @@ OTHER_ELEMENTS = [
             "#666666", 
             "#999999", 
             "#CCCCCC", 
-            "#EEEEEE", 
-            "#FFFFFF"
+            "#D4C2B0", 
+            "#A5D5F2"
           ], 
           "8": [
             "#000000", 
@@ -8089,9 +8053,9 @@ OTHER_ELEMENTS = [
             "#575757", 
             "#838383", 
             "#AFAFAF", 
-            "#D6D6D6", 
-            "#F0F0F0", 
-            "#FFFFFF"
+            "#CFC9C4", 
+            "#CFC5B9", 
+            "#A5D5F2"
           ], 
           "9": [
             "#000000", 
@@ -8100,9 +8064,9 @@ OTHER_ELEMENTS = [
             "#727272", 
             "#999999", 
             "#BFBFBF", 
-            "#DDDDDD", 
-            "#F2F2F2", 
-            "#FFFFFF"
+            "#D0C7BE", 
+            "#CBC7C0", 
+            "#A5D5F2"
           ], 
           "10": [
             "#000000", 
@@ -8112,9 +8076,9 @@ OTHER_ELEMENTS = [
             "#888888", 
             "#AAAAAA", 
             "#CCCCCC", 
-            "#E3E3E3", 
-            "#F4F4F4", 
-            "#FFFFFF"
+            "#D2C5B9", 
+            "#C8C8C6", 
+            "#A5D5F2"
           ], 
           "11": [
             "#000000", 
@@ -8124,10 +8088,10 @@ OTHER_ELEMENTS = [
             "#7A7A7A", 
             "#999999", 
             "#B7B7B7", 
-            "#D3D3D3", 
-            "#E7E7E7", 
-            "#F5F5F5", 
-            "#FFFFFF"
+            "#CECAC6", 
+            "#D3C4B6", 
+            "#C5CACA", 
+            "#A5D5F2"
           ]
         }, 
         "name_en": "Surface Shortwave Albedo", 
@@ -8506,76 +8470,51 @@ OTHER_ELEMENTS = [
         "source": "Harvard Medical School / Fitzpatrick Phototypes", 
         "classes": {
           "3": [
-            "#FCEFE6", 
-            "#CF8F66", 
+            "#FAD8C3", 
+            "#BA774B", 
             "#452514"
           ], 
           "4": [
-            "#FCEFE6", 
-            "#EBB897", 
-            "#A4663E", 
+            "#FAD8C3", 
+            "#D5976F", 
+            "#8F5532", 
             "#452514"
           ], 
           "5": [
-            "#FCEFE6", 
-            "#F5CCB2", 
-            "#CF8F66", 
-            "#8A512F", 
-            "#452514"
-          ], 
-          "6": [
-            "#FCEFE6", 
             "#FAD8C3", 
             "#E3A882", 
             "#BA774B", 
             "#7A4526", 
             "#452514"
           ], 
+          "6": [
+            "#FAD8C3", 
+            "#E8B18F", 
+            "#CB8A61", 
+            "#A0623C", 
+            "#6F3E22", 
+            "#452514"
+          ], 
           "7": [
-            "#FCEFE6", 
-            "#FBDCC9", 
+            "#FAD8C3", 
             "#EBB897", 
-            "#CF8F66", 
-            "#A4663E", 
-            "#713F23", 
+            "#D5976F", 
+            "#BA774B", 
+            "#8F5532", 
+            "#683A20", 
             "#452514"
           ], 
           "8": [
-            "#FCEFE6", 
-            "#FBDFCD", 
-            "#F1C3A7", 
+            "#FAD8C3", 
+            "#EDBC9D", 
             "#DDA17A", 
-            "#C07E53", 
-            "#955A35", 
-            "#6A3C21", 
+            "#C6855A", 
+            "#A76840", 
+            "#834C2B", 
+            "#63371E", 
             "#452514"
           ], 
           "9": [
-            "#FCEFE6", 
-            "#FBE1D0", 
-            "#F5CCB2", 
-            "#E6AE8A", 
-            "#CF8F66", 
-            "#B27146", 
-            "#8A512F", 
-            "#66391F", 
-            "#452514"
-          ], 
-          "10": [
-            "#FCEFE6", 
-            "#FBE2D2", 
-            "#F8D3BC", 
-            "#EBB897", 
-            "#DA9D75", 
-            "#C38257", 
-            "#A4663E", 
-            "#814A2A", 
-            "#62361E", 
-            "#452514"
-          ], 
-          "11": [
-            "#FCEFE6", 
-            "#FBE3D4", 
             "#FAD8C3", 
             "#EFC0A2", 
             "#E3A882", 
@@ -8584,6 +8523,31 @@ OTHER_ELEMENTS = [
             "#995D38", 
             "#7A4526", 
             "#5F351D", 
+            "#452514"
+          ], 
+          "10": [
+            "#FAD8C3", 
+            "#F0C2A6", 
+            "#E6AD89", 
+            "#D5976F", 
+            "#C38257", 
+            "#AB6C42", 
+            "#8F5532", 
+            "#744124", 
+            "#5C331C", 
+            "#452514"
+          ], 
+          "11": [
+            "#FAD8C3", 
+            "#F1C5A9", 
+            "#E8B18F", 
+            "#DB9E77", 
+            "#CB8A61", 
+            "#BA774B", 
+            "#A0623C", 
+            "#864F2D", 
+            "#6F3E22", 
+            "#5A311B", 
             "#452514"
           ]
         }, 
@@ -8686,53 +8650,32 @@ OTHER_ELEMENTS = [
         "source": "Photobiology & Endocrine Society Guidelines", 
         "classes": {
           "3": [
-            "#EDF8FB", 
-            "#66C2A4", 
+            "#B2E2E2", 
+            "#4CB281", 
             "#006D2C"
           ], 
           "4": [
-            "#EDF8FB", 
-            "#9AD7CD", 
-            "#43AD76", 
-            "#006D2C"
-          ], 
-          "5": [
-            "#EDF8FB", 
             "#B2E2E2", 
             "#66C2A4", 
             "#2CA25F", 
             "#006D2C"
           ], 
+          "5": [
+            "#B2E2E2", 
+            "#7ACAB3", 
+            "#4CB281", 
+            "#239452", 
+            "#006D2C"
+          ], 
           "6": [
-            "#EDF8FB", 
-            "#BEE6E7", 
+            "#B2E2E2", 
             "#86CFBC", 
-            "#52B588", 
-            "#259755", 
+            "#5CBC96", 
+            "#3AA86D", 
+            "#1D8C4A", 
             "#006D2C"
           ], 
           "7": [
-            "#EDF8FB", 
-            "#C6E9EA", 
-            "#9AD7CD", 
-            "#66C2A4", 
-            "#43AD76", 
-            "#20904E", 
-            "#006D2C"
-          ], 
-          "8": [
-            "#EDF8FB", 
-            "#CCEBED", 
-            "#A8DDD9", 
-            "#7DCBB5", 
-            "#58B990", 
-            "#36A769", 
-            "#1C8B49", 
-            "#006D2C"
-          ], 
-          "9": [
-            "#EDF8FB", 
-            "#D0EDEE", 
             "#B2E2E2", 
             "#8DD2C3", 
             "#66C2A4", 
@@ -8741,29 +8684,50 @@ OTHER_ELEMENTS = [
             "#198745", 
             "#006D2C"
           ], 
+          "8": [
+            "#B2E2E2", 
+            "#93D4C7", 
+            "#72C7AD", 
+            "#58B990", 
+            "#40AB73", 
+            "#279A58", 
+            "#168341", 
+            "#006D2C"
+          ], 
+          "9": [
+            "#B2E2E2", 
+            "#97D6CA", 
+            "#7ACAB3", 
+            "#60BE9B", 
+            "#4CB281", 
+            "#35A668", 
+            "#239452", 
+            "#14803F", 
+            "#006D2C"
+          ], 
           "10": [
-            "#EDF8FB", 
-            "#D3EEF0", 
-            "#B9E4E5", 
+            "#B2E2E2", 
             "#9AD7CD", 
-            "#78C9B2", 
-            "#5BBB94", 
+            "#81CDB8", 
+            "#66C2A4", 
+            "#55B78D", 
             "#43AD76", 
-            "#289C59", 
-            "#178442", 
+            "#2CA25F", 
+            "#20904E", 
+            "#127E3D", 
             "#006D2C"
           ], 
           "11": [
-            "#EDF8FB", 
-            "#D6EFF1", 
-            "#BEE6E7", 
-            "#A3DCD5", 
+            "#B2E2E2", 
+            "#9CD9CF", 
             "#86CFBC", 
-            "#66C2A4", 
-            "#52B588", 
+            "#6EC5AA", 
+            "#5CBC96", 
+            "#4CB281", 
             "#3AA86D", 
-            "#259755", 
-            "#158240", 
+            "#289D5A", 
+            "#1D8C4A", 
+            "#107D3B", 
             "#006D2C"
           ]
         }, 
@@ -8873,66 +8837,33 @@ OTHER_ELEMENTS = [
         "source": "WMO International Cloud Atlas (Okta Scale)", 
         "classes": {
           "3": [
-            "#FFFFFF", 
-            "#6AA6CE", 
-            "#17202A"
-          ], 
-          "4": [
-            "#FFFFFF", 
-            "#A9CCE3", 
+            "#A8D4F5", 
             "#2980B9", 
             "#17202A"
           ], 
+          "4": [
+            "#A8D4F5", 
+            "#5499C7", 
+            "#2471A3", 
+            "#17202A"
+          ], 
           "5": [
-            "#FFFFFF", 
-            "#C9DFEE", 
-            "#6AA6CE", 
-            "#2575A8", 
-            "#17202A"
-          ], 
-          "6": [
-            "#FFFFFF", 
-            "#D9E9F3", 
-            "#90BDDB", 
-            "#458FC1", 
-            "#226A99", 
-            "#17202A"
-          ], 
-          "7": [
-            "#FFFFFF", 
-            "#E0EDF6", 
-            "#A9CCE3", 
+            "#A8D4F5", 
             "#6AA6CE", 
             "#2980B9", 
             "#20608A", 
             "#17202A"
           ], 
-          "8": [
-            "#FFFFFF", 
-            "#E4F1F8", 
-            "#BCD7E9", 
-            "#85B7D7", 
-            "#4F95C5", 
-            "#277AB0", 
-            "#1E5880", 
+          "6": [
+            "#A8D4F5", 
+            "#77AED2", 
+            "#458FC1", 
+            "#2677AC", 
+            "#1D567C", 
             "#17202A"
           ], 
-          "9": [
-            "#FFFFFF", 
-            "#E8F3FA", 
-            "#C9DFEE", 
-            "#9AC3DE", 
-            "#6AA6CE", 
-            "#3C89BE", 
-            "#2575A8", 
-            "#1C5378", 
-            "#17202A"
-          ], 
-          "10": [
-            "#FFFFFF", 
-            "#EBF5FB", 
-            "#D4E6F1", 
-            "#A9CCE3", 
+          "7": [
+            "#A8D4F5", 
             "#7FB3D5", 
             "#5499C7", 
             "#2980B9", 
@@ -8940,17 +8871,50 @@ OTHER_ELEMENTS = [
             "#1B4F72", 
             "#17202A"
           ], 
-          "11": [
-            "#FFFFFF", 
-            "#EDF6FB", 
-            "#D9E9F3", 
-            "#B6D4E7", 
-            "#90BDDB", 
+          "8": [
+            "#A8D4F5", 
+            "#85B8DA", 
+            "#61A0CB", 
+            "#3E8BBF", 
+            "#277AB0", 
+            "#216795", 
+            "#1C4867", 
+            "#17202A"
+          ], 
+          "9": [
+            "#A8D4F5", 
+            "#89BBDD", 
             "#6AA6CE", 
-            "#458FC1", 
+            "#4B93C4", 
+            "#2980B9", 
+            "#2575A8", 
+            "#20608A", 
+            "#1C435F", 
+            "#17202A"
+          ], 
+          "10": [
+            "#A8D4F5", 
+            "#8DBEE0", 
+            "#71AAD0", 
+            "#5499C7", 
+            "#3A88BE", 
             "#277BB2", 
+            "#2471A3", 
+            "#1E5A82", 
+            "#1D3F59", 
+            "#17202A"
+          ], 
+          "11": [
+            "#A8D4F5", 
+            "#8FC0E2", 
+            "#77AED2", 
+            "#5D9ECA", 
+            "#458FC1", 
+            "#2980B9", 
+            "#2677AC", 
             "#226A99", 
-            "#1C4A6A", 
+            "#1D567C", 
+            "#1C3B54", 
             "#17202A"
           ]
         }, 
@@ -8963,54 +8927,33 @@ OTHER_ELEMENTS = [
         "source": "MODIS / EUMETSAT Cloud Fraction", 
         "classes": {
           "3": [
-            "#F7FBFF", 
-            "#6BAED6", 
+            "#BDD7E7", 
+            "#4292C6", 
             "#08306B"
           ], 
           "4": [
-            "#F7FBFF", 
-            "#ACD0E6", 
-            "#3987C0", 
-            "#08306B"
-          ], 
-          "5": [
-            "#F7FBFF", 
-            "#C6DBEF", 
+            "#BDD7E7", 
             "#6BAED6", 
             "#2171B5", 
             "#08306B"
           ], 
+          "5": [
+            "#BDD7E7", 
+            "#86BCDC", 
+            "#4292C6", 
+            "#1761A8", 
+            "#08306B"
+          ], 
           "6": [
-            "#F7FBFF", 
-            "#D0E1F2", 
+            "#BDD7E7", 
             "#94C4DF", 
-            "#4B98C9", 
-            "#1964AB", 
+            "#5CA3D0", 
+            "#307EBC", 
+            "#0F57A1", 
             "#08306B"
           ], 
           "7": [
-            "#F7FBFF", 
-            "#D6E6F4", 
-            "#ACD0E6", 
-            "#6BAED6", 
-            "#3987C0", 
-            "#135BA4", 
-            "#08306B"
-          ], 
-          "8": [
-            "#F7FBFF", 
-            "#DBE9F6", 
-            "#BBD6EB", 
-            "#89BEDC", 
-            "#559ECD", 
-            "#2C7ABA", 
-            "#0D55A0", 
-            "#08306B"
-          ], 
-          "9": [
-            "#F7FBFF", 
-            "#DEEBF7", 
-            "#C6DBEF", 
+            "#BDD7E7", 
             "#9ECAE1", 
             "#6BAED6", 
             "#4292C6", 
@@ -9018,29 +8961,50 @@ OTHER_ELEMENTS = [
             "#08519C", 
             "#08306B"
           ], 
+          "8": [
+            "#BDD7E7", 
+            "#A3CCE2", 
+            "#7BB6D9", 
+            "#559ECD", 
+            "#3684BF", 
+            "#1C68AE", 
+            "#084C95", 
+            "#08306B"
+          ], 
+          "9": [
+            "#BDD7E7", 
+            "#A6CDE3", 
+            "#86BCDC", 
+            "#62A7D2", 
+            "#4292C6", 
+            "#2B79B9", 
+            "#1761A8", 
+            "#09498F", 
+            "#08306B"
+          ], 
           "10": [
-            "#F7FBFF", 
-            "#E1EDF8", 
-            "#CBDFF1", 
-            "#ACD0E6", 
-            "#83BADB", 
-            "#5AA1CF", 
+            "#BDD7E7", 
+            "#A9CEE3", 
+            "#8EC1DD", 
+            "#6BAED6", 
+            "#519BCB", 
             "#3987C0", 
-            "#1D6AAF", 
-            "#084D96", 
+            "#2171B5", 
+            "#135BA4", 
+            "#09468B", 
             "#08306B"
           ], 
           "11": [
-            "#F7FBFF", 
-            "#E3EEF9", 
-            "#D0E1F2", 
-            "#B6D4E9", 
+            "#BDD7E7", 
+            "#ABCFE3", 
             "#94C4DF", 
-            "#6BAED6", 
-            "#4B98C9", 
+            "#76B4D8", 
+            "#5CA3D0", 
+            "#4292C6", 
             "#307EBC", 
-            "#1964AB", 
-            "#084A92", 
+            "#1D6AB0", 
+            "#0F57A1", 
+            "#094388", 
             "#08306B"
           ]
         }, 
@@ -9053,84 +9017,84 @@ OTHER_ELEMENTS = [
         "source": "NOAA GOES-R Advanced Baseline Imager (ABI)", 
         "classes": {
           "3": [
-            "#FFFFFF", 
-            "#333333", 
+            "#B0D0E8", 
+            "#0000FF", 
             "#FF0000"
           ], 
           "4": [
-            "#FFFFFF", 
-            "#777777", 
-            "#766EC5", 
-            "#FF0000"
-          ], 
-          "5": [
-            "#FFFFFF", 
-            "#999999", 
-            "#333333", 
+            "#B0D0E8", 
+            "#444444", 
             "#00FF00", 
             "#FF0000"
           ], 
+          "5": [
+            "#B0D0E8", 
+            "#656565", 
+            "#0000FF", 
+            "#AEFF00", 
+            "#FF0000"
+          ], 
           "6": [
-            "#FFFFFF", 
-            "#ADADAD", 
-            "#5B5B5B", 
-            "#371BD3", 
-            "#9BFF00", 
+            "#B0D0E8", 
+            "#7A7A7A", 
+            "#50378B", 
+            "#7CA993", 
+            "#E1FF00", 
             "#FF0000"
           ], 
           "7": [
-            "#FFFFFF", 
-            "#BBBBBB", 
-            "#777777", 
-            "#333333", 
-            "#766EC5", 
-            "#CBFF00", 
-            "#FF0000"
-          ], 
-          "8": [
-            "#FFFFFF", 
-            "#C5C5C5", 
-            "#8A8A8A", 
-            "#4F4F4F", 
-            "#4327A2", 
-            "#73C27A", 
-            "#E9FF00", 
-            "#FF0000"
-          ], 
-          "9": [
-            "#FFFFFF", 
-            "#CCCCCC", 
-            "#999999", 
-            "#666666", 
-            "#333333", 
+            "#B0D0E8", 
+            "#888888", 
+            "#444444", 
             "#0000FF", 
             "#00FF00", 
             "#FFFF00", 
             "#FF0000"
           ], 
+          "8": [
+            "#B0D0E8", 
+            "#8E9295", 
+            "#575757", 
+            "#4D2FAB", 
+            "#7C84B3", 
+            "#82FF00", 
+            "#FFE500", 
+            "#FF0000"
+          ], 
+          "9": [
+            "#B0D0E8", 
+            "#92999F", 
+            "#656565", 
+            "#4E3D70", 
+            "#0000FF", 
+            "#6FC972", 
+            "#AEFF00", 
+            "#FFD100", 
+            "#FF0000"
+          ], 
           "10": [
-            "#FFFFFF", 
-            "#D2D2D2", 
-            "#A4A4A4", 
-            "#777777", 
-            "#494949", 
-            "#442C88", 
+            "#B0D0E8", 
+            "#969FA7", 
+            "#707070", 
+            "#444444", 
+            "#4929BD", 
             "#766EC5", 
-            "#73FF00", 
-            "#FFEB00", 
+            "#00FF00", 
+            "#CBFF00", 
+            "#FFC200", 
             "#FF0000"
           ], 
           "11": [
-            "#FFFFFF", 
-            "#D6D6D6", 
-            "#ADADAD", 
-            "#848484", 
-            "#5B5B5B", 
-            "#333333", 
-            "#371BD3", 
+            "#B0D0E8", 
+            "#99A4AD", 
+            "#7A7A7A", 
+            "#515151", 
+            "#50378B", 
+            "#0000FF", 
             "#7CA993", 
-            "#9BFF00", 
-            "#FFDB00", 
+            "#6DFF00", 
+            "#E1FF00", 
+            "#FFB500", 
             "#FF0000"
           ]
         }, 
@@ -9143,53 +9107,32 @@ OTHER_ELEMENTS = [
         "source": "NASA MODIS Cloud Optical Properties", 
         "classes": {
           "3": [
-            "#F7FCF0", 
-            "#7BCCC4", 
+            "#CCEBC5", 
+            "#4EB3D3", 
             "#084081"
           ], 
           "4": [
-            "#F7FCF0", 
-            "#B4E2BA", 
-            "#44A6CC", 
-            "#084081"
-          ], 
-          "5": [
-            "#F7FCF0", 
             "#CCEBC5", 
             "#7BCCC4", 
             "#2B8CBE", 
             "#084081"
           ], 
+          "5": [
+            "#CCEBC5", 
+            "#93D4BD", 
+            "#4EB3D3", 
+            "#1E7AB5", 
+            "#084081"
+          ], 
           "6": [
-            "#F7FCF0", 
-            "#D4EECE", 
+            "#CCEBC5", 
             "#A0DAB8", 
-            "#59B8D0", 
-            "#217DB7", 
+            "#6CC2CA", 
+            "#3B9BC6", 
+            "#136FB0", 
             "#084081"
           ], 
           "7": [
-            "#F7FCF0", 
-            "#D9F0D4", 
-            "#B4E2BA", 
-            "#7BCCC4", 
-            "#44A6CC", 
-            "#1974B2", 
-            "#084081"
-          ], 
-          "8": [
-            "#F7FCF0", 
-            "#DDF2D8", 
-            "#C2E7C0", 
-            "#96D6BC", 
-            "#64BECD", 
-            "#3697C4", 
-            "#116DAF", 
-            "#084081"
-          ], 
-          "9": [
-            "#F7FCF0", 
-            "#E0F3DB", 
             "#CCEBC5", 
             "#A8DDB5", 
             "#7BCCC4", 
@@ -9198,29 +9141,50 @@ OTHER_ELEMENTS = [
             "#0868AC", 
             "#084081"
           ], 
+          "8": [
+            "#CCEBC5", 
+            "#ADDFB7", 
+            "#89D1C0", 
+            "#64BECD", 
+            "#40A2CA", 
+            "#2482B9", 
+            "#0962A6", 
+            "#084081"
+          ], 
+          "9": [
+            "#CCEBC5", 
+            "#B1E1B9", 
+            "#93D4BD", 
+            "#72C6C8", 
+            "#4EB3D3", 
+            "#3596C3", 
+            "#1E7AB5", 
+            "#095EA1", 
+            "#084081"
+          ], 
           "10": [
-            "#F7FCF0", 
-            "#E3F4DD", 
-            "#D0EDCA", 
+            "#CCEBC5", 
             "#B4E2BA", 
-            "#90D4BD", 
-            "#6AC1CB", 
+            "#9AD7BA", 
+            "#7BCCC4", 
+            "#60BBCE", 
             "#44A6CC", 
-            "#2684BA", 
-            "#0963A7", 
+            "#2B8CBE", 
+            "#1974B2", 
+            "#095A9D", 
             "#084081"
           ], 
           "11": [
-            "#F7FCF0", 
-            "#E5F5DF", 
-            "#D4EECE", 
-            "#BEE5BF", 
+            "#CCEBC5", 
+            "#B7E3BB", 
             "#A0DAB8", 
-            "#7BCCC4", 
-            "#59B8D0", 
+            "#85CFC1", 
+            "#6CC2CA", 
+            "#4EB3D3", 
             "#3B9BC6", 
-            "#217DB7", 
-            "#0960A3", 
+            "#2685BA", 
+            "#136FB0", 
+            "#0A589B", 
             "#084081"
           ]
         }, 
@@ -9233,84 +9197,84 @@ OTHER_ELEMENTS = [
         "source": "Aviation Weather Center Ceiling & Fog Hazard", 
         "classes": {
           "3": [
-            "#F8F9F9", 
-            "#C0C5CA", 
+            "#C5CBD0", 
+            "#8E99A2", 
             "#566573"
           ], 
           "4": [
-            "#F8F9F9", 
-            "#DCDFE2", 
-            "#9CA5AA", 
+            "#C5CBD0", 
+            "#A1AAB1", 
+            "#849094", 
             "#566573"
           ], 
           "5": [
-            "#F8F9F9", 
-            "#E5E8EA", 
-            "#C0C5CA", 
-            "#8A9598", 
+            "#C5CBD0", 
+            "#ABB2B9", 
+            "#8E99A2", 
+            "#7F8C8D", 
             "#566573"
           ], 
           "6": [
-            "#F8F9F9", 
-            "#EBEDEF", 
-            "#D5D8DC", 
-            "#ABB2B9", 
-            "#7F8C8D", 
+            "#C5CBD0", 
+            "#B0B7BE", 
+            "#9AA3AB", 
+            "#88949A", 
+            "#778488", 
             "#566573"
           ], 
           "7": [
-            "#F8F9F9", 
-            "#EDEFF1", 
-            "#DCDFE2", 
-            "#C0C5CA", 
-            "#9CA5AA", 
-            "#788589", 
+            "#C5CBD0", 
+            "#B4BAC1", 
+            "#A1AAB1", 
+            "#8E99A2", 
+            "#849094", 
+            "#717F84", 
             "#566573"
           ], 
           "8": [
-            "#F8F9F9", 
-            "#EFF0F2", 
-            "#E2E4E7", 
-            "#CFD2D7", 
-            "#B1B7BE", 
-            "#929CA0", 
-            "#738186", 
+            "#C5CBD0", 
+            "#B6BDC3", 
+            "#A7AEB6", 
+            "#96A0A9", 
+            "#8A959C", 
+            "#818E90", 
+            "#6D7B82", 
             "#566573"
           ], 
           "9": [
-            "#F8F9F9", 
-            "#F0F1F3", 
-            "#E5E8EA", 
-            "#D8DBDE", 
-            "#C0C5CA", 
-            "#A5ADB3", 
-            "#8A9598", 
-            "#707D83", 
+            "#C5CBD0", 
+            "#B8BEC4", 
+            "#ABB2B9", 
+            "#9CA5AD", 
+            "#8E99A2", 
+            "#869297", 
+            "#7F8C8D", 
+            "#6A7880", 
             "#566573"
           ], 
           "10": [
-            "#F8F9F9", 
-            "#F1F2F3", 
-            "#E9EBED", 
-            "#DCDFE2", 
-            "#CCCFD4", 
-            "#B4BAC1", 
-            "#9CA5AA", 
-            "#849092", 
-            "#6D7A81", 
+            "#C5CBD0", 
+            "#B9C0C6", 
+            "#AEB5BC", 
+            "#A1AAB1", 
+            "#949EA7", 
+            "#8B969D", 
+            "#849094", 
+            "#7A888A", 
+            "#68767E", 
             "#566573"
           ], 
           "11": [
-            "#F8F9F9", 
-            "#F1F3F4", 
-            "#EBEDEF", 
-            "#E0E2E5", 
-            "#D5D8DC", 
-            "#C0C5CA", 
-            "#ABB2B9", 
-            "#959FA3", 
-            "#7F8C8D", 
-            "#6A7880", 
+            "#C5CBD0", 
+            "#BBC1C7", 
+            "#B0B7BE", 
+            "#A5ADB4", 
+            "#9AA3AB", 
+            "#8E99A2", 
+            "#88949A", 
+            "#828F91", 
+            "#778488", 
+            "#66747D", 
             "#566573"
           ]
         }, 
@@ -9325,20 +9289,20 @@ OTHER_ELEMENTS = [
           "3": [
             "#000080", 
             "#FFFF00", 
-            "#FFFFFF"
+            "#4A004A"
           ], 
           "4": [
             "#000080", 
             "#4FE97C", 
             "#FF6500", 
-            "#FFFFFF"
+            "#4A004A"
           ], 
           "5": [
             "#000080", 
             "#00BFFF", 
             "#FFFF00", 
             "#FF0000", 
-            "#FFFFFF"
+            "#4A004A"
           ], 
           "6": [
             "#000080", 
@@ -9346,7 +9310,7 @@ OTHER_ELEMENTS = [
             "#6DFF00", 
             "#FF9B00", 
             "#D10042", 
-            "#FFFFFF"
+            "#4A004A"
           ], 
           "7": [
             "#000080", 
@@ -9355,7 +9319,7 @@ OTHER_ELEMENTS = [
             "#FFFF00", 
             "#FF6500", 
             "#B1005E", 
-            "#FFFFFF"
+            "#4A004A"
           ], 
           "8": [
             "#000080", 
@@ -9365,7 +9329,7 @@ OTHER_ELEMENTS = [
             "#FFB800", 
             "#FF4000", 
             "#960071", 
-            "#FFFFFF"
+            "#4A004A"
           ], 
           "9": [
             "#000080", 
@@ -9376,7 +9340,7 @@ OTHER_ELEMENTS = [
             "#FF7F00", 
             "#FF0000", 
             "#800080", 
-            "#FFFFFF"
+            "#4A004A"
           ], 
           "10": [
             "#000080", 
@@ -9387,8 +9351,8 @@ OTHER_ELEMENTS = [
             "#FFC800", 
             "#FF6500", 
             "#E6002D", 
-            "#902F8E", 
-            "#FFFFFF"
+            "#7A007A", 
+            "#4A004A"
           ], 
           "11": [
             "#000080", 
@@ -9400,8 +9364,8 @@ OTHER_ELEMENTS = [
             "#FF9B00", 
             "#FF4D00", 
             "#D10042", 
-            "#9C4699", 
-            "#FFFFFF"
+            "#750075", 
+            "#4A004A"
           ]
         }, 
         "name_en": "Overshooting Tops & Hailstorms", 
@@ -9503,84 +9467,84 @@ OTHER_ELEMENTS = [
         "source": "Cirrus Cloud Radiation & Cryosphere Climatology", 
         "classes": {
           "3": [
-            "#F7FBFF", 
-            "#6BAED6", 
+            "#BDD7E7", 
+            "#4C8FC6", 
             "#08306B"
           ], 
           "4": [
-            "#F7FBFF", 
-            "#AACCE7", 
-            "#4085C0", 
-            "#08306B"
-          ], 
-          "5": [
-            "#F7FBFF", 
-            "#C6DBEF", 
+            "#BDD7E7", 
             "#6BAED6", 
             "#2171B5", 
             "#08306B"
           ], 
+          "5": [
+            "#BDD7E7", 
+            "#82B8DA", 
+            "#4C8FC6", 
+            "#1C60A2", 
+            "#08306B"
+          ], 
           "6": [
-            "#F7FBFF", 
-            "#D0E1F2", 
-            "#92C0E0", 
-            "#5295C9", 
-            "#1D63A6", 
+            "#BDD7E7", 
+            "#8EBEDD", 
+            "#5FA1CF", 
+            "#357DBC", 
+            "#185697", 
             "#08306B"
           ], 
           "7": [
-            "#F7FBFF", 
-            "#D6E6F4", 
-            "#AACCE7", 
-            "#6BAED6", 
-            "#4085C0", 
-            "#1A5A9C", 
-            "#08306B"
-          ], 
-          "8": [
-            "#F7FBFF", 
-            "#DBE9F6", 
-            "#BAD4EB", 
-            "#87BBDD", 
-            "#5A9CCD", 
-            "#3079BA", 
-            "#185494", 
-            "#08306B"
-          ], 
-          "9": [
-            "#F7FBFF", 
-            "#DFEBF7", 
-            "#C6DBEF", 
-            "#9BC4E3", 
+            "#BDD7E7", 
+            "#96C2DF", 
             "#6BAED6", 
             "#4C8FC6", 
             "#2171B5", 
             "#164F8F", 
             "#08306B"
           ], 
+          "8": [
+            "#BDD7E7", 
+            "#9CC5E0", 
+            "#78B4D8", 
+            "#5A9CCD", 
+            "#3C82BE", 
+            "#1E67AA", 
+            "#144B8A", 
+            "#08306B"
+          ], 
+          "9": [
+            "#BDD7E7", 
+            "#A0C7E1", 
+            "#82B8DA", 
+            "#64A6D2", 
+            "#4C8FC6", 
+            "#2E78B9", 
+            "#1C60A2", 
+            "#134786", 
+            "#08306B"
+          ], 
           "10": [
-            "#F7FBFF", 
-            "#E1EDF8", 
-            "#CBDFF1", 
-            "#AACCE7", 
-            "#81B8DC", 
-            "#5EA0CF", 
+            "#BDD7E7", 
+            "#A4C9E1", 
+            "#89BBDC", 
+            "#6BAED6", 
+            "#5799CB", 
             "#4085C0", 
-            "#1F69AC", 
-            "#144C8B", 
+            "#2171B5", 
+            "#1A5A9C", 
+            "#124583", 
             "#08306B"
           ], 
           "11": [
-            "#F7FBFF", 
-            "#E4EEF9", 
-            "#D0E1F2", 
-            "#B5D2EA", 
-            "#92C0E0", 
-            "#6BAED6", 
-            "#5295C9", 
+            "#BDD7E7", 
+            "#A6CBE2", 
+            "#8EBEDD", 
+            "#74B2D8", 
+            "#5FA1CF", 
+            "#4C8FC6", 
             "#357DBC", 
-            "#1D63A6", 
-            "#134988", 
+            "#1F6AAD", 
+            "#185697", 
+            "#114380", 
             "#08306B"
           ]
         }, 
@@ -9691,7 +9655,7 @@ OTHER_ELEMENTS = [
         "classes": {
           "3": [
             "#D6604D", 
-            "#F7F7F7", 
+            "#FFFFBF", 
             "#2166AC"
           ], 
           "4": [
@@ -9703,7 +9667,7 @@ OTHER_ELEMENTS = [
           "5": [
             "#67001F", 
             "#F4A582", 
-            "#F7F7F7", 
+            "#FFFFBF", 
             "#92C5DE", 
             "#053061"
           ], 
@@ -9719,7 +9683,7 @@ OTHER_ELEMENTS = [
             "#67001F", 
             "#C4413C", 
             "#F4A582", 
-            "#F7F7F7", 
+            "#FFFFBF", 
             "#92C5DE", 
             "#347CB8", 
             "#053061"
@@ -9739,7 +9703,7 @@ OTHER_ELEMENTS = [
             "#B2182B", 
             "#D6604D", 
             "#F4A582", 
-            "#F7F7F7", 
+            "#FFFFBF", 
             "#92C5DE", 
             "#4393C3", 
             "#2166AC", 
@@ -9763,7 +9727,7 @@ OTHER_ELEMENTS = [
             "#C4413C", 
             "#DE725A", 
             "#F4A582", 
-            "#F7F7F7", 
+            "#FFFFBF", 
             "#92C5DE", 
             "#5A9FCA", 
             "#347CB8", 
@@ -10051,7 +10015,7 @@ OTHER_ELEMENTS = [
         "classes": {
           "3": [
             "#35978F", 
-            "#F5F5F5", 
+            "#F6E8C3", 
             "#8C510A"
           ], 
           "4": [
@@ -10063,7 +10027,7 @@ OTHER_ELEMENTS = [
           "5": [
             "#01665E", 
             "#80CDC1", 
-            "#F5F5F5", 
+            "#F6E8C3", 
             "#DFC27D", 
             "#543005"
           ], 
@@ -10079,7 +10043,7 @@ OTHER_ELEMENTS = [
             "#01665E", 
             "#35978F", 
             "#80CDC1", 
-            "#F5F5F5", 
+            "#F6E8C3", 
             "#DFC27D", 
             "#A5691C", 
             "#543005"
@@ -10099,7 +10063,7 @@ OTHER_ELEMENTS = [
             "#27867E", 
             "#50A99F", 
             "#80CDC1", 
-            "#F5F5F5", 
+            "#F6E8C3", 
             "#DFC27D", 
             "#BF812D", 
             "#8C510A", 
@@ -10123,7 +10087,7 @@ OTHER_ELEMENTS = [
             "#35978F", 
             "#5CB2A8", 
             "#80CDC1", 
-            "#F5F5F5", 
+            "#F6E8C3", 
             "#DFC27D", 
             "#C89142", 
             "#A5691C", 
@@ -10141,7 +10105,7 @@ OTHER_ELEMENTS = [
         "classes": {
           "3": [
             "#BF812D", 
-            "#F5F5F5", 
+            "#F6E8C3", 
             "#80CDC1"
           ], 
           "4": [
@@ -10153,7 +10117,7 @@ OTHER_ELEMENTS = [
           "5": [
             "#8C510A", 
             "#DFC27D", 
-            "#F5F5F5", 
+            "#F6E8C3", 
             "#C7EAE5", 
             "#01665E"
           ], 
@@ -10169,7 +10133,7 @@ OTHER_ELEMENTS = [
             "#8C510A", 
             "#BF812D", 
             "#DFC27D", 
-            "#F5F5F5", 
+            "#F6E8C3", 
             "#C7EAE5", 
             "#80CDC1", 
             "#01665E"
@@ -10189,7 +10153,7 @@ OTHER_ELEMENTS = [
             "#AE7122", 
             "#CB9648", 
             "#DFC27D", 
-            "#F5F5F5", 
+            "#F6E8C3", 
             "#C7EAE5", 
             "#99D7CD", 
             "#5BA99F", 
@@ -10213,7 +10177,7 @@ OTHER_ELEMENTS = [
             "#BF812D", 
             "#D0A155", 
             "#DFC27D", 
-            "#F5F5F5", 
+            "#F6E8C3", 
             "#C7EAE5", 
             "#A4DCD3", 
             "#80CDC1", 
@@ -10321,7 +10285,7 @@ OTHER_ELEMENTS = [
         "classes": {
           "3": [
             "#DFC27D", 
-            "#F5F5F5", 
+            "#F6E8C3", 
             "#01665E"
           ], 
           "4": [
@@ -10333,7 +10297,7 @@ OTHER_ELEMENTS = [
           "5": [
             "#8C510A", 
             "#DFC27D", 
-            "#F5F5F5", 
+            "#F6E8C3", 
             "#80CDC1", 
             "#003C30"
           ], 
@@ -10349,7 +10313,7 @@ OTHER_ELEMENTS = [
             "#8C510A", 
             "#B78845", 
             "#DFC27D", 
-            "#F5F5F5", 
+            "#F6E8C3", 
             "#80CDC1", 
             "#01665E", 
             "#003C30"
@@ -10369,7 +10333,7 @@ OTHER_ELEMENTS = [
             "#A97532", 
             "#C49B57", 
             "#DFC27D", 
-            "#F5F5F5", 
+            "#F6E8C3", 
             "#80CDC1", 
             "#36877E", 
             "#01584E", 
@@ -10393,7 +10357,7 @@ OTHER_ELEMENTS = [
             "#B78845", 
             "#CBA560", 
             "#DFC27D", 
-            "#F5F5F5", 
+            "#F6E8C3", 
             "#80CDC1", 
             "#49988E", 
             "#01665E", 
@@ -10508,7 +10472,7 @@ OTHER_ELEMENTS = [
         "classes": {
           "3": [
             "#6BAED6", 
-            "#F7F7F7", 
+            "#FFFFBF", 
             "#CB181D"
           ], 
           "4": [
@@ -10520,7 +10484,7 @@ OTHER_ELEMENTS = [
           "5": [
             "#08306B", 
             "#BDD7E7", 
-            "#F7F7F7", 
+            "#FFFFBF", 
             "#FCAE91", 
             "#67000D"
           ], 
@@ -10536,7 +10500,7 @@ OTHER_ELEMENTS = [
             "#08306B", 
             "#4C8FC6", 
             "#BDD7E7", 
-            "#F7F7F7", 
+            "#FFFFBF", 
             "#FCAE91", 
             "#E34733", 
             "#67000D"
@@ -10556,7 +10520,7 @@ OTHER_ELEMENTS = [
             "#2171B5", 
             "#6BAED6", 
             "#BDD7E7", 
-            "#F7F7F7", 
+            "#FFFFBF", 
             "#FCAE91", 
             "#FB6A4A", 
             "#CB181D", 
@@ -10580,7 +10544,7 @@ OTHER_ELEMENTS = [
             "#4C8FC6", 
             "#82B8DA", 
             "#BDD7E7", 
-            "#F7F7F7", 
+            "#FFFFBF", 
             "#FCAE91", 
             "#FD7C5B", 
             "#E34733", 
@@ -10598,7 +10562,7 @@ OTHER_ELEMENTS = [
         "classes": {
           "3": [
             "#4393C3", 
-            "#FFFFE5", 
+            "#FFFFBF", 
             "#F46D43"
           ], 
           "4": [
@@ -10610,7 +10574,7 @@ OTHER_ELEMENTS = [
           "5": [
             "#053061", 
             "#92C5DE", 
-            "#FFFFE5", 
+            "#FFFFBF", 
             "#FEE090", 
             "#A50026"
           ], 
@@ -10626,7 +10590,7 @@ OTHER_ELEMENTS = [
             "#053061", 
             "#347CB8", 
             "#92C5DE", 
-            "#FFFFE5", 
+            "#FFFFBF", 
             "#FEE090", 
             "#F46D43", 
             "#A50026"
@@ -10646,7 +10610,7 @@ OTHER_ELEMENTS = [
             "#2166AC", 
             "#4393C3", 
             "#92C5DE", 
-            "#FFFFE5", 
+            "#FFFFBF", 
             "#FEE090", 
             "#FB9957", 
             "#E14730", 
@@ -10670,7 +10634,7 @@ OTHER_ELEMENTS = [
             "#347CB8", 
             "#5A9FCA", 
             "#92C5DE", 
-            "#FFFFE5", 
+            "#FFFFBF", 
             "#FEE090", 
             "#FDAE61", 
             "#F46D43", 
@@ -10688,7 +10652,7 @@ OTHER_ELEMENTS = [
         "classes": {
           "3": [
             "#BF812D", 
-            "#F5F5F5", 
+            "#F6E8C3", 
             "#01665E"
           ], 
           "4": [
@@ -10700,7 +10664,7 @@ OTHER_ELEMENTS = [
           "5": [
             "#543005", 
             "#DFC27D", 
-            "#F5F5F5", 
+            "#F6E8C3", 
             "#80CDC1", 
             "#003C30"
           ], 
@@ -10716,7 +10680,7 @@ OTHER_ELEMENTS = [
             "#543005", 
             "#A5691C", 
             "#DFC27D", 
-            "#F5F5F5", 
+            "#F6E8C3", 
             "#80CDC1", 
             "#1F7E76", 
             "#003C30"
@@ -10736,7 +10700,7 @@ OTHER_ELEMENTS = [
             "#8C510A", 
             "#BF812D", 
             "#DFC27D", 
-            "#F5F5F5", 
+            "#F6E8C3", 
             "#80CDC1", 
             "#35978F", 
             "#01665E", 
@@ -10760,7 +10724,7 @@ OTHER_ELEMENTS = [
             "#A5691C", 
             "#C89142", 
             "#DFC27D", 
-            "#F5F5F5", 
+            "#F6E8C3", 
             "#80CDC1", 
             "#4AA49B", 
             "#1F7E76", 
@@ -11138,7 +11102,7 @@ OTHER_ELEMENTS = [
         "classes": {
           "3": [
             "#DFC27D", 
-            "#F5F5F5", 
+            "#F6E8C3", 
             "#018571"
           ], 
           "4": [
@@ -11150,7 +11114,7 @@ OTHER_ELEMENTS = [
           "5": [
             "#A6611A", 
             "#DFC27D", 
-            "#F5F5F5", 
+            "#F6E8C3", 
             "#80CDC1", 
             "#003C30"
           ], 
@@ -11166,7 +11130,7 @@ OTHER_ELEMENTS = [
             "#A6611A", 
             "#C4914C", 
             "#DFC27D", 
-            "#F5F5F5", 
+            "#F6E8C3", 
             "#80CDC1", 
             "#018571", 
             "#003C30"
@@ -11186,7 +11150,7 @@ OTHER_ELEMENTS = [
             "#BA813B", 
             "#CDA15C", 
             "#DFC27D", 
-            "#F5F5F5", 
+            "#F6E8C3", 
             "#80CDC1", 
             "#3C9D8B", 
             "#016C5A", 
@@ -11210,7 +11174,7 @@ OTHER_ELEMENTS = [
             "#C4914C", 
             "#D2A964", 
             "#DFC27D", 
-            "#F5F5F5", 
+            "#F6E8C3", 
             "#80CDC1", 
             "#4EA898", 
             "#018571", 
@@ -11227,33 +11191,24 @@ OTHER_ELEMENTS = [
         "source": "Energy Climatology Heating & Cooling Degree Days", 
         "classes": {
           "3": [
-            "#EFF3FF", 
-            "#3182BD", 
+            "#BDD7E7", 
+            "#2169AC", 
             "#BD0026"
           ], 
           "4": [
-            "#EFF3FF", 
-            "#6BAED6", 
-            "#08519C", 
+            "#BDD7E7", 
+            "#4790C5", 
+            "#885379", 
             "#BD0026"
           ], 
           "5": [
-            "#EFF3FF", 
-            "#96C2DF", 
-            "#3182BD", 
-            "#A95367", 
+            "#BDD7E7", 
+            "#5EA3D0", 
+            "#2169AC", 
+            "#D4524B", 
             "#BD0026"
           ], 
           "6": [
-            "#EFF3FF", 
-            "#AECFE4", 
-            "#569CCC", 
-            "#1E64A9", 
-            "#DC5245", 
-            "#BD0026"
-          ], 
-          "7": [
-            "#EFF3FF", 
             "#BDD7E7", 
             "#6BAED6", 
             "#3182BD", 
@@ -11261,50 +11216,59 @@ OTHER_ELEMENTS = [
             "#FC4E2A", 
             "#BD0026"
           ], 
+          "7": [
+            "#BDD7E7", 
+            "#7AB5D9", 
+            "#4790C5", 
+            "#2169AC", 
+            "#885379", 
+            "#F1452A", 
+            "#BD0026"
+          ], 
           "8": [
-            "#EFF3FF", 
-            "#C4DBEA", 
+            "#BDD7E7", 
             "#85BADB", 
-            "#4D95C8", 
-            "#246DAF", 
-            "#7E537E", 
-            "#F3462A", 
+            "#559BCB", 
+            "#2D7BB8", 
+            "#1258A1", 
+            "#B5535F", 
+            "#EA3E29", 
             "#BD0026"
           ], 
           "9": [
-            "#EFF3FF", 
-            "#CADEED", 
-            "#96C2DF", 
+            "#BDD7E7", 
+            "#8CBDDC", 
             "#5EA3D0", 
-            "#3182BD", 
-            "#175DA4", 
-            "#A95367", 
-            "#EC4029", 
+            "#3A87C0", 
+            "#2169AC", 
+            "#53528F", 
+            "#D4524B", 
+            "#E43829", 
             "#BD0026"
           ], 
           "10": [
-            "#EFF3FF", 
-            "#CEE0EF", 
-            "#A4C9E1", 
-            "#6BAED6", 
+            "#BDD7E7", 
+            "#92C0DE", 
+            "#65A9D3", 
             "#4790C5", 
-            "#2771B2", 
-            "#08519C", 
-            "#C65355", 
-            "#E73B29", 
+            "#2B77B6", 
+            "#165CA3", 
+            "#885379", 
+            "#EA503A", 
+            "#E03429", 
             "#BD0026"
           ], 
           "11": [
-            "#EFF3FF", 
-            "#D1E2F1", 
-            "#AECFE4", 
-            "#7DB6D9", 
-            "#569CCC", 
+            "#BDD7E7", 
+            "#96C2DF", 
+            "#6BAED6", 
+            "#5198C9", 
             "#3182BD", 
-            "#1E64A9", 
-            "#695387", 
-            "#DC5245", 
-            "#E33729", 
+            "#2169AC", 
+            "#08519C", 
+            "#A95367", 
+            "#FC4E2A", 
+            "#DC3029", 
             "#BD0026"
           ]
         }, 

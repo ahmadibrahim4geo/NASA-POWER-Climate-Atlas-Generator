@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Targeted regression: _interpolate_all with the NEW signature (no depth)
-on tiny data, UV module (5 fast rasters incl. display + lyr + sidecar)."""
+on tiny data, UV module (5 fast rasters incl. classified display, no .lyr)."""
 import os
 import shutil
 import sys
@@ -32,16 +32,17 @@ with arcpy.da.InsertCursor(mini, ["SHAPE@XY", "UV_Annual_Mean", "UV_Winter_Mean"
 arcpy.CheckOutExtension("Spatial")
 try:
     reg = tool._interpolate_all(mini, ["UV Index"], paths, 0.5, "IDW", None,
-                                msgs.append, msgs.append)
+                                msgs.append, msgs.append,
+                                reclass_opts={"enable": True, "nclass": 5,
+                                              "method": "Natural Breaks (Jenks)"})
     print("registry: %d" % len(reg))
     assert len(reg) == 5, len(reg)
     for (f, rp, lp, m, c, n) in reg:
         assert os.path.isfile(rp), rp
-        assert os.path.isfile(lp), lp
-        assert os.path.isfile(lp + ".json"), lp
+        assert lp is None, lp
         assert os.path.isfile(os.path.join(os.path.dirname(rp), f + "_cls.tif")), f
-        assert os.path.isfile(os.path.join(os.path.dirname(os.path.dirname(rp)), "Layers", f + ".clr")), f
-    print("ALL RASTERS+DISPLAY+LYR OK")
+        assert os.path.isfile(os.path.join(os.path.dirname(rp), f + ".clr")), f
+    print("ALL RASTERS+DISPLAY OK (no .lyr)")
 finally:
     arcpy.CheckInExtension("Spatial")
 shutil.rmtree(OUT, ignore_errors=True)

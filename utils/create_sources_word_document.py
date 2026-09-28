@@ -19,7 +19,7 @@ from docx.enum.table import WD_TABLE_ALIGNMENT, WD_ALIGN_VERTICAL
 from docx.oxml import OxmlElement, parse_xml
 from docx.oxml.ns import qn, nsdecls
 
-BASE_DIR = r"C:\Users\ahmad\Desktop\NASA POWER Climate Atlas Generator"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STYLE_DIR = os.path.join(BASE_DIR, "style")
 SOURCES_DIR = os.path.join(STYLE_DIR, "Source_of_Style_and_Color")
 DOCX_PATH = os.path.join(SOURCES_DIR, "Climate_Styles_Sources_and_References.docx")

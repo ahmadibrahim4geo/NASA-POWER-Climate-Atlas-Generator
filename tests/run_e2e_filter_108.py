@@ -108,9 +108,9 @@ try:
     assert "R_Summer_Total" in p_fields, "R_Summer_Total missing"
     assert "R_Winter_Total" not in p_fields, "R_Winter_Total should have been filtered out!"
 
-    # Verify Rasters generated: exactly 4 rasters
-    t_rasters = os.listdir(os.path.join(OUT, "01_Temperature", "Rasters"))
-    p_rasters = os.listdir(os.path.join(OUT, "02_Precipitation", "Rasters"))
+    # Verify Rasters generated directly inside each element folder: exactly 4 rasters
+    t_rasters = os.listdir(os.path.join(OUT, "01_Temperature"))
+    p_rasters = os.listdir(os.path.join(OUT, "02_Precipitation"))
     log("Temperature Rasters: %s" % t_rasters)
     log("Precipitation Rasters: %s" % p_rasters)
     
