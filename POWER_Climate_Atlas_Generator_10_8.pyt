@@ -40,6 +40,47 @@ import datetime as _dt
 
 PY27 = sys.version_info[0] == 2
 
+# Python 2/3 compat aliases (RHS only evaluated in the taken branch, so no NameError).
+if PY27:
+    _text_type = unicode  # noqa: F821 - Python 2 only
+    _binary_type = str
+else:
+    _text_type = str
+    _binary_type = bytes
+
+
+def _excel_text(v):
+    """Return text suitable for xlwt on both Python 2 (unicode) and 3 (str)."""
+    if v is None:
+        return ""
+    if PY27:
+        try:
+            if isinstance(v, _text_type):
+                return v
+            if isinstance(v, _binary_type):
+                try:
+                    return v.decode("utf-8")
+                except Exception:
+                    return v
+            return _text_type(v)
+        except Exception:
+            try:
+                return str(v)
+            except Exception:
+                return ""
+    else:
+        if isinstance(v, str):
+            return v
+        if isinstance(v, bytes):
+            try:
+                return v.decode("utf-8")
+            except Exception:
+                return v.decode("utf-8", errors="replace")
+        try:
+            return str(v)
+        except Exception:
+            return ""
+
 try:
     import arcpy
     _HAS_ARCPY = True
@@ -70,6 +111,10 @@ NASA_COMMUNITY = "AG"
 MISSING_SENTINELS = (-999.0, -999, -99.0, -99)
 
 SEASONS = {
+    # Climatological approximation: December of the SAME calendar year.
+    # Strict WMO DJF uses Dec of the previous year + Jan/Feb of the current
+    # year; for multi-year climatological means the difference is negligible,
+    # for single years it can be noticeable (documented, test-verified).
     "Winter": (1, 2, 12),
     "Spring": (3, 4, 5),
     "Summer": (6, 7, 8),
@@ -139,7 +184,7 @@ SUBMODEL_DEPS = {
     "Heat Index / Thermal Stress [Requires: Temperature, Relative Humidity]": {
         "short": "Heat_Index",
         "field": "HI_Summer_Mean",
-        "fields": ["HI_Summer_Mean", "HI_Annual_Mean", "HI_Winter_Mean"],
+        "fields": ["HI_Summer_Mean", "HI_Annual_Mean", "HI_Winter_Mean", "WBGT_Summer_Mean"],
         "modules": ["Temperature", "Relative Humidity"],
         "params": ["T2M", "T2M_MAX", "RH2M"]
     }
@@ -289,7 +334,7 @@ def write_excel_file(path, header, rows, sheet_name="Data", rtl=False):
 
     col_widths = {}
     for col_idx, h in enumerate(header):
-        h_str = unicode(h) if isinstance(h, str) else (h if isinstance(h, unicode) else unicode(str(h)))
+        h_str = _excel_text(h)
         ws.write(0, col_idx, h_str, header_style)
         col_widths[col_idx] = len(h_str)
 
@@ -299,7 +344,7 @@ def write_excel_file(path, header, rows, sheet_name="Data", rtl=False):
             val = cell
             if cell is None:
                 val = ""
-            elif isinstance(cell, str):
+            elif isinstance(cell, _binary_type):
                 try:
                     val = cell.decode("utf-8")
                 except Exception:
@@ -311,7 +356,7 @@ def write_excel_file(path, header, rows, sheet_name="Data", rtl=False):
                     val = round(cell, 3)
 
             ws.write(row_idx + 1, col_idx, val, cur_style)
-            val_len = len(unicode(val)) if val != "" else 0
+            val_len = len(_excel_text(val)) if val != "" else 0
             if val_len > col_widths.get(col_idx, 0):
                 col_widths[col_idx] = val_len
 
@@ -361,7 +406,7 @@ def write_master_excel_workbook(path, sheets_list):
 
         col_widths = {}
         for col_idx, h in enumerate(header):
-            h_str = unicode(h) if isinstance(h, str) else (h if isinstance(h, unicode) else unicode(str(h)))
+            h_str = _excel_text(h)
             ws.write(0, col_idx, h_str, header_style)
             col_widths[col_idx] = len(h_str)
 
@@ -371,7 +416,7 @@ def write_master_excel_workbook(path, sheets_list):
                 val = cell
                 if cell is None:
                     val = ""
-                elif isinstance(cell, str):
+                elif isinstance(cell, _binary_type):
                     try:
                         val = cell.decode("utf-8")
                     except Exception:
@@ -383,7 +428,7 @@ def write_master_excel_workbook(path, sheets_list):
                         val = round(cell, 3)
 
                 ws.write(row_idx + 1, col_idx, val, cur_style)
-                val_len = len(unicode(val)) if val != "" else 0
+                val_len = len(_excel_text(val)) if val != "" else 0
                 if val_len > col_widths.get(col_idx, 0):
                     col_widths[col_idx] = val_len
 
@@ -428,10 +473,24 @@ def safe_mean(values):
     return sum(vals) / len(vals)
 
 
-def safe_sum(values):
+def safe_sum(values, expected=None, min_frac=0.75):
+    """Sum of valid values, or None.
+
+    expected: how many values a complete period should hold (e.g. days in
+        month for daily->monthly precipitation sums). When given, returns
+        None unless at least min_frac of them are valid -- otherwise a
+        partial sum would silently under-report the total (a missing rainy
+        month/day shrinks the annual total with no warning). Without
+        expected, keeps the legacy behavior (sum of whatever is valid)."""
     vals = [float(v) for v in values if not is_missing(v)]
     if not vals:
         return None
+    if expected:
+        try:
+            if len(vals) < float(expected) * float(min_frac):
+                return None
+        except Exception:
+            pass
     return sum(vals)
 
 
@@ -533,11 +592,20 @@ def solar_mj_to_kwh(mj):
     return float(mj) / 3.6
 
 
-def pressure_kpa_to_mbar(v):
-    """Auto-convert: POWER PS/PSL are typically kPa (~80-105). If |v|<200 treat as kPa."""
+def pressure_kpa_to_mbar(v, source_unit="auto"):
+    """Convert pressure to mbar/hPa.
+
+    source_unit: "kPa" forces x10, "hPa"/"mbar"/"mb" keeps as-is,
+        "auto" (default, backward compatible): POWER PS/SLP are typically
+        kPa (~80-105), so |v|<200 is treated as kPa. Prefer an explicit
+        unit whenever the provider documents it."""
     if is_missing(v):
         return None
     f = float(v)
+    if source_unit == "kPa":
+        return f * 10.0
+    if source_unit in ("hPa", "mbar", "mb"):
+        return f
     if abs(f) < 200.0:
         return f * 10.0
     return f
@@ -601,6 +669,38 @@ def humidex_c(t_c, rh):
         rh = 100.0
     e = 6.112 * (10.0 ** ((7.5 * t_c) / (237.7 + t_c))) * (rh / 100.0)
     return t_c + (5.0 / 9.0) * (e - 10.0)
+
+
+def wetbulb_stull_c(t_c, rh):
+    """Psychrometric wet-bulb temperature in C (Stull 2011) from air temp C + RH %.
+
+    Closed-form empirical fit, valid roughly for -20..50 C and RH 5..99%.
+    Returns None when inputs are missing."""
+    if t_c is None or rh is None or is_missing(t_c) or is_missing(rh):
+        return None
+    t_c, rh = float(t_c), float(rh)
+    if rh < 0.0:
+        rh = 0.0
+    if rh > 100.0:
+        rh = 100.0
+    return (t_c * math.atan(0.151977 * math.sqrt(rh + 8.313659))
+            + math.atan(t_c + rh) - math.atan(rh - 1.676331)
+            + 0.00391838 * (rh ** 1.5) * math.atan(0.023101 * rh)
+            - 4.686035)
+
+
+def wbgt_shade_c(t_c, rh):
+    """Simplified outdoor-shade WBGT in C (ISO 7243, no solar load).
+
+    WBGT = 0.7 * Tnwb + 0.3 * Ta with natural wet-bulb via Stull (2011).
+    Needs only air temp C + RH %; wind/solar corrections (Liljegren) not applied.
+    Returns None when inputs are missing."""
+    if t_c is None or rh is None or is_missing(t_c) or is_missing(rh):
+        return None
+    tw = wetbulb_stull_c(t_c, rh)
+    if tw is None:
+        return None
+    return 0.7 * tw + 0.3 * float(t_c)
 
 
 def equal_interval_breaks(vmin, vmax, n=7):
@@ -710,6 +810,11 @@ def launch_calendar_picker(initial_start=None, initial_end=None):
             cmd = [py_exe, script_path, "--start", str(initial_start or "01/01/2024"), "--end", str(initial_end or "31/12/2024")]
             proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             out, err = proc.communicate()
+            if isinstance(out, bytes):
+                try:
+                    out = out.decode("utf-8", errors="replace")
+                except Exception:
+                    out = ""
             if out and "{" in out:
                 data = json.loads(out[out.find("{"):out.rfind("}") + 1])
                 return data
@@ -799,6 +904,32 @@ def thin_points_tolerance(pts, tol_m):
     return kept, dropped
 
 
+def compute_thermal_stress_fields(c_t, c_rh):
+    """Shared Heat Index / Humidex / WBGT aggregation (single source of truth).
+
+    c_t / c_rh: climatological monthly means {1..12: value} (T in C, RH in %).
+    Used by both compute_temperature_fields (Temperature module) and the
+    Climate_Models branch of compute_point_fields (previously copy-pasted).
+    Returns HI_Annual/Summer/Winter_Mean, HI_Annual_Range, WBGT_Summer_Mean."""
+    c_t = c_t or {}
+    c_rh = c_rh or {}
+    hi_m = dict((m, heat_index_c(c_t.get(m), c_rh.get(m))) for m in range(1, 13))
+    hi_vals = [v for v in hi_m.values() if v is not None]
+    hi_sum = [hi_m[m] for m in SEASONS["Summer"] if hi_m.get(m) is not None]
+    hi_win = [humidex_c(c_t.get(m), c_rh.get(m)) for m in SEASONS["Winter"]
+              if c_t.get(m) is not None and c_rh.get(m) is not None]
+    hi_win_vals = [v for v in hi_win if v is not None]
+    wb_m = dict((m, wbgt_shade_c(c_t.get(m), c_rh.get(m))) for m in range(1, 13))
+    wb_sum = [wb_m[m] for m in SEASONS["Summer"] if wb_m.get(m) is not None]
+    return {
+        "HI_Annual_Mean": sum(hi_vals) / len(hi_vals) if hi_vals else None,
+        "HI_Summer_Mean": sum(hi_sum) / len(hi_sum) if hi_sum else None,
+        "HI_Winter_Mean": sum(hi_win_vals) / len(hi_win_vals) if hi_win_vals else None,
+        "HI_Annual_Range": (max(hi_vals) - min(hi_vals)) if len(hi_vals) >= 2 else None,
+        "WBGT_Summer_Mean": sum(wb_sum) / len(wb_sum) if wb_sum else None,
+    }
+
+
 def compute_temperature_fields(m_tmean, m_tmax, m_tmin, m_rh=None):
     """m_*: {(y,m): value C (RH in %)}. Returns dict of new T_*/HI_* fields."""
     s_mean = seasonal_means_from_monthly(m_tmean)
@@ -808,11 +939,7 @@ def compute_temperature_fields(m_tmean, m_tmax, m_tmin, m_rh=None):
     sum_max = [clim.get(m) for m in SEASONS["Summer"] if clim.get(m) is not None]
     win_min = [clim.get(m) for m in SEASONS["Winter"] if clim.get(m) is not None]
     clim_rh = climat_monthly_means(m_rh or {})
-    hi_m = dict((m, heat_index_c(clim.get(m), clim_rh.get(m))) for m in range(1, 13))
-    hi_vals = [v for v in hi_m.values() if v is not None]
-    hi_sum = [hi_m[m] for m in SEASONS["Summer"] if hi_m.get(m) is not None]
-    hi_win = [humidex_c(clim.get(m), clim_rh.get(m)) for m in SEASONS["Winter"] if clim.get(m) is not None and clim_rh.get(m) is not None]
-    hi_win_vals = [v for v in hi_win if v is not None]
+    _ts = compute_thermal_stress_fields(clim, clim_rh)
     return {
         "T_Annual_Mean": s_mean["Annual"],
         "T_Winter_Mean": s_mean["Winter"],
@@ -824,9 +951,11 @@ def compute_temperature_fields(m_tmean, m_tmax, m_tmin, m_rh=None):
         "T_Min_Winter_Month_Mean": min(win_min) if win_min else None,
         "T_Annual_Max_Mean": s_max["Annual"],
         "T_Annual_Min_Mean": s_min["Annual"],
-        "HI_Annual_Mean": sum(hi_vals) / len(hi_vals) if hi_vals else None,
-        "HI_Summer_Mean": sum(hi_sum) / len(hi_sum) if hi_sum else None,
-        "HI_Winter_Mean": sum(hi_win_vals) / len(hi_win_vals) if hi_win_vals else None,
+        "HI_Annual_Mean": _ts["HI_Annual_Mean"],
+        "HI_Summer_Mean": _ts["HI_Summer_Mean"],
+        "HI_Winter_Mean": _ts["HI_Winter_Mean"],
+        "HI_Annual_Range": _ts["HI_Annual_Range"],
+        "WBGT_Summer_Mean": _ts["WBGT_Summer_Mean"],
     }
 
 
@@ -881,6 +1010,7 @@ def compute_solar_fields(m_sol_mj, years):
         "Sol_Spring_Mean": s["Spring"],
         "Sol_Summer_Mean": s["Summer"],
         "Sol_Autumn_Mean": s["Autumn"],
+        "Sol_Annual_Range": monthly_range(daily_kwh),
     }
 
 
@@ -919,11 +1049,30 @@ def compute_drought_fields(m_tmean, m_tmax, m_tmin, m_precip, lat=0.0):
     c_tmin = climat_monthly_means(m_tmin)
     c_precip = climat_monthly_means(m_precip)
 
-    days_in_m = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+    # No single year exists at climatological scale, so February uses the
+    # long-term average month length (28.25 days) instead of a fixed 28 --
+    # otherwise every leap-day's PET is silently dropped.
+    days_in_m = [31, 28.25, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
     monthly_pet = []
     monthly_p = []
     monthly_t = []
     dry_count = 0
+
+    # Total input absence must NOT yield plausible-looking numbers from the
+    # per-month fallbacks below (t=20C, p=0 would fake a hyper-arid site).
+    _has_any_input = any(
+        c_tmean.get(m) is not None or c_tmax.get(m) is not None
+        or c_tmin.get(m) is not None or c_precip.get(m) is not None
+        for m in range(1, 13)
+    )
+    if not _has_any_input:
+        return {
+            "DM_Aridity_Annual": None,
+            "PET_Hargreaves_Annual": None,
+            "UNEP_Aridity_Annual": None,
+            "Water_Deficit_Annual": None,
+            "Dry_Months_Count": None,
+        }
 
     for m in range(1, 13):
         t = c_tmean.get(m)
@@ -962,12 +1111,14 @@ def compute_drought_fields(m_tmean, m_tmax, m_tmin, m_precip, lat=0.0):
     pet_annual = sum(monthly_pet)
 
     denom_dm = t_annual + 10.0
-    dm_aridity = (p_annual / denom_dm) if denom_dm > 0.01 else 0.0
+    # De Martonne is undefined for denom <= 0 (polar edge t_annual <= -10C):
+    # None (not applicable) instead of 0.0 (which would misread as hyper-arid).
+    dm_aridity = (p_annual / denom_dm) if denom_dm > 0.01 else None
     unep_aridity = (p_annual / pet_annual) if pet_annual > 0.01 else 0.0
     water_deficit = p_annual - pet_annual
 
     return {
-        "DM_Aridity_Annual": round(dm_aridity, 2),
+        "DM_Aridity_Annual": round(dm_aridity, 2) if dm_aridity is not None else None,
         "PET_Hargreaves_Annual": round(pet_annual, 1),
         "UNEP_Aridity_Annual": round(unep_aridity, 3),
         "Water_Deficit_Annual": round(water_deficit, 1),
@@ -992,8 +1143,10 @@ FIELD_DEFS = [
     ("HI_Annual_Mean", "Annual Mean Heat Index", u"المتوسط السنوي لمؤشر الحرارة المحسوسة", "T2M+RH2M", "Temperature", "Annual", "Mean", "C", u"متوسط مؤشر الحرارة المحسوسة الشهرية", "Annual mean Rothfusz heat index from T2M and RH2M", "Mean of monthly HI; equals T below 26.7C; needs humidity"),
     ("HI_Summer_Mean", "Summer Mean Heat Index", u"متوسط مؤشر الحرارة المحسوسة في فصل الصيف", "T2M+RH2M", "Temperature", "Summer", "Mean", "C", u"متوسط المؤشر صيفاً", "Summer mean heat index", "Mean of monthly HI for months 6,7,8"),
     ("HI_Winter_Mean", "Winter Mean Heat Index", u"متوسط مؤشر الحرارة المحسوسة في فصل الشتاء", "T2M+RH2M", "Temperature", "Winter", "Mean", "C", u"متوسط مؤشر الحرارة المحسوسة (الهيوميدكس IH) شتاءً", "Winter mean perceived temperature (Humidex/IH)", "Mean of monthly Humidex IH for months 12,1,2"),
+    ("HI_Annual_Range", "Annual Heat Index Range", u"المدى السنوي لمؤشر الحرارة المحسوسة (الإجهاد الحراري)", "T2M+RH2M", "Temperature", "Annual", "Range", "C", u"أعلى مؤشر شهري بروثفوز ناقص أدناه", "Highest monthly Rothfusz heat index minus lowest monthly heat index", "max(monthly Rothfusz HI) - min(monthly Rothfusz HI)"),
+    ("WBGT_Summer_Mean", "Summer Mean WBGT Heat Stress", u"متوسط الإجهاد الحراري صيفاً (WBGT)", "T2M+RH2M", "Temperature", "Summer", "Mean", "C", u"متوسط مؤشر WBGT الظلي صيفاً من الحرارة والرطوبة", "Summer mean shade WBGT from T2M and RH2M (Stull + ISO 7243)", "Mean of monthly shade WBGT for months 6,7,8"),
     ("R_Annual_Total", "Annual Total Precipitation", u"التراكم السنوي الإجمالي للأمطار", "PRECTOTCORR", "Precipitation", "Annual", "Sum", "mm/year", u"مجموع كميات المطر السنوي", "Mean annual total across years (single year: yearly sum)", "Mean of per-year annual sums"),
-    ("R_Annual_Mean", "Mean Monthly Precipitation", u"المتوسط السنوي لمعدلات الأمطار الشهرية", "PRECTOTCORR", "Precipitation", "Annual", "Mean", "mm", u"متوسط الإجماليات الشهرية", "Mean of climatological monthly totals", "Mean of 12 monthly means"),
+    ("R_Annual_Mean", "Mean Monthly Precipitation", u"المتوسط السنوي لمعدلات الأمطار الشهرية", "PRECTOTCORR", "Precipitation", "Annual", "Mean", "mm", u"متوسط الإجماليات الشهرية", "Mean of climatological monthly totals", "Mean of 12 climatological monthly totals (= Annual Total / 12)"),
     ("R_Winter_Total", "Winter Total Precipitation", u"إجمالي أمطار فصل الشتاء", "PRECTOTCORR", "Precipitation", "Winter", "Sum", "mm", u"مجموع أمطار أشهر الشتاء", "Mean winter total across years", "Mean of per-year Dec+Jan+Feb totals"),
     ("R_Spring_Total", "Spring Total Precipitation", u"إجمالي أمطار فصل الربيع", "PRECTOTCORR", "Precipitation", "Spring", "Sum", "mm", u"مجموع أمطار أشهر الربيع", "Mean spring total across years", "Mean of per-year Mar+Apr+May totals"),
     ("R_Summer_Total", "Summer Total Precipitation", u"إجمالي أمطار فصل الصيف", "PRECTOTCORR", "Precipitation", "Summer", "Sum", "mm", u"مجموع أمطار أشهر الصيف", "Mean summer total across years", "Mean of per-year Jun+Jul+Aug totals"),
@@ -1029,22 +1182,26 @@ FIELD_DEFS = [
     ("RH_Spring_Mean", "Spring Mean Relative Humidity", u"متوسط الرطوبة النسبية ربيعاً", "RH2M", "Relative Humidity", "Spring", "Mean", "%", u"متوسط الربيع", "Spring mean", "months 3,4,5"),
     ("RH_Summer_Mean", "Summer Mean Relative Humidity", u"متوسط الرطوبة النسبية صيفاً", "RH2M", "Relative Humidity", "Summer", "Mean", "%", u"متوسط الصيف", "Summer mean", "months 6,7,8"),
     ("RH_Autumn_Mean", "Autumn Mean Relative Humidity", u"متوسط الرطوبة النسبية خريفاً", "RH2M", "Relative Humidity", "Autumn", "Mean", "%", u"متوسط الخريف", "Autumn mean", "months 9,10,11"),
+    ("RH_Annual_Range", "Annual Relative Humidity Range", u"المدى السنوي للرطوبة النسبية", "RH2M", "Relative Humidity", "Annual", "Range", "%", u"أعلى متوسط شهري ناقص أدنى متوسط شهري", "Highest monthly mean minus lowest monthly mean", "max(clim monthly) - min(clim monthly)"),
     ("Sol_Annual_Mean", "Annual Mean Daily Solar Radiation", u"المتوسط اليومي السنوي للإشعاع الشمسي", "ALLSKY_SFC_SW_DWN", "Solar Radiation", "Annual", "Mean", "kWh/m2/day", u"معدل الإشعاع اليومي المعتاد", "Mean daily solar radiation", "Mean of MJ/3.6"),
     ("Sol_Annual_Total", "Annual Total Solar Radiation", u"إجمالي الإشعاع الشمسي السنوي التراكمي", "ALLSKY_SFC_SW_DWN", "Solar Radiation", "Annual", "Sum", "kWh/m2/year", u"إجمالي الطاقة الشمسية المتراكمة خلال السنة", "Annual accumulated solar energy", "Per-year sum(daily*days), averaged"),
     ("Sol_Winter_Mean", "Winter Mean Daily Solar Radiation", u"متوسط الإشعاع الشمسي شتاءً", "ALLSKY_SFC_SW_DWN", "Solar Radiation", "Winter", "Mean", "kWh/m2/day", u"متوسط الشتاء", "Winter mean", "months 12,1,2 (kWh)"),
     ("Sol_Spring_Mean", "Spring Mean Daily Solar Radiation", u"متوسط الإشعاع الشمسي ربيعاً", "ALLSKY_SFC_SW_DWN", "Solar Radiation", "Spring", "Mean", "kWh/m2/day", u"متوسط الربيع", "Spring mean", "months 3,4,5"),
     ("Sol_Summer_Mean", "Summer Mean Daily Solar Radiation", u"متوسط الإشعاع الشمسي صيفاً", "ALLSKY_SFC_SW_DWN", "Solar Radiation", "Summer", "Mean", "kWh/m2/day", u"متوسط الصيف", "Summer mean", "months 6,7,8"),
     ("Sol_Autumn_Mean", "Autumn Mean Daily Solar Radiation", u"متوسط الإشعاع الشمسي خريفاً", "ALLSKY_SFC_SW_DWN", "Solar Radiation", "Autumn", "Mean", "kWh/m2/day", u"متوسط الخريف", "Autumn mean", "months 9,10,11"),
+    ("Sol_Annual_Range", "Annual Solar Radiation Range", u"المدى السنوي للإشعاع الشمسي", "ALLSKY_SFC_SW_DWN", "Solar Radiation", "Annual", "Range", "kWh/m2/day", u"أعلى متوسط شهري ناقص أدنى متوسط شهري", "Highest monthly mean minus lowest monthly mean", "max(clim monthly) - min(clim monthly)"),
     ("UV_Annual_Mean", "Annual Mean UV Index", u"المتوسط السنوي لمؤشر الأشعة فوق البنفسجية", "ALLSKY_SFC_UV_INDEX", "UV Index", "Annual", "Mean", "Index", u"متوسط مؤشر UV", "Mean UV index", "Mean of valid values"),
     ("UV_Winter_Mean", "Winter Mean UV Index", u"متوسط مؤشر UV شتاءً", "ALLSKY_SFC_UV_INDEX", "UV Index", "Winter", "Mean", "Index", u"متوسط الشتاء", "Winter mean", "months 12,1,2"),
     ("UV_Spring_Mean", "Spring Mean UV Index", u"متوسط مؤشر UV ربيعاً", "ALLSKY_SFC_UV_INDEX", "UV Index", "Spring", "Mean", "Index", u"متوسط الربيع", "Spring mean", "months 3,4,5"),
     ("UV_Summer_Mean", "Summer Mean UV Index", u"متوسط مؤشر UV صيفاً", "ALLSKY_SFC_UV_INDEX", "UV Index", "Summer", "Mean", "Index", u"متوسط الصيف", "Summer mean", "months 6,7,8"),
     ("UV_Autumn_Mean", "Autumn Mean UV Index", u"متوسط مؤشر UV خريفاً", "ALLSKY_SFC_UV_INDEX", "UV Index", "Autumn", "Mean", "Index", u"متوسط الخريف", "Autumn mean", "months 9,10,11"),
+    ("UV_Annual_Range", "Annual UV Index Range", u"المدى السنوي لمؤشر الأشعة فوق البنفسجية", "ALLSKY_SFC_UV_INDEX", "UV Index", "Annual", "Range", "Index", u"أعلى متوسط شهري ناقص أدنى متوسط شهري", "Highest monthly mean minus lowest monthly mean", "max(clim monthly) - min(clim monthly)"),
     ("Cld_Annual_Mean", "Annual Mean Cloud Cover", u"المتوسط السنوي للغطاء السحابي", "CLOUD_AMT", "Cloud Cover", "Annual", "Mean", "%", u"متوسط الغطاء السحابي", "Mean cloud amount", "Mean of valid values"),
     ("Cld_Winter_Mean", "Winter Mean Cloud Cover", u"متوسط الغطاء السحابي شتاءً", "CLOUD_AMT", "Cloud Cover", "Winter", "Mean", "%", u"متوسط الشتاء", "Winter mean", "months 12,1,2"),
     ("Cld_Spring_Mean", "Spring Mean Cloud Cover", u"متوسط الغطاء السحابي ربيعاً", "CLOUD_AMT", "Cloud Cover", "Spring", "Mean", "%", u"متوسط الربيع", "Spring mean", "months 3,4,5"),
     ("Cld_Summer_Mean", "Summer Mean Cloud Cover", u"متوسط الغطاء السحابي صيفاً", "CLOUD_AMT", "Cloud Cover", "Summer", "Mean", "%", u"متوسط الصيف", "Summer mean", "months 6,7,8"),
     ("Cld_Autumn_Mean", "Autumn Mean Cloud Cover", u"متوسط الغطاء السحابي خريفاً", "CLOUD_AMT", "Cloud Cover", "Autumn", "Mean", "%", u"متوسط الخريف", "Autumn mean", "months 9,10,11"),
+    ("Cld_Annual_Range", "Annual Cloud Cover Range", u"المدى السنوي للغطاء السحابي", "CLOUD_AMT", "Cloud Cover", "Annual", "Range", "%", u"أعلى متوسط شهري ناقص أدنى متوسط شهري", "Highest monthly mean minus lowest monthly mean", "max(clim monthly) - min(clim monthly)"),
     ("DM_Aridity_Annual", "De Martonne Aridity Index", u"مؤشر دي مارتون للجفاف والقحولة", "PRECTOTCORR+T2M", "Climate_Models", "Annual", "Index", "Index", u"مؤشر دي مارتون السنوي للقحولة والجفاف = P / (T + 10)", "Annual De Martonne aridity index P / (T + 10)", "P_ann / (T_ann + 10)"),
     ("PET_Hargreaves_Annual", "Annual Potential Evapotranspiration (Hargreaves)", u"التبخر-نتح الكامن السنوي بهارجريفز", "T2M+T2M_MAX+T2M_MIN", "Climate_Models", "Annual", "Sum", "mm/year", u"التبخر-نتح الكامن السنوي المحسوب بطريقة هارجريفز-ساماني", "Annual potential evapotranspiration (Hargreaves-Samani)", "Sum of monthly Hargreaves ETo"),
     ("UNEP_Aridity_Annual", "UNEP Aridity Index", u"مؤشر القحولة العالمي (برنامج الأمم المتحدة للبيئة)", "PRECTOTCORR+PET", "Climate_Models", "Annual", "Index", "Index", u"مؤشر القحولة العالمي المعتمد من UNEP = P / PET", "UNEP Aridity Index P / PET", "P_ann / PET_ann"),
@@ -1059,7 +1216,8 @@ for _r in FIELD_DEFS:
     MODULE_FIELDS.setdefault(_r[4], []).append(_r[0])
 MODULE_FIELDS["Climate_Models"] = [
     "DM_Aridity_Annual", "PET_Hargreaves_Annual", "UNEP_Aridity_Annual",
-    "Water_Deficit_Annual", "Dry_Months_Count", "HI_Summer_Mean", "HI_Annual_Mean", "HI_Winter_Mean"
+    "Water_Deficit_Annual", "Dry_Months_Count", "HI_Summer_Mean", "HI_Annual_Mean", "HI_Winter_Mean",
+    "HI_Annual_Range", "WBGT_Summer_Mean"
 ]
 MODULE_FIELDS["Drought & Aridity"] = [
     "DM_Aridity_Annual", "PET_Hargreaves_Annual", "UNEP_Aridity_Annual",
@@ -1083,6 +1241,7 @@ MODULE_SHORT = {
 
 SHP_FIELD_MAP = {
     "Cld_Annual_Mean": "Cld_AnMean",
+    "Cld_Annual_Range": "Cld_AnRng",
     "Cld_Autumn_Mean": "Cld_AuMean",
     "Cld_Spring_Mean": "Cld_SpMean",
     "Cld_Summer_Mean": "Cld_SuMean",
@@ -1090,6 +1249,8 @@ SHP_FIELD_MAP = {
     "DM_Aridity_Annual": "DM_AridAnn",
     "Dry_Months_Count": "Dry_Months",
     "HI_Annual_Mean": "HI_AnnMean",
+    "HI_Annual_Range": "HI_AnRng",
+    "WBGT_Summer_Mean": "WBGT_SuMn",
     "HI_Summer_Mean": "HI_SumMean",
     "HI_Winter_Mean": "HI_WinMean",
     "Interp_Meth": "Intrp_Meth",
@@ -1106,6 +1267,7 @@ SHP_FIELD_MAP = {
     "PS_Summer_Mean": "PS_SumMean",
     "PS_Winter_Mean": "PS_WinMean",
     "RH_Annual_Mean": "RH_AnMean",
+    "RH_Annual_Range": "RH_AnRng",
     "RH_Autumn_Mean": "RH_AuMean",
     "RH_Spring_Mean": "RH_SpMean",
     "RH_Summer_Mean": "RH_SuMean",
@@ -1119,6 +1281,7 @@ SHP_FIELD_MAP = {
     "R_Summer_Total": "R_SumTot",
     "R_Winter_Total": "R_WinTot",
     "Sol_Annual_Mean": "Sol_AnMean",
+    "Sol_Annual_Range": "Sol_AnRng",
     "Sol_Annual_Total": "Sol_AnTot",
     "Sol_Autumn_Mean": "Sol_AuMean",
     "Sol_Spring_Mean": "Sol_SpMean",
@@ -1135,6 +1298,7 @@ SHP_FIELD_MAP = {
     "T_Summer_Mean": "T_SumMean",
     "T_Winter_Mean": "T_WinMean",
     "UV_Annual_Mean": "UV_AnMean",
+    "UV_Annual_Range": "UV_AnRng",
     "UV_Autumn_Mean": "UV_AuMean",
     "UV_Spring_Mean": "UV_SpMean",
     "UV_Summer_Mean": "UV_SuMean",
@@ -1303,7 +1467,10 @@ def _http_get_json(url, timeout, session=None):
             raise RuntimeError("HTTP %s: %s" % (resp.status_code, resp.text[:300]))
         return resp.json()
     # fallback for environments without requests
-    import urllib2
+    if PY27:
+        import urllib2
+    else:
+        import urllib.request as urllib2
     req = urllib2.Request(url, headers={"User-Agent": "POWER-Climate-Atlas-Generator/1.0-arcmap10"})
     resp = urllib2.urlopen(req, timeout=timeout)
     return json.load(resp)
@@ -1369,7 +1536,11 @@ def build_monthly_from_daily(parameter_dict, mean_params, sum_params, years):
         m = {}
         for ym, vals in by_month.items():
             if p in sum_params:
-                m[ym] = safe_sum(vals)
+                try:
+                    _exp = calendar.monthrange(int(ym[0]), int(ym[1]))[1]
+                except Exception:
+                    _exp = None
+                m[ym] = safe_sum(vals, expected=_exp)
             else:
                 m[ym] = safe_mean(vals)
         monthly[p] = m
@@ -1483,11 +1654,16 @@ def spatial_impute_missing(results, modules):
                     rlat, rlon = float(r["lat"]), float(r["lon"])
                     dists = []
                     for vlat, vlon, val in valid_pts:
-                        d = math.hypot(rlat - vlat, rlon - vlon)
+                        # Equirectangular metres (same as thin_points_tolerance):
+                        # plain degree hypot() overweights E-W gaps at high latitudes.
+                        mlat = math.radians((rlat + vlat) / 2.0)
+                        dx = (rlon - vlon) * 111320.0 * math.cos(mlat)
+                        dy = (rlat - vlat) * 111320.0
+                        d = math.sqrt(dx * dx + dy * dy)
                         dists.append((d, val))
                     dists.sort(key=lambda x: x[0])
                     top = dists[:min(3, len(dists))]
-                    if top[0][0] < 1e-6:
+                    if top[0][0] < 1.0:
                         imputed = top[0][1]
                     else:
                         w_sum = sum(1.0 / max(d[0], 1e-6) for d in top)
@@ -1524,7 +1700,7 @@ REQUIRED_COLUMNS = [
     "Temporal", "Interp_Meth", "Cell_Size", "Wind_Cell", "Status", "Error_Msg",
     "T_Annual_Mean", "T_Winter_Mean", "T_Spring_Mean", "T_Summer_Mean", "T_Autumn_Mean",
     "T_Annual_Range", "T_Max_Summer_Month_Mean", "T_Min_Winter_Month_Mean",
-    "T_Annual_Max_Mean", "T_Annual_Min_Mean", "HI_Annual_Mean", "HI_Summer_Mean", "HI_Winter_Mean",
+    "T_Annual_Max_Mean", "T_Annual_Min_Mean", "HI_Annual_Mean", "HI_Summer_Mean", "HI_Winter_Mean", "HI_Annual_Range", "WBGT_Summer_Mean",
     "R_Annual_Total", "R_Annual_Mean", "R_Winter_Total", "R_Spring_Total",
     "R_Summer_Total", "R_Autumn_Total", "R_Max_Daily_Month", "R_Annual_Rain_Days_Total",
     "PSL_Annual_Mean", "PSL_Winter_Mean", "PSL_Spring_Mean", "PSL_Summer_Mean", "PSL_Autumn_Mean", "PSL_Annual_Range",
@@ -1532,10 +1708,10 @@ REQUIRED_COLUMNS = [
     "W_Spd_Annual_Mean", "W_Spd_Winter_Mean", "W_Spd_Spring_Mean", "W_Spd_Summer_Mean", "W_Spd_Autumn_Mean",
     "W_Spd_Annual_Max_Month", "W_Spd_Annual_Range",
     "W_Dir_Annual_Mean", "W_Dir_Winter_Mean", "W_Dir_Spring_Mean", "W_Dir_Summer_Mean", "W_Dir_Autumn_Mean",
-    "RH_Annual_Mean", "RH_Winter_Mean", "RH_Spring_Mean", "RH_Summer_Mean", "RH_Autumn_Mean",
-    "Sol_Annual_Mean", "Sol_Annual_Total", "Sol_Winter_Mean", "Sol_Spring_Mean", "Sol_Summer_Mean", "Sol_Autumn_Mean",
-    "UV_Annual_Mean", "UV_Winter_Mean", "UV_Spring_Mean", "UV_Summer_Mean", "UV_Autumn_Mean",
-    "Cld_Annual_Mean", "Cld_Winter_Mean", "Cld_Spring_Mean", "Cld_Summer_Mean", "Cld_Autumn_Mean",
+    "RH_Annual_Mean", "RH_Winter_Mean", "RH_Spring_Mean", "RH_Summer_Mean", "RH_Autumn_Mean", "RH_Annual_Range",
+    "Sol_Annual_Mean", "Sol_Annual_Total", "Sol_Winter_Mean", "Sol_Spring_Mean", "Sol_Summer_Mean", "Sol_Autumn_Mean", "Sol_Annual_Range",
+    "UV_Annual_Mean", "UV_Winter_Mean", "UV_Spring_Mean", "UV_Summer_Mean", "UV_Autumn_Mean", "UV_Annual_Range",
+    "Cld_Annual_Mean", "Cld_Winter_Mean", "Cld_Spring_Mean", "Cld_Summer_Mean", "Cld_Autumn_Mean", "Cld_Annual_Range",
     "DM_Aridity_Annual", "PET_Hargreaves_Annual", "UNEP_Aridity_Annual", "Water_Deficit_Annual", "Dry_Months_Count",
 ]
 
@@ -1844,14 +2020,7 @@ def compute_point_fields(monthly, years, modules, temporal, daily_raw=None,
         if "Climate_Models" in modules:
             c_t = climat_monthly_means(monthly.get("T2M", {}))
             c_rh = climat_monthly_means(monthly.get("RH2M", {}))
-            hi_m = dict((m, heat_index_c(c_t.get(m), c_rh.get(m))) for m in range(1, 13))
-            hi_vals = [v for v in hi_m.values() if v is not None]
-            hi_sum = [hi_m[m] for m in SEASONS["Summer"] if hi_m.get(m) is not None]
-            hi_win = [humidex_c(c_t.get(m), c_rh.get(m)) for m in SEASONS["Winter"] if c_t.get(m) is not None and c_rh.get(m) is not None]
-            hi_win_vals = [v for v in hi_win if v is not None]
-            res["HI_Annual_Mean"] = sum(hi_vals) / len(hi_vals) if hi_vals else None
-            res["HI_Summer_Mean"] = sum(hi_sum) / len(hi_sum) if hi_sum else None
-            res["HI_Winter_Mean"] = sum(hi_win_vals) / len(hi_win_vals) if hi_win_vals else None
+            res.update(compute_thermal_stress_fields(c_t, c_rh))
     if "Sea Level Pressure" in modules:
         conv = dict((ym, pressure_kpa_to_mbar(v)) for ym, v in monthly.get("SLP", {}).items())
         s = seasonal_means_from_monthly(conv)
@@ -1869,22 +2038,28 @@ def compute_point_fields(monthly, years, modules, temporal, daily_raw=None,
     if "Wind" in modules:
         res.update(compute_wind_fields(monthly.get("WS10M", {}), monthly.get("WD10M", {})))
     if "Relative Humidity" in modules:
-        s = seasonal_means_from_monthly(monthly.get("RH2M", {}))
+        _rh_monthly = monthly.get("RH2M", {})
+        s = seasonal_means_from_monthly(_rh_monthly)
         res.update({"RH_Annual_Mean": s["Annual"], "RH_Winter_Mean": s["Winter"],
                     "RH_Spring_Mean": s["Spring"], "RH_Summer_Mean": s["Summer"],
-                    "RH_Autumn_Mean": s["Autumn"]})
+                    "RH_Autumn_Mean": s["Autumn"],
+                    "RH_Annual_Range": monthly_range(_rh_monthly)})
     if "Solar Radiation" in modules:
         res.update(compute_solar_fields(monthly.get("ALLSKY_SFC_SW_DWN", {}), years))
     if "UV Index" in modules:
-        s = seasonal_means_from_monthly(monthly.get("ALLSKY_SFC_UV_INDEX", {}))
+        _uv_monthly = monthly.get("ALLSKY_SFC_UV_INDEX", {})
+        s = seasonal_means_from_monthly(_uv_monthly)
         res.update({"UV_Annual_Mean": s["Annual"], "UV_Winter_Mean": s["Winter"],
                     "UV_Spring_Mean": s["Spring"], "UV_Summer_Mean": s["Summer"],
-                    "UV_Autumn_Mean": s["Autumn"]})
+                    "UV_Autumn_Mean": s["Autumn"],
+                    "UV_Annual_Range": monthly_range(_uv_monthly)})
     if "Cloud Cover" in modules:
-        s = seasonal_means_from_monthly(monthly.get("CLOUD_AMT", {}))
+        _cld_monthly = monthly.get("CLOUD_AMT", {})
+        s = seasonal_means_from_monthly(_cld_monthly)
         res.update({"Cld_Annual_Mean": s["Annual"], "Cld_Winter_Mean": s["Winter"],
                     "Cld_Spring_Mean": s["Spring"], "Cld_Summer_Mean": s["Summer"],
-                    "Cld_Autumn_Mean": s["Autumn"]})
+                    "Cld_Autumn_Mean": s["Autumn"],
+                    "Cld_Annual_Range": monthly_range(_cld_monthly)})
     return res
 
 
@@ -3916,7 +4091,7 @@ class PowerClimateAtlasGenerator(object):
                               wanted_fields_by_module=wanted_fields_by_module)
 
             if is_offline:
-                _first_fc = element_fcs.values()[0] if element_fcs else None
+                _first_fc = list(element_fcs.values())[0] if element_fcs else None
                 _n_pts = int(arcpy.GetCount_management(_first_fc)[0]) if (_first_fc and arcpy.Exists(_first_fc)) else 0
                 _n_ok = _n_pts
                 _fail = []
@@ -4712,6 +4887,10 @@ class PowerClimateAtlasGenerator(object):
                             hw = humidex_c(float(t_val), float(rh_val))
                             if hw is not None:
                                 f["HI_Winter_Mean"] = round(hw, 2)
+                        if f.get("WBGT_Summer_Mean") is None and t_val is not None and rh_val is not None:
+                            wb = wbgt_shade_c(float(t_val), float(rh_val))
+                            if wb is not None:
+                                f["WBGT_Summer_Mean"] = round(wb, 2)
 
             # 5. Create primary element feature classes in GDB
             admin_names = [a[0] for a in ADMIN_FIELDS]
@@ -5641,6 +5820,7 @@ class PowerClimateAtlasGenerator(object):
             ranges = [("Temperature", "T_Annual_Mean", (-30, 45)),
                       ("Temperature", "HI_Annual_Mean", (-30, 60)),
                       ("Temperature", "HI_Winter_Mean", (-30, 60)),
+                      ("Temperature", "WBGT_Summer_Mean", (-30, 60)),
                       ("Relative Humidity", "RH_Annual_Mean", (0, 100)),
                       ("Cloud Cover", "Cld_Annual_Mean", (0, 100)),
                       ("Sea Level Pressure", "PSL_Annual_Mean", (870, 1050)),

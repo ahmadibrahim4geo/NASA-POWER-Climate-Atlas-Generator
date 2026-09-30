@@ -15,8 +15,21 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
 
-import imp
-pyt_mod = imp.load_source("pyt_tool", os.path.join(ROOT, "POWER_Climate_Atlas_Generator_10_8.pyt"))
+try:  # Python 3 (imp was removed in 3.12; .pyt needs SourceFileLoader)
+    import importlib.machinery as _ilm
+
+    def _load_source(_name, _path):
+        return _ilm.SourceFileLoader(_name, _path).load_module()
+except ImportError:  # Python 2.7 fallback
+    import imp as _imp
+    _load_source = _imp.load_source
+pyt_mod = _load_source("pyt_tool", os.path.join(ROOT, "POWER_Climate_Atlas_Generator_10_8.pyt"))
+
+try:
+    import arcpy  # noqa - getParameterInfo() builds real arcpy.Parameter objects
+    _HAS_ARCPY = True
+except ImportError:
+    _HAS_ARCPY = False
 
 
 class DummyParameter(object):
@@ -39,6 +52,7 @@ class DummyParameter(object):
         return self._message is not None
 
 
+@unittest.skipUnless(_HAS_ARCPY, "needs ArcGIS arcpy for getParameterInfo()")
 class TestModesAndInputs(unittest.TestCase):
 
     def setUp(self):

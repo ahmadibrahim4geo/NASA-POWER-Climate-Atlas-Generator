@@ -21,6 +21,47 @@ import datetime as _dt
 
 PY27 = sys.version_info[0] == 2
 
+# Python 2/3 compat aliases (RHS only evaluated in the taken branch, so no NameError).
+if PY27:
+    _text_type = unicode  # noqa: F821 - Python 2 only
+    _binary_type = str
+else:
+    _text_type = str
+    _binary_type = bytes
+
+
+def _excel_text(v):
+    """Return text suitable for xlwt on both Python 2 (unicode) and 3 (str)."""
+    if v is None:
+        return ""
+    if PY27:
+        try:
+            if isinstance(v, _text_type):
+                return v
+            if isinstance(v, _binary_type):
+                try:
+                    return v.decode("utf-8")
+                except Exception:
+                    return v
+            return _text_type(v)
+        except Exception:
+            try:
+                return str(v)
+            except Exception:
+                return ""
+    else:
+        if isinstance(v, str):
+            return v
+        if isinstance(v, bytes):
+            try:
+                return v.decode("utf-8")
+            except Exception:
+                return v.decode("utf-8", errors="replace")
+        try:
+            return str(v)
+        except Exception:
+            return ""
+
 try:
     import arcpy
     _HAS_ARCPY = True
@@ -122,7 +163,8 @@ SUBMODEL_DEPS = {
         "fields": [
             ("HI_Annual_Mean", "Heat Index Annual Mean"),
             ("HI_Summer_Mean", "Heat Index Summer Mean"),
-            ("HI_Winter_Mean", "HI_Winter_Mean")
+            ("HI_Winter_Mean", "HI_Winter_Mean"),
+            ("WBGT_Summer_Mean", "Summer Mean WBGT Heat Stress")
         ],
         "field": "HI_Summer_Mean",
         "label": "Heat Index Summer Mean",
@@ -171,6 +213,7 @@ COLOR_RAMPS = {
 
 SHP_FIELD_MAP = {
     "Cld_Annual_Mean": "Cld_AnMean",
+    "Cld_Annual_Range": "Cld_AnRng",
     "Cld_Autumn_Mean": "Cld_AuMean",
     "Cld_Spring_Mean": "Cld_SpMean",
     "Cld_Summer_Mean": "Cld_SuMean",
@@ -178,6 +221,8 @@ SHP_FIELD_MAP = {
     "DM_Aridity_Annual": "DM_AridAnn",
     "Dry_Months_Count": "Dry_Months",
     "HI_Annual_Mean": "HI_AnnMean",
+    "HI_Annual_Range": "HI_AnRng",
+    "WBGT_Summer_Mean": "WBGT_SuMn",
     "HI_Summer_Mean": "HI_SumMean",
     "HI_Winter_Mean": "HI_WinMean",
     "Interp_Meth": "Intrp_Meth",
@@ -194,6 +239,7 @@ SHP_FIELD_MAP = {
     "PS_Summer_Mean": "PS_SumMean",
     "PS_Winter_Mean": "PS_WinMean",
     "RH_Annual_Mean": "RH_AnMean",
+    "RH_Annual_Range": "RH_AnRng",
     "RH_Autumn_Mean": "RH_AuMean",
     "RH_Spring_Mean": "RH_SpMean",
     "RH_Summer_Mean": "RH_SuMean",
@@ -207,6 +253,7 @@ SHP_FIELD_MAP = {
     "R_Summer_Total": "R_SumTot",
     "R_Winter_Total": "R_WinTot",
     "Sol_Annual_Mean": "Sol_AnMean",
+    "Sol_Annual_Range": "Sol_AnRng",
     "Sol_Annual_Total": "Sol_AnTot",
     "Sol_Autumn_Mean": "Sol_AuMean",
     "Sol_Spring_Mean": "Sol_SpMean",
@@ -223,6 +270,7 @@ SHP_FIELD_MAP = {
     "T_Summer_Mean": "T_SumMean",
     "T_Winter_Mean": "T_WinMean",
     "UV_Annual_Mean": "UV_AnMean",
+    "UV_Annual_Range": "UV_AnRng",
     "UV_Autumn_Mean": "UV_AuMean",
     "UV_Spring_Mean": "UV_SpMean",
     "UV_Summer_Mean": "UV_SuMean",
@@ -261,6 +309,8 @@ MODULE_INDICATOR_FIELDS = {
         ("HI_Annual_Mean", "Annual Mean Heat Index"),
         ("HI_Summer_Mean", "Summer Mean Heat Index"),
         ("HI_Winter_Mean", "Winter Mean Heat Index"),
+        ("HI_Annual_Range", "Annual Heat Index Range"),
+        ("WBGT_Summer_Mean", "Summer Mean WBGT Heat Stress"),
     ],
     "Precipitation": [
         ("R_Annual_Total", "Annual Total Precipitation"),
@@ -278,6 +328,7 @@ MODULE_INDICATOR_FIELDS = {
         ("RH_Spring_Mean", "Spring Mean Relative Humidity"),
         ("RH_Summer_Mean", "Summer Mean Relative Humidity"),
         ("RH_Autumn_Mean", "Autumn Mean Relative Humidity"),
+        ("RH_Annual_Range", "Annual Relative Humidity Range"),
     ],
     "Wind": [
         ("W_Spd_Annual_Mean", "Annual Mean Wind Speed"),
@@ -300,6 +351,7 @@ MODULE_INDICATOR_FIELDS = {
         ("Sol_Spring_Mean", "Spring Mean Daily Solar Radiation"),
         ("Sol_Summer_Mean", "Summer Mean Daily Solar Radiation"),
         ("Sol_Autumn_Mean", "Autumn Mean Daily Solar Radiation"),
+        ("Sol_Annual_Range", "Annual Solar Radiation Range"),
     ],
     "Surface Pressure": [
         ("PS_Annual_Mean", "Annual Mean Surface Pressure"),
@@ -323,6 +375,7 @@ MODULE_INDICATOR_FIELDS = {
         ("Cld_Spring_Mean", "Spring Mean Cloud Cover"),
         ("Cld_Summer_Mean", "Summer Mean Cloud Cover"),
         ("Cld_Autumn_Mean", "Autumn Mean Cloud Cover"),
+        ("Cld_Annual_Range", "Annual Cloud Cover Range"),
     ],
     "UV Index": [
         ("UV_Annual_Mean", "Annual Mean UV Index"),
@@ -330,6 +383,7 @@ MODULE_INDICATOR_FIELDS = {
         ("UV_Spring_Mean", "Spring Mean UV Index"),
         ("UV_Summer_Mean", "Summer Mean UV Index"),
         ("UV_Autumn_Mean", "Autumn Mean UV Index"),
+        ("UV_Annual_Range", "Annual UV Index Range"),
     ],
     "Climate_Models": [
         ("DM_Aridity_Annual", "De Martonne Aridity Index"),
@@ -340,6 +394,8 @@ MODULE_INDICATOR_FIELDS = {
         ("HI_Summer_Mean", "Summer Mean Heat Index"),
         ("HI_Annual_Mean", "Annual Mean Heat Index"),
         ("HI_Winter_Mean", "Winter Mean Heat Index"),
+        ("HI_Annual_Range", "Annual Heat Index Range"),
+        ("WBGT_Summer_Mean", "Summer Mean WBGT Heat Stress"),
     ],
 }
 
@@ -531,6 +587,33 @@ def humidex_c(t_c, rh):
     return t_c + (5.0 / 9.0) * (e - 10.0)
 
 
+def wetbulb_stull_c(t_c, rh):
+    """Psychrometric wet-bulb temperature in C (Stull 2011) from air temp C + RH %."""
+    if t_c is None or rh is None or is_missing(t_c) or is_missing(rh):
+        return None
+    t_c, rh = float(t_c), float(rh)
+    if rh < 0.0:
+        rh = 0.0
+    if rh > 100.0:
+        rh = 100.0
+    return (t_c * math.atan(0.151977 * math.sqrt(rh + 8.313659))
+            + math.atan(t_c + rh) - math.atan(rh - 1.676331)
+            + 0.00391838 * (rh ** 1.5) * math.atan(0.023101 * rh)
+            - 4.686035)
+
+
+def wbgt_shade_c(t_c, rh):
+    """Simplified outdoor-shade WBGT in C (ISO 7243, no solar load).
+
+    WBGT = 0.7 * Tnwb + 0.3 * Ta with natural wet-bulb via Stull (2011)."""
+    if t_c is None or rh is None or is_missing(t_c) or is_missing(rh):
+        return None
+    tw = wetbulb_stull_c(t_c, rh)
+    if tw is None:
+        return None
+    return 0.7 * tw + 0.3 * float(t_c)
+
+
 def makedirs_ok(path):
     if not os.path.isdir(path):
         try:
@@ -588,14 +671,14 @@ def write_excel_file(path, header, rows, sheet_name="Data"):
         "borders: left thin, right thin, top thin, bottom thin; align: vert center;"
     )
     for col_idx, h in enumerate(header):
-        h_str = unicode(h) if isinstance(h, str) else (h if isinstance(h, unicode) else unicode(str(h)))
+        h_str = _excel_text(h)
         ws.write(0, col_idx, h_str, header_style)
     for row_idx, r in enumerate(rows):
         for col_idx, cell in enumerate(r):
             val = cell
             if cell is None:
                 val = ""
-            elif isinstance(cell, str):
+            elif isinstance(cell, _binary_type):
                 try:
                     val = cell.decode("utf-8")
                 except Exception:
@@ -1467,6 +1550,8 @@ class RasterDataClimateAtlasGenerator(object):
 
                 is_sum = (module == "Precipitation")
                 divisor = 1.0 if is_sum else 3.0
+                # Same-year December climatological approximation (see SEASONS note
+                # in the point toolbox: strict WMO DJF uses Dec of previous year).
                 r_win = (m_layers[12] + m_layers[1] + m_layers[2]) / divisor
                 r_spr = (m_layers[3] + m_layers[4] + m_layers[5]) / divisor
                 r_sum = (m_layers[6] + m_layers[7] + m_layers[8]) / divisor
@@ -1484,10 +1569,30 @@ class RasterDataClimateAtlasGenerator(object):
                     [r_aut, aut_fld]
                 ]
                 if is_sum and len(indicator_fields) > 1 and indicator_fields[1][0] == "R_Annual_Mean":
-                    r_mean = (m_layers[1] + m_layers[2] + m_layers[3] + m_layers[4] + m_layers[5] +
-                              m_layers[6] + m_layers[7] + m_layers[8] + m_layers[9] + m_layers[10] +
-                              m_layers[11] + m_layers[12]) / 12.0
+                    # MEAN + DATA skips NoData months; a plain /12 sum would null
+                    # the whole year when a single month is NoData.
+                    try:
+                        r_mean = CellStatistics([m_layers[m_i] for m_i in range(1, 13)], "MEAN", "DATA")
+                    except Exception:
+                        r_mean = (m_layers[1] + m_layers[2] + m_layers[3] + m_layers[4] + m_layers[5] +
+                                  m_layers[6] + m_layers[7] + m_layers[8] + m_layers[9] + m_layers[10] +
+                                  m_layers[11] + m_layers[12]) / 12.0
                     extract_list.append([r_mean, "R_Annual_Mean"])
+
+                range_flds = [f for f, _l in indicator_fields
+                              if f.endswith("_Range") and "Dir_" not in f]
+                if range_flds and module != "Precipitation":
+                    try:
+                        _m_list = [m_layers[m_i] for m_i in range(1, 13)]
+                        r_max = CellStatistics(_m_list, "MAXIMUM", "DATA")
+                        r_min = CellStatistics(_m_list, "MINIMUM", "DATA")
+                        r_rng = r_max - r_min
+                        extract_list.append([r_rng, range_flds[0]])
+                    except Exception as _rng_ex:
+                        try:
+                            warn("  ! Range calc skipped for %s: %s" % (module, _rng_ex))
+                        except Exception:
+                            pass
 
                 ExtractMultiValuesToPoints(tile_pts, extract_list)
 
@@ -1674,6 +1779,8 @@ class RasterDataClimateAtlasGenerator(object):
                         val = humidex_c(t, rh)
                     elif fld == "HI_Annual_Mean":
                         val = heat_index_c(t, rh)
+                    elif fld == "WBGT_Summer_Mean":
+                        val = wbgt_shade_c(t, rh)
                     row[2 + f_idx] = round(val, 3) if val is not None else None
                 cur.updateRow(row)
 
@@ -1834,6 +1941,10 @@ class RasterDataClimateAtlasGenerator(object):
                             hw = humidex_c(float(t_val), float(rh_val))
                             if hw is not None:
                                 f["HI_Winter_Mean"] = round(hw, 2)
+                        if f.get("WBGT_Summer_Mean") is None and t_val is not None and rh_val is not None:
+                            wb = wbgt_shade_c(float(t_val), float(rh_val))
+                            if wb is not None:
+                                f["WBGT_Summer_Mean"] = round(wb, 2)
 
             # Build feature classes for each module
             for m in modules:
@@ -2178,7 +2289,7 @@ class RasterDataClimateAtlasGenerator(object):
             "created": _dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
         with open_utf8(json_path, "w") as fh:
-            fh.write(unicode(json.dumps(sidecar, indent=2, ensure_ascii=False)))
+            fh.write(json.dumps(sidecar, indent=2, ensure_ascii=False))
 
         try:
             mem_lyr = "lyr_%s" % fld_name

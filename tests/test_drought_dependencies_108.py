@@ -18,23 +18,35 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
 
-# Import pure-python functions from PYT
-import imp
-pyt_mod = imp.load_source("pyt_tool", os.path.join(ROOT, "POWER_Climate_Atlas_Generator_10_8.pyt"))
+# Import pure-python functions from PYT (2/3 compatible: imp was removed in 3.12,
+# and spec_from_file_location() returns None for the .pyt extension)
+try:
+    import importlib.machinery as _ilm
+
+    def _load_source(_name, _path):
+        return _ilm.SourceFileLoader(_name, _path).load_module()
+except ImportError:  # Python 2.7 fallback
+    import imp as _imp
+    _load_source = _imp.load_source
+pyt_mod = _load_source("pyt_tool", os.path.join(ROOT, "POWER_Climate_Atlas_Generator_10_8.pyt"))
 
 
 class TestDroughtIndices(unittest.TestCase):
 
     def test_drought_module_registered(self):
-        self.assertIn("Drought & Aridity", pyt_mod.MODULES_ALL)
-        self.assertIn("Drought & Aridity", pyt_mod.MODULE_PARAMS)
-        self.assertIn("Drought & Aridity", pyt_mod.MODULE_FOLDER)
-        self.assertIn("Drought & Aridity", pyt_mod.COLOR_RAMPS)
+        # Schema evolved: drought/aridity indices live under "Climate_Models"
+        # as named submodels (no standalone "Drought & Aridity" module).
+        for _sub in pyt_mod.SUBMODELS_ALL:
+            self.assertIn(_sub, pyt_mod.MODULES_ALL,
+                          "Submodel %s missing from MODULES_ALL" % _sub)
+        self.assertIn("Climate_Models", pyt_mod.MODULE_PARAMS)
+        self.assertIn("Climate_Models", pyt_mod.MODULE_FOLDER)
+        self.assertIn("Climate_Models", pyt_mod.COLOR_RAMPS)
 
         # Verify auto-dependency requirements
-        params = pyt_mod.MODULE_PARAMS["Drought & Aridity"]
+        params = pyt_mod.MODULE_PARAMS["Climate_Models"]
         for p in ["PRECTOTCORR", "T2M", "T2M_MAX", "T2M_MIN"]:
-            self.assertIn(p, params, "Missing required parameter %s for Drought" % p)
+            self.assertIn(p, params, "Missing required parameter %s for drought" % p)
 
     def test_extraterrestrial_radiation_ra(self):
         # Cairo latitude ~30 degrees North

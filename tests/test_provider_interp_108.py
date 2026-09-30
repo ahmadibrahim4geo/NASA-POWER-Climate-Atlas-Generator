@@ -3,16 +3,21 @@
 advanced parameters + dynamic enabling + SA execution. Runs on ArcMap 10.x
 python (2.7); the OM pure-logic section needs no network and no arcpy."""
 import csv
+import io
 import os
 import shutil
 import sys
 
-BASE = r"C:\Users\ahmad\Desktop\NASA POWER Climate Atlas Generator"
+BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PYT = os.path.join(BASE, "POWER_Climate_Atlas_Generator_10_8.pyt")
 TMP = os.path.join(BASE, "ProvTest_TMP")
 
-mod = type(sys)("mprov")
-exec(compile(open(PYT, "rb").read(), PYT, "exec"), mod.__dict__)
+if sys.version_info[0] == 2:
+    mod = type(sys)("mprov")
+    exec(compile(open(PYT, "rb").read(), PYT, "exec"), mod.__dict__)
+else:  # Python 3: SourceFileLoader handles the PEP 263 coding cookie
+    import importlib.machinery as _ilm
+    mod = _ilm.SourceFileLoader("mprov", PYT).load_module()
 
 PASS, FAIL = [], []
 
@@ -75,15 +80,24 @@ check("nasa rate still x-days", pf2["R_Winter_Total"] is not None and abs(
     mod.monthly_precip_total_from_rate(2.0, 2025, 1) - 62.0) < 1e-9)
 
 # ---------------- 4. provider-aware dictionaries (no arcpy needed) ----------------
-import arcpy  # noqa - required below for params/SA sections
+try:
+    import arcpy  # noqa - required below for params/SA sections
+    _HAS_ARCPY = True
+except ImportError:
+    arcpy = None
+    _HAS_ARCPY = False
 tool = mod.PowerClimateAtlasGenerator()
 if os.path.isdir(TMP):
     shutil.rmtree(TMP, ignore_errors=True)
 os.makedirs(TMP)
 def read_dict_csv(path):
-    lines = open(path, "rb").read().decode("utf-8-sig").splitlines()
-    rows = list(csv.reader([ln.encode("utf-8") for ln in lines]))
-    rows = [[c.decode("utf-8") if isinstance(c, str) else c for c in r] for r in rows]
+    if sys.version_info[0] == 2:
+        lines = open(path, "rb").read().decode("utf-8-sig").splitlines()
+        rows = list(csv.reader([ln.encode("utf-8") for ln in lines]))
+        rows = [[c.decode("utf-8") if isinstance(c, str) else c for c in r] for r in rows]
+    else:
+        with io.open(path, "r", encoding="utf-8-sig", newline="") as _fh:
+            rows = list(csv.reader(_fh))
     return rows[0], [dict(zip(rows[0], r)) for r in rows[1:]]
 
 tool._write_dictionaries(TMP, ["UV Index", "Wind", "Sea Level Pressure"],
@@ -104,6 +118,16 @@ head2, rows2 = read_dict_csv(os.path.join(TMP, "Metadata_Dictionary.csv"))
 r2 = rows2[0]
 check("nasa dict unchanged", r2["Source"] == "NASA POWER" and "uv_index_max" not in r2["Notes"],
       (r2["Source"], r2["Notes"][:60]))
+
+# Sections 5-7 need real arcpy (parameters + Spatial Analyst); the pure-logic
+# sections above already ran. Exit here with their summary when arcpy is absent.
+if not _HAS_ARCPY:
+    print("")
+    print("==== SUMMARY: %d passed, %d failed ====" % (len(PASS), len(FAIL)))
+    print("SKIP arcpy-only sections 5-7 (no ArcGIS in this interpreter)")
+    if FAIL:
+        print("FAILED:", FAIL)
+    sys.exit(0 if not FAIL else 1)
 
 # ---------------- 5. toolbox params + dynamic enabling ----------------
 ps = tool.getParameterInfo()

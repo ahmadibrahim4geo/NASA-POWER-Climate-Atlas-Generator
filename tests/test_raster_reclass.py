@@ -5,11 +5,19 @@ import sys
 import unittest
 import numpy as np
 
-# Load the toolbox module
+# Load the toolbox module (2/3 compatible: imp was removed in 3.12,
+# and spec_from_file_location() returns None for the .pyt extension)
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-import imp
+try:
+    import importlib.machinery as _ilm
+
+    def _load_source(_name, _path):
+        return _ilm.SourceFileLoader(_name, _path).load_module()
+except ImportError:  # Python 2.7 fallback
+    import imp as _imp
+    _load_source = _imp.load_source
 pyt_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "POWER_Climate_Atlas_Generator_10_8.pyt")
-mod = imp.load_source("power_atlas_108", pyt_path)
+mod = _load_source("power_atlas_108", pyt_path)
 
 passed = 0
 failed = 0

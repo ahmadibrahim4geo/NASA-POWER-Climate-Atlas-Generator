@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Offline QA tests for POWER_Climate_Atlas_Generator_10_8.pyt (new 77-column schema).
+"""Offline QA tests for POWER_Climate_Atlas_Generator_10_8.pyt (new 89-column schema).
 Runs with ArcMap 10.x python (2.7) WITHOUT network and WITHOUT arcpy.
 Covers: seasons, missing values, circular mean, precip monthly/daily + rain days,
 solar, pressure conversion + ranges, temperature range, Heat Index, wind
@@ -22,8 +22,24 @@ try:
     raw = raw.decode("utf-8")
 except Exception:
     pass
-if isinstance(raw, unicode):
-    raw = raw.encode("utf-8")  # py2.7 compile() needs bytes when a coding cookie is present
+try:
+    _text_type = unicode  # noqa: F821 - Python 2 only
+except NameError:  # Python 3
+    _text_type = str
+if isinstance(raw, _text_type):
+    try:
+        raw = raw.encode("utf-8")  # py2.7 compile() needs bytes when a coding cookie is present
+    except Exception:
+        pass
+if sys.version_info[0] == 3:
+    # Python 3 compile() forbids a PEP 263 coding cookie in str source;
+    # decode to str and drop the cookie line (file is utf-8).
+    if isinstance(raw, bytes):
+        raw = raw.decode("utf-8")
+    _nl = "\n" if "\n" in raw else "\r\n"
+    _first, _sep, _rest = raw.partition(_nl)
+    if "coding" in _first and _first.lstrip().startswith("#"):
+        raw = _rest
 exec(compile(raw, PYT, "exec"), mod.__dict__)
 
 PASS, FAIL = [], []
@@ -60,6 +76,14 @@ check("T annual min mean", abs(tf["T_Annual_Min_Mean"] - 11.5) < 1e-9, tf["T_Ann
 check("HI equals T when cool", abs(tf["HI_Annual_Mean"] - 16.5) < 1e-9 and abs(tf["HI_Summer_Mean"] - 17.0) < 1e-9,
       (tf["HI_Annual_Mean"], tf["HI_Summer_Mean"]))
 check("HI_Winter_Mean present", tf.get("HI_Winter_Mean") is not None, tf.get("HI_Winter_Mean"))
+check("HI range equals T range when cool", abs(tf.get("HI_Annual_Range") - 11.0) < 1e-9,
+      tf.get("HI_Annual_Range"))
+check("WBGT summer cool", tf.get("WBGT_Summer_Mean") is not None
+      and 10.0 < tf["WBGT_Summer_Mean"] < 17.0, tf.get("WBGT_Summer_Mean"))
+check("WBGT below air temp", tf.get("WBGT_Summer_Mean") < tf.get("T_Summer_Mean"))
+check("WBGT missing inputs", mod.wbgt_shade_c(None, 50.0) is None and mod.wbgt_shade_c(30.0, None) is None)
+check("wetbulb below air temp", mod.wetbulb_stull_c(30.0, 60.0) < 30.0)
+check("wetbulb saturated ~= air temp", abs(mod.wetbulb_stull_c(30.0, 100.0) - 30.0) < 0.5)
 check("humidex calculation", mod.humidex_c(15.0, 60.0) is not None)
 check("HI below threshold", mod.heat_index_c(20.0, 50.0) == 20.0)
 _hot = mod.heat_index_c(35.0, 60.0)
@@ -89,6 +113,7 @@ msol = dict(((2025, m), 18.0) for m in range(1, 13))
 sf = mod.compute_solar_fields(msol, [2025])
 check("solar ann 5.0", abs(sf["Sol_Annual_Mean"] - 5.0) < 1e-9, sf["Sol_Annual_Mean"])
 check("solar total 1825", abs(sf["Sol_Annual_Total"] - 5.0 * 365) < 1e-6, sf["Sol_Annual_Total"])
+check("solar range const is 0", sf.get("Sol_Annual_Range") == 0.0, sf.get("Sol_Annual_Range"))
 
 monthly = {"T2M": mt, "T2M_MAX": mx, "T2M_MIN": mn,
            "PRECTOTCORR": dict(((2025, m), 1.0) for m in range(1, 13)),
@@ -106,6 +131,10 @@ check("PSL range const is 0", pf["PSL_Annual_Range"] == 0.0)
 check("R annual total 365", abs(pf["R_Annual_Total"] - 365.0) < 1e-9, pf["R_Annual_Total"])
 check("R annual mean 365/12", abs(pf["R_Annual_Mean"] - 365.0 / 12) < 1e-9, pf["R_Annual_Mean"])
 check("R extremes None monthly", pf["R_Max_Daily_Month"] is None and pf["R_Annual_Rain_Days_Total"] is None)
+check("RH range const is 0", pf.get("RH_Annual_Range") == 0.0, pf.get("RH_Annual_Range"))
+check("UV range const is 0", pf.get("UV_Annual_Range") == 0.0, pf.get("UV_Annual_Range"))
+check("Cld range const is 0", pf.get("Cld_Annual_Range") == 0.0, pf.get("Cld_Annual_Range"))
+check("Sol range const is 0", pf.get("Sol_Annual_Range") == 0.0, pf.get("Sol_Annual_Range"))
 check("HI needs humidity note", True)
 pfd = mod.compute_point_fields(monthly, [2025], ["Precipitation"], "Daily",
                                daily_raw={"PRECTOTCORR": {(2025, 1, 1): 0.5, (2025, 1, 2): 12.7, (2025, 1, 3): -999}})
@@ -117,18 +146,18 @@ check("PSL range varying", abs(pfr["PSL_Annual_Range"] - 110.0) < 1e-9, pfr["PSL
 check("temp fetches RH2M", "RH2M" in mod.MODULE_PARAMS["Temperature"])
 
 rows = mod.metadata_rows_for_modules(["Temperature", "Wind"])
-check("metadata rows T+W=25", len(rows) == 13 + 12, len(rows))
+check("metadata rows T+W=27", len(rows) == 15 + 12, len(rows))
 cols = ["Field_Name", "Full_Name_EN", "Name_AR", "NASA_Code", "Module", "Period", "Statistic", "Unit", "Description_AR", "Description_EN", "Calculation", "Source", "Notes"]
 check("metadata cols", all(all(c in r for c in cols) for r in rows))
-check("REQUIRED 83", len(mod.REQUIRED_COLUMNS) == 83, len(mod.REQUIRED_COLUMNS))
+check("REQUIRED 89", len(mod.REQUIRED_COLUMNS) == 89, len(mod.REQUIRED_COLUMNS))
 check("all fielddefs in REQUIRED", all(r[0] in mod.REQUIRED_COLUMNS for r in mod.FIELD_DEFS))
 
 allf = [r[0] for r in mod.FIELD_DEFS] + [a[0] for a in mod.ADMIN_FIELDS]
 bad = [f for f in allf if len(f) > 10]
 check("long names all mapped", all(b in mod.SHP_FIELD_MAP for b in bad), bad[:3])
-check("shp map 72 unique<=10", len(mod.SHP_FIELD_MAP) == 72
+check("shp map 78 unique<=10", len(mod.SHP_FIELD_MAP) == 78
       and all(len(v) <= 10 for v in mod.SHP_FIELD_MAP.values())
-      and len(set(mod.SHP_FIELD_MAP.values())) == 72)
+      and len(set(mod.SHP_FIELD_MAP.values())) == 78)
 check("shp map covers climate", all(f in mod.SHP_FIELD_MAP for r in mod.FIELD_DEFS for f in [r[0]]))
 check("ramps 7", all(len(mod.COLOR_RAMPS[k]) == 7 for k in ["Temperature", "Precipitation", "Sea Level Pressure", "Relative Humidity", "Solar Radiation", "Cloud Cover"]))
 check("UV 5 classes", len(mod.COLOR_RAMPS["UV Index"]) == 5)
