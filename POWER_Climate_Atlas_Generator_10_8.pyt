@@ -172,7 +172,7 @@ CANONICAL_DERIVED_MAP = {
     "Trends & Baseline Anomalies [Requires: Temperature, Precipitation]": "Trends & Anomalies",
 }
 
-DERIVED_TO_SUBMODEL_KEY = dict((v, k) for k, v in CANONICAL_DERIVED_MAP.items())
+DERIVED_TO_SUBMODEL_KEY = dict((CANONICAL_DERIVED_MAP[s], s) for s in SUBMODELS_ALL)
 
 MODULES_ALL = PRIMARY_MODULES_ALL + SUBMODELS_ALL
 ALL_CANONICAL_MODULES = PRIMARY_MODULES_ALL + DERIVED_MODULES_ALL
@@ -247,6 +247,17 @@ SUBMODEL_DEPS = {
     }
 }
 
+# Fail-safe alias population for SUBMODEL_DEPS
+for _can, _sub_k in DERIVED_TO_SUBMODEL_KEY.items():
+    if _sub_k in SUBMODEL_DEPS and _can not in SUBMODEL_DEPS:
+        SUBMODEL_DEPS[_can] = SUBMODEL_DEPS[_sub_k]
+
+if "Evapotranspiration (ET) [Requires: Temperature]" in SUBMODEL_DEPS:
+    _et_info = SUBMODEL_DEPS["Evapotranspiration (ET) [Requires: Temperature]"]
+    SUBMODEL_DEPS["ET"] = _et_info
+    SUBMODEL_DEPS["Hargreaves PET"] = _et_info
+    SUBMODEL_DEPS["Hargreaves_PET"] = _et_info
+
 def resolve_module_canonical(name):
     """Maps any module name (full UI string, canonical, or short) to its canonical name."""
     if not name:
@@ -300,9 +311,19 @@ def resolve_module_canonical(name):
 
 def resolve_submodel_name(name):
     """Legacy helper returning full submodel key if name represents a derived module."""
-    can = resolve_module_canonical(name)
+    if not name:
+        return None
+    name_str = str(name).strip().strip("'\"")
+    if name_str in SUBMODELS_ALL:
+        return name_str
+    can = resolve_module_canonical(name_str)
     if can and can in DERIVED_TO_SUBMODEL_KEY:
         return DERIVED_TO_SUBMODEL_KEY[can]
+    if name_str in SUBMODEL_DEPS:
+        sub_k = SUBMODEL_DEPS[name_str].get("canonical")
+        if sub_k and sub_k in DERIVED_TO_SUBMODEL_KEY:
+            return DERIVED_TO_SUBMODEL_KEY[sub_k]
+        return name_str
     return None
 
 MODULE_PARAMS = {
@@ -3426,7 +3447,10 @@ class PowerClimateAtlasGenerator(object):
                         if any(f in layer_fnames or sf in layer_fnames for f, sf in zip(m_flds, shp_flds)):
                             detected_mods.append(m)
 
-                    for sub_name, sinfo in SUBMODEL_DEPS.items():
+                    for sub_name in SUBMODELS_ALL:
+                        sinfo = SUBMODEL_DEPS.get(sub_name)
+                        if not sinfo:
+                            continue
                         req_flds = sinfo.get("fields", [sinfo["field"]])
                         has_out = any(f in layer_fnames for f in req_flds)
                         has_inp = False
