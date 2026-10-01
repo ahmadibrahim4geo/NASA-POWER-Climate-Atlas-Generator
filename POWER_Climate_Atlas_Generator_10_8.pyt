@@ -4089,6 +4089,32 @@ class PowerClimateAtlasGenerator(object):
             arcpy.ClearEnvironment("mask")
             arcpy.ClearEnvironment("extent")
             arcpy.env.outputCoordinateSystem = out_sr
+
+            # --- PRE-RASTERIZE MASK: raster-on-raster ExtractByMask is 10-50x faster ---
+            raster_mask = None
+            if mask and arcpy.Exists(mask):
+                try:
+                    _rmask_path = os.path.join(scratch_dir, "mask_raster.tif")
+                    if arcpy.Exists(_rmask_path):
+                        try:
+                            arcpy.management.Delete(_rmask_path)
+                        except Exception:
+                            pass
+                    # Rasterize: polygon -> 1/NoData raster at target cell size
+                    arcpy.env.extent = mask
+                    arcpy.env.cellSize = eff_base
+                    arcpy.conversion.PolygonToRaster(
+                        mask, arcpy.Describe(mask).OIDFieldName,
+                        _rmask_path, "CELL_CENTER", "NONE", eff_base)
+                    if arcpy.Exists(_rmask_path):
+                        raster_mask = _rmask_path
+                        msg("Vector mask pre-rasterized to %s (fast raster masking enabled)." % _rmask_path)
+                    else:
+                        msg("Pre-rasterization did not produce output; will use vector mask (slower).")
+                except Exception as ex_rmask:
+                    warn("Mask pre-rasterization failed (%s); will use vector mask (slower)." % ex_rmask)
+                finally:
+                    arcpy.ClearEnvironment("extent")
             arcpy.env.cellSize = eff_base
             # --- guard: refuse rasters that would exhaust 32-bit ArcMap ---
             try:
@@ -4117,7 +4143,7 @@ class PowerClimateAtlasGenerator(object):
                 arcpy.env.compression = "LZW"
                 arcpy.env.tileSize = "128 128"
                 arcpy.env.pyramid = "NONE"
-                arcpy.env.rasterStatistics = "STATISTICS 1 1"
+                arcpy.env.rasterStatistics = "NONE"
             except Exception:
                 pass
             try:
@@ -4203,7 +4229,8 @@ class PowerClimateAtlasGenerator(object):
                             None, [m], paths, eff_base, interp, mask, msg, warn,
                             iopts, kopts, is_geo, purge, scratch_dir, focal,
                             {m: fc}, wanted_fields_by_module=wanted_fields_by_module,
-                            reclass_opts=reclass_opts)
+                            reclass_opts=reclass_opts,
+                            raster_mask=raster_mask)
                         raster_registry.extend(elem_rasters)
                         if purge and os.path.exists(scratch_dir):
                             for sf in os.listdir(scratch_dir):
@@ -4211,7 +4238,7 @@ class PowerClimateAtlasGenerator(object):
                                 try:
                                     # NEVER delete the reprojected mask: it is
                                     # reused by every element + wind vectors.
-                                    if os.path.isfile(sfp) and not sf.lower().startswith("maskp."):
+                                    if os.path.isfile(sfp) and not sf.lower().startswith(("maskp.", "mask_raster")):
                                         os.remove(sfp)
                                 except Exception:
                                     pass
@@ -4435,7 +4462,8 @@ class PowerClimateAtlasGenerator(object):
                                     None, [m], paths, eff_base, interp, mask, msg, warn,
                                     iopts, kopts, is_geo, purge, scratch_dir, focal,
                                     {m: fc}, wanted_fields_by_module=wanted_fields_by_module,
-                                    reclass_opts=reclass_opts)
+                                    reclass_opts=reclass_opts,
+                                    raster_mask=raster_mask)
                                 raster_registry.extend(elem_rasters)
                                 if purge and os.path.exists(scratch_dir):
                                     for sf in os.listdir(scratch_dir):
@@ -4443,7 +4471,7 @@ class PowerClimateAtlasGenerator(object):
                                         try:
                                             # NEVER delete the reprojected mask: it is
                                             # reused by every element + wind vectors.
-                                            if os.path.isfile(sfp) and not sf.lower().startswith("maskp."):
+                                            if os.path.isfile(sfp) and not sf.lower().startswith(("maskp.", "mask_raster")):
                                                 os.remove(sfp)
                                         except Exception:
                                             pass
@@ -4473,13 +4501,14 @@ class PowerClimateAtlasGenerator(object):
                                 None, [m], paths, eff_base, interp, mask, msg, warn,
                                 iopts, kopts, is_geo, purge, scratch_dir, focal,
                                 {m: fc}, wanted_fields_by_module=wanted_fields_by_module,
-                                reclass_opts=reclass_opts)
+                                reclass_opts=reclass_opts,
+                                raster_mask=raster_mask)
                             raster_registry.extend(elem_rasters)
                             if purge and os.path.exists(scratch_dir):
                                 for sf in os.listdir(scratch_dir):
                                     sfp = os.path.join(scratch_dir, sf)
                                     try:
-                                        if os.path.isfile(sfp) and not sf.lower().startswith("maskp."):
+                                        if os.path.isfile(sfp) and not sf.lower().startswith(("maskp.", "mask_raster")):
                                             os.remove(sfp)
                                     except Exception:
                                         pass
@@ -5680,7 +5709,8 @@ class PowerClimateAtlasGenerator(object):
     def _interpolate_all(self, master_fc, modules, paths, cell, method, mask, msg, warn,
                          iopts=None, kopts=None, is_geo=False,
                          purge=True, scratch=None, focal=None, source_by_module=None,
-                         wanted_fields_by_module=None, reclass_opts=None):
+                         wanted_fields_by_module=None, reclass_opts=None,
+                         raster_mask=None):
         from arcpy.sa import ExtractByMask
         out_ws = os.path.dirname(paths["vec"])
         if scratch is None:
@@ -5808,21 +5838,32 @@ class PowerClimateAtlasGenerator(object):
                     surf = self._interp_surface(lyr, actual_field, cell, method, iopts, kopts)
                 rp, lp = self._raster_paths(out_ws, module, field)
                 # --- clip to final extent in memory ---
-                if mask:
+                # Prefer pre-rasterized mask (10-50x faster than vector mask)
+                effective_mask = raster_mask if (raster_mask and arcpy.Exists(raster_mask)) else mask
+                if effective_mask:
                     try:
-                        clipped = ExtractByMask(surf, mask)
+                        clipped = ExtractByMask(surf, effective_mask)
                     except Exception:
-                        # Fallback for massive rasters needing staged scratch
-                        tmpu = os.path.join(scratch, "u_" + field + ".tif")
-                        try:
-                            surf.save(tmpu)
-                            clipped = ExtractByMask(tmpu, mask)
-                        finally:
+                        # Fallback 1: try vector mask if raster mask failed
+                        if effective_mask != mask and mask:
                             try:
-                                if arcpy.Exists(tmpu):
-                                    arcpy.management.Delete(tmpu)
+                                clipped = ExtractByMask(surf, mask)
                             except Exception:
-                                pass
+                                clipped = surf
+                        else:
+                            # Fallback 2: save to scratch then mask
+                            tmpu = os.path.join(scratch, "u_" + field + ".tif")
+                            try:
+                                surf.save(tmpu)
+                                clipped = ExtractByMask(tmpu, effective_mask)
+                            except Exception:
+                                clipped = surf
+                            finally:
+                                try:
+                                    if arcpy.Exists(tmpu):
+                                        arcpy.management.Delete(tmpu)
+                                except Exception:
+                                    pass
                 else:
                     clipped = surf
 
