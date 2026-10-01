@@ -2625,7 +2625,16 @@ class RasterDataClimateAtlasGenerator(object):
                 raw_interp = Idw(pts_fc, fld_name, cell_size, 2.0)
 
             # Mask/Clip with Layer 2 (Final Clip Mask)
-            clipped = ExtractByMask(raw_interp, clip_layer)
+            if clip_layer and arcpy.Exists(clip_layer):
+                clipped = ExtractByMask(raw_interp, clip_layer)
+            else:
+                clipped = raw_interp
+
+            # Convert to 32-bit Float
+            try:
+                float_out = Float(clipped)
+            except Exception:
+                float_out = clipped
 
             # Save as GeoTIFF with maximum lossless LZW block compression
             try:
