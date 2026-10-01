@@ -5775,12 +5775,12 @@ class PowerClimateAtlasGenerator(object):
                 arcpy.management.MakeFeatureLayer(
                     src_fc, lyr, "%s IS NOT NULL" % arcpy.AddFieldDelimiters(src_fc, actual_field))
                 try:
+                    arcpy.ClearEnvironment("mask")
                     if mask and arcpy.Exists(mask):
-                        arcpy.env.mask = mask
                         arcpy.env.extent = mask
                     else:
-                        arcpy.ClearEnvironment("mask")
                         arcpy.ClearEnvironment("extent")
+                    arcpy.env.parallelProcessingFactor = "100%"
                 except Exception:
                     pass
                 # Circular directions must NOT be interpolated linearly
@@ -5847,25 +5847,29 @@ class PowerClimateAtlasGenerator(object):
                 t_fld_dur = time.time() - t_fld_start
                 msg("     [OK] Successfully saved: %s (in %.1f seconds)" % (os.path.basename(rp), t_fld_dur))
 
+                # Immediately release raster memory and dataset locks before next iteration
                 try:
                     del surf
                 except Exception:
                     pass
-                if (i + 1) % 10 == 0:
-                    try:
-                        gc.collect()
-                    except Exception:
-                        pass
+                try:
+                    del clipped
+                except Exception:
+                    pass
+                try:
+                    del src_raster
+                except Exception:
+                    pass
                 try:
                     arcpy.management.Delete(lyr)
                 except Exception:
                     pass
                 try:
-                    arcpy.management.CalculateStatistics(rp)
-                    _rmin = float(arcpy.GetRasterProperties_management(rp, "MINIMUM")[0])
-                    _rmax = float(arcpy.GetRasterProperties_management(rp, "MAXIMUM")[0])
+                    import gc
+                    gc.collect()
                 except Exception:
-                    _rmin, _rmax = None, None
+                    pass
+
                 colors = self._colors_for(module, field)
 
                 if reclass_on:
@@ -5875,33 +5879,9 @@ class PowerClimateAtlasGenerator(object):
                         rp, field, module, interp_colors, nclass, reclass_method, msg, warn, purge=purge)
                     # No .lyr output: registry keeps the raster path only.
                     registry.append((field, rp, None, module, interp_colors, nclass))
-                    # Remove any legacy .lyr left by previous runs.
-                    try:
-                        _legacy_lyr = os.path.join(os.path.dirname(rp), "Layers", field + ".lyr")
-                        if arcpy.Exists(_legacy_lyr):
-                            arcpy.management.Delete(_legacy_lyr)
-                    except Exception:
-                        pass
                     msg("Raster: %s [raw float, LZW] + %s [%d classes, %s]" % (
                         rp, os.path.basename(cls_rp) if cls_rp else "", nclass, reclass_method))
                 else:
-                    # Reclass is DISABLED: only raw continuous float raster, no _cls.tif
-                    rdir = os.path.dirname(rp)
-                    old_cls = os.path.join(rdir, field + "_cls.tif")
-                    old_clr = os.path.join(rdir, field + ".clr")
-                    for _old in (old_cls, old_clr):
-                        try:
-                            if arcpy.Exists(_old):
-                                arcpy.management.Delete(_old)
-                        except Exception:
-                            pass
-                    # Remove any legacy .lyr left by previous runs.
-                    try:
-                        _legacy_lyr = os.path.join(rdir, "Layers", field + ".lyr")
-                        if arcpy.Exists(_legacy_lyr):
-                            arcpy.management.Delete(_legacy_lyr)
-                    except Exception:
-                        pass
                     nclass = len(colors)
                     registry.append((field, rp, None, module, colors, nclass))
                     msg("Raster: %s [raw float, LZW, continuous]" % rp)
