@@ -5737,6 +5737,8 @@ class PowerClimateAtlasGenerator(object):
         for module, field in todo:
             i += 1
             arcpy.SetProgressorPosition(i)
+            t_fld_start = time.time()
+            msg("  -> [%d/%d] Processing column: %s (%s)..." % (i, len(todo), field, module))
             try:
                 # NOTE: each element interpolates from its own point layer
                 src_fc = (source_by_module or {}).get(module, master_fc)
@@ -5841,6 +5843,9 @@ class PowerClimateAtlasGenerator(object):
                         arcpy.Raster(src_raster).save(rp)
                     except Exception:
                         src_raster.save(rp)
+
+                t_fld_dur = time.time() - t_fld_start
+                msg("     [OK] Successfully saved: %s (in %.1f seconds)" % (os.path.basename(rp), t_fld_dur))
 
                 try:
                     del surf

@@ -2508,6 +2508,7 @@ class RasterDataClimateAtlasGenerator(object):
                 warn("  ! Field %s has no valid data in %s; skipping raster interpolation." % (fld_name, pts_fc))
                 continue
 
+            t_fld_start = time.time()
             msg("  -> Interpolating: %s (%s)..." % (fld_name, interp_method))
             out_tif = os.path.join(mod_dir, "%s.tif" % fld_name)
             success = self._interpolate_and_clip(
@@ -2515,6 +2516,8 @@ class RasterDataClimateAtlasGenerator(object):
                 eff_cell_size, out_tif, target_sr, msg, warn
             )
             if success:
+                t_fld_dur = time.time() - t_fld_start
+                msg("     [OK] Saved GeoTIFF: %s (in %.1f seconds)" % (os.path.basename(out_tif), t_fld_dur))
                 generated_rasters.append((fld_name, out_tif, mod))
                 self._create_layer_file(out_tif, mod, fld_name, fld_label, msg)
 
