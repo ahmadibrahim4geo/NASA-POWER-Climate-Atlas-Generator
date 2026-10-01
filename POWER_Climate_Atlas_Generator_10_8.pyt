@@ -5805,82 +5805,43 @@ class PowerClimateAtlasGenerator(object):
                 else:
                     surf = self._interp_surface(lyr, actual_field, cell, method, iopts, kopts)
                 rp, lp = self._raster_paths(out_ws, module, field)
-                # --- staged save: unclipped surface -> scratch temp first ---
-                tmpu = os.path.join(scratch, "u_" + field + ".tif")
-                try:
-                    if arcpy.Exists(tmpu):
-                        arcpy.management.Delete(tmpu)
-                except Exception:
-                    pass
-                try:
-                    surf.save(tmpu)
-                except Exception:
-                    tmpu = "in_memory/u_raw"
-                    try:
-                        arcpy.management.Delete(tmpu)
-                    except Exception:
-                        pass
-                    surf.save(tmpu)
-                # --- clip to final extent (spec: delete unclipped right after) ---
+                # --- clip to final extent in memory ---
                 if mask:
-                    tmpc = os.path.join(scratch, "c_" + field + ".tif") \
-                        if not tmpu.startswith("in_memory") else "in_memory/u_clip"
                     try:
-                        if arcpy.Exists(tmpc):
-                            arcpy.management.Delete(tmpc)
+                        clipped = ExtractByMask(surf, mask)
                     except Exception:
-                        pass
-                    try:
-                        ExtractByMask(tmpu, mask).save(tmpc)
-                        src_path = tmpc
-                    except Exception as ex:
-                        # Strict policy: never publish an unclipped surface as a
-                        # final result. Discard the intermediate and skip.
-                        warn("Raster %s skipped: clip to study area failed (%s). "
-                             "Unclipped surface discarded, not published." % (field, ex))
-                        for _t in (tmpu, tmpc):
+                        # Fallback for massive rasters needing staged scratch
+                        tmpu = os.path.join(scratch, "u_" + field + ".tif")
+                        try:
+                            surf.save(tmpu)
+                            clipped = ExtractByMask(tmpu, mask)
+                        finally:
                             try:
-                                if _t and arcpy.Exists(_t):
-                                    arcpy.management.Delete(_t)
+                                if arcpy.Exists(tmpu):
+                                    arcpy.management.Delete(tmpu)
                             except Exception:
                                 pass
-                        try:
-                            arcpy.management.Delete(lyr)
-                        except Exception:
-                            pass
-                        continue
                 else:
-                    src_path = tmpu
-                    tmpc = None
-                # --- focal smoothing replaces the output (same element name) ---
+                    clipped = surf
+
+                # --- focal smoothing if requested ---
                 if focal["apply"]:
                     from arcpy.sa import FocalStatistics, NbrRectangle
-                    tmpf = os.path.join(scratch, "f_" + field + ".tif") \
-                        if not src_path.startswith("in_memory") else "in_memory/u_focal"
-                    try:
-                        if arcpy.Exists(tmpf):
-                            arcpy.management.Delete(tmpf)
-                    except Exception:
-                        pass
-                    FocalStatistics(arcpy.Raster(src_path),
+                    src_raster = FocalStatistics(clipped,
                                     NbrRectangle(focal["size"], focal["size"], "CELL"),
-                                    focal["stat"]).save(tmpf)
-                    if purge:
-                        for _t in (tmpu, tmpc):
-                            try:
-                                if _t and _t != tmpf and arcpy.Exists(_t):
-                                    arcpy.management.Delete(_t)
-                            except Exception:
-                                pass
-                    src_path = tmpf
+                                    focal["stat"])
+                else:
+                    src_raster = clipped
+
                 # --- raw float save with maximum LZW block compression ---
                 try:
-                    arcpy.management.CopyRaster(src_path, rp, nodata_value="-3.4028235e+38")
+                    arcpy.management.CopyRaster(src_raster, rp, nodata_value="-3.4028235e+38")
                 except Exception:
                     try:
-                        arcpy.Raster(src_path).save(rp)
+                        arcpy.Raster(src_raster).save(rp)
                     except Exception:
-                        surf.save(rp)
+                        src_raster.save(rp)
+
                 try:
                     del surf
                 except Exception:
@@ -5888,18 +5849,6 @@ class PowerClimateAtlasGenerator(object):
                 if (i + 1) % 10 == 0:
                     try:
                         gc.collect()
-                    except Exception:
-                        pass
-                if purge:
-                    for _t in (tmpu, tmpc):
-                        try:
-                            if _t and arcpy.Exists(_t):
-                                arcpy.management.Delete(_t)
-                        except Exception:
-                            pass
-                    try:
-                        if focal["apply"] and src_path != rp and arcpy.Exists(src_path):
-                            arcpy.management.Delete(src_path)
                     except Exception:
                         pass
                 try:
