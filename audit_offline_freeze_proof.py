@@ -10,10 +10,14 @@ layers laid out exactly the way DOWNLOAD mode writes them:
 
 and reports every write the tool performs against those input datasets.
 """
-import importlib.machinery
-import importlib.util
 import os
 import sys
+
+if sys.version_info[0] >= 3:
+    import importlib.machinery
+    import importlib.util
+else:
+    import imp
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 PYT = os.path.join(ROOT, "POWER_Climate_Atlas_Generator_10_8.pyt")
@@ -178,11 +182,15 @@ class MockArcPy(object):
 # ------------------------------------------------------- build the fake GDB
 mock = MockArcPy()
 
-loader = importlib.machinery.SourceFileLoader("pytmod", PYT)
-spec = importlib.util.spec_from_file_location("pytmod", PYT, loader=loader)
-mod = importlib.util.module_from_spec(spec)
-sys.modules["pytmod"] = mod
-spec.loader.exec_module(mod)
+if sys.version_info[0] >= 3:
+    loader = importlib.machinery.SourceFileLoader("pytmod", PYT)
+    spec = importlib.util.spec_from_file_location("pytmod", PYT, loader=loader)
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules["pytmod"] = mod
+    spec.loader.exec_module(mod)
+else:
+    mod = imp.load_source("pytmod", PYT)
+    sys.modules["pytmod"] = mod
 
 mod.arcpy = mock
 mod._HAS_ARCPY = True

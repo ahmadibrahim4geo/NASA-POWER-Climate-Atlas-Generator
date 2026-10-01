@@ -193,7 +193,7 @@ CANONICAL_DERIVED_MAP = {
 DERIVED_TO_SUBMODEL_KEY = dict((v, k) for k, v in CANONICAL_DERIVED_MAP.items())
 
 MODULES_ALL = PRIMARY_MODULES_ALL + SUBMODELS_ALL
-ALL_CANONICAL_MODULES = PRIMARY_MODULES_ALL + DERIVED_MODULES_ALL + ["Hargreaves PET"]
+ALL_CANONICAL_MODULES = PRIMARY_MODULES_ALL + DERIVED_MODULES_ALL
 
 SUBMODEL_DEPS = {
     "Heat Index / Thermal Stress [Requires: Temperature, Relative Humidity]": {
@@ -1726,6 +1726,51 @@ class RasterDataClimateAtlasGenerator(object):
         if is_geo and wind_cell_size > 1.0:
             warn("Target SR is Geographic: wind vector spacing %.1f meters converted to %.6f degrees." % (wind_cell_size, eff_wind_size))
 
+        if target_sr:
+            try:
+                arcpy.env.outputCoordinateSystem = target_sr
+            except Exception:
+                pass
+
+        try:
+            arcpy.env.parallelProcessingFactor = "0"
+            arcpy.env.compression = "LZW"
+            arcpy.env.tileSize = "128 128"
+            arcpy.env.pyramid = "NONE"
+            arcpy.env.rasterStatistics = "NONE"
+        except Exception:
+            pass
+
+        # Cell size safety guard to prevent memory exhaustion / indefinite freeze
+        try:
+            _desc_target = None
+            if in_clip_layer and arcpy.Exists(in_clip_layer):
+                _desc_target = arcpy.Describe(in_clip_layer)
+            elif in_extent_layer and arcpy.Exists(in_extent_layer):
+                _desc_target = arcpy.Describe(in_extent_layer)
+            elif is_offline and layer_paths and arcpy.Exists(layer_paths[0]):
+                _desc_target = arcpy.Describe(layer_paths[0])
+            if _desc_target and hasattr(_desc_target, "extent"):
+                _ext = _desc_target.extent
+                _w = float(_ext.XMax - _ext.XMin)
+                _h = float(_ext.YMax - _ext.YMin)
+                if _w > 0 and _h > 0 and eff_cell_size > 0:
+                    _cells = (_w / eff_cell_size) * (_h / eff_cell_size)
+                    if _cells > 50000000:
+                        _unit_lbl = "degrees" if is_geo else "metres"
+                        _err_msg = (
+                            "Cell size %.4g %s produces approximately %.1f million cells (safety limit: 50 million). "
+                            "This would exhaust system memory and cause an unrecoverable freeze. "
+                            "Please increase the Base Cell Size parameter and re-run."
+                            % (cell_size, _unit_lbl, _cells / 1000000.0)
+                        )
+                        arcpy.AddError(_err_msg)
+                        raise RuntimeError(_err_msg)
+        except RuntimeError:
+            raise
+        except Exception:
+            pass
+
         generated_rasters = []
         element_layers = {}
         indicator_fields_by_module = {}
@@ -1829,6 +1874,10 @@ class RasterDataClimateAtlasGenerator(object):
 
         arcpy.ClearEnvironment("mask")
         arcpy.ClearEnvironment("extent")
+        try:
+            arcpy.ResetEnvironments()
+        except Exception:
+            pass
 
         # 5. Dictionaries & Processing Log
         self._write_dictionaries(vec_dir, ordered_modules, msg)
@@ -2686,12 +2735,16 @@ class RasterDataClimateAtlasGenerator(object):
                               cell_size, out_tif, out_sr, msg, warn):
         try:
             if clip_layer and arcpy.Exists(clip_layer):
-                arcpy.env.mask = clip_layer
                 arcpy.env.extent = clip_layer
             else:
                 desc_pts = arcpy.Describe(pts_fc)
                 arcpy.env.extent = desc_pts.extent
-                arcpy.ClearEnvironment("mask")
+            arcpy.ClearEnvironment("mask")
+            if out_sr:
+                try:
+                    arcpy.env.outputCoordinateSystem = out_sr
+                except Exception:
+                    pass
 
             # Circular directions must NOT be interpolated linearly
             # (mean of 350+10=180 instead of 0). Use sin/cos U/V method.
@@ -2793,7 +2846,7 @@ class RasterDataClimateAtlasGenerator(object):
                 arcpy.env.compression = "LZW"
                 arcpy.env.tileSize = "128 128"
                 arcpy.env.pyramid = "NONE"
-                arcpy.env.rasterStatistics = "STATISTICS 1 1"
+                arcpy.env.rasterStatistics = "NONE"
                 arcpy.env.parallelProcessingFactor = "0"
             except Exception:
                 pass
@@ -2827,7 +2880,9 @@ class RasterDataClimateAtlasGenerator(object):
 
             return True
         except Exception as ex:
-            warn("Interpolation error for %s: %s" % (fld_name, ex))
+            _err_str = "Interpolation error for %s: %s" % (fld_name, ex)
+            warn(_err_str)
+            arcpy.AddWarning(_err_str)
             return False
 
     def _build_wind_vectors(self, gdb_path, generated_rasters, out_root, in_clip_layer,

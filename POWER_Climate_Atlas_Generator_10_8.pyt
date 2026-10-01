@@ -175,7 +175,7 @@ CANONICAL_DERIVED_MAP = {
 DERIVED_TO_SUBMODEL_KEY = dict((v, k) for k, v in CANONICAL_DERIVED_MAP.items())
 
 MODULES_ALL = PRIMARY_MODULES_ALL + SUBMODELS_ALL
-ALL_CANONICAL_MODULES = PRIMARY_MODULES_ALL + DERIVED_MODULES_ALL + ["Hargreaves PET"]
+ALL_CANONICAL_MODULES = PRIMARY_MODULES_ALL + DERIVED_MODULES_ALL
 
 SUBMODEL_DEPS = {
     "Heat Index / Thermal Stress [Requires: Temperature, Relative Humidity]": {
@@ -4159,7 +4159,10 @@ class PowerClimateAtlasGenerator(object):
                      "(base=%.5f deg, wind=%.5f deg)." % (eff_base, eff_wind))
             msg("Output SR: %s (%s)" % (out_sr.name, getattr(out_sr, "type", "?")))
 
-            gdb_name = "Climate_Database_%s.gdb" % time_tag
+            if is_offline:
+                gdb_name = "Climate_Atlas_Offline_%s.gdb" % time_tag
+            else:
+                gdb_name = "Climate_Database_%s.gdb" % time_tag
             gdb_path, paths = self._build_layout(out_ws, active_export_modules, gdb_name=gdb_name, export_shp=export_shp)
             msg("Workspace: %s (GDB: %s)" % (out_ws, gdb_name))
 
@@ -4230,12 +4233,16 @@ class PowerClimateAtlasGenerator(object):
                 if _w > 0 and _h > 0 and eff_base > 0:
                     _cells = (_w / eff_base) * (_h / eff_base)
                     if _cells > 50000000:
-                        warn(
-                            "Cell size %.4g %s produces approximately %.1f million cells. "
-                            "Processing may take longer depending on hardware." % (
-                                base_cell,
-                                ("degrees" if is_geo else "metres"),
-                                _cells / 1000000.0))
+                        _unit_lbl = "degrees" if is_geo else "metres"
+                        _err_msg = (
+                            "Cell size %.4g %s produces approximately %.1f million cells (safety limit: 50 million). "
+                            "This would exhaust system memory and cause an unrecoverable freeze. "
+                            "Please increase the Base Cell Size parameter and re-run." % (
+                                base_cell, _unit_lbl, _cells / 1000000.0))
+                        arcpy.AddError(_err_msg)
+                        raise RuntimeError(_err_msg)
+            except RuntimeError:
+                raise
             except Exception:
                 pass
             # --- ArcMap 10.x & CopyRaster deadlock guard: explicitly disable parallel processing ---
@@ -5261,6 +5268,7 @@ class PowerClimateAtlasGenerator(object):
             rdir = os.path.join(out_ws, folder, sub)
         else:
             rdir = os.path.join(out_ws, folder)
+        makedirs_ok(rdir)
         return os.path.join(rdir, field + ".tif"), None
 
     def _module_of_field(self, field):
@@ -5634,14 +5642,15 @@ class PowerClimateAtlasGenerator(object):
                             wc = windchill_c(float(t_val), float(ws_ann_val))
                             if wc is not None:
                                 f["WC_Annual_Mean"] = round(wc, 2)
-                        if f.get("WC_Annual_Mean") is None and t_val is not None and ws_ann_val is not None:
-                            wc = windchill_c(float(t_val), float(ws_ann_val))
-                            if wc is not None:
-                                f["WC_Annual_Mean"] = round(wc, 2)
 
             # 5. Create primary element feature classes in GDB for remaining modules
             admin_names = [a[0] for a in ADMIN_FIELDS]
-            for m in remaining_modules:
+            for mi, m in enumerate(remaining_modules):
+                try:
+                    arcpy.SetProgressorLabel("Offline Merge: processing module %s [%d/%d]..." % (m, mi + 1, len(remaining_modules)))
+                except Exception:
+                    pass
+                msg("  Offline Merge: assembling module [%d/%d] '%s'..." % (mi + 1, len(remaining_modules), m))
                 short = MODULE_SHORT.get(m, m)
                 fc = os.path.join(gdb_path, short)
                 for _inp in layer_paths:
@@ -6648,6 +6657,7 @@ class PowerClimateAtlasGenerator(object):
         try:
             arcpy.ClearEnvironment("mask")
             arcpy.ClearEnvironment("extent")
+            arcpy.ResetEnvironments()
         except Exception:
             pass
         if scratch and purge:
