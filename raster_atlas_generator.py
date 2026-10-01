@@ -144,6 +144,7 @@ PRIMARY_MODULES_ALL = [
     "Temperature",
     "Precipitation",
     "Relative Humidity",
+    "Dew Point",
     "Wind",
     "Solar Radiation",
     "Surface Pressure",
@@ -156,7 +157,7 @@ SUBMODELS_ALL = [
     "Heat Index / Thermal Stress [Requires: Temperature, Relative Humidity]",
     "Wind Chill / Cold Stress [Requires: Temperature, Wind]",
     "De Martonne Aridity Index [Requires: Temperature, Precipitation]",
-    "FAO-56 Hargreaves PET [Requires: Temperature]",
+    "Evapotranspiration (ET) [Requires: Temperature]",
     "UNEP Aridity Index [Requires: Temperature, Precipitation]",
     "Water Deficit Annual [Requires: Temperature, Precipitation]",
     "Walter-Lieth Dry Months Count [Requires: Temperature, Precipitation]",
@@ -167,7 +168,7 @@ DERIVED_MODULES_ALL = [
     "Heat Index",
     "Wind Chill",
     "De Martonne Aridity",
-    "Hargreaves PET",
+    "Evapotranspiration",
     "UNEP Aridity",
     "Water Deficit",
     "Dry Months",
@@ -178,7 +179,11 @@ CANONICAL_DERIVED_MAP = {
     "Heat Index / Thermal Stress [Requires: Temperature, Relative Humidity]": "Heat Index",
     "Wind Chill / Cold Stress [Requires: Temperature, Wind]": "Wind Chill",
     "De Martonne Aridity Index [Requires: Temperature, Precipitation]": "De Martonne Aridity",
-    "FAO-56 Hargreaves PET [Requires: Temperature]": "Hargreaves PET",
+    "Evapotranspiration (ET) [Requires: Temperature]": "Evapotranspiration",
+    "FAO-56 Hargreaves PET [Requires: Temperature]": "Evapotranspiration",
+    "Hargreaves PET": "Evapotranspiration",
+    "Hargreaves_PET": "Evapotranspiration",
+    "ET": "Evapotranspiration",
     "UNEP Aridity Index [Requires: Temperature, Precipitation]": "UNEP Aridity",
     "Water Deficit Annual [Requires: Temperature, Precipitation]": "Water Deficit",
     "Walter-Lieth Dry Months Count [Requires: Temperature, Precipitation]": "Dry Months",
@@ -188,7 +193,7 @@ CANONICAL_DERIVED_MAP = {
 DERIVED_TO_SUBMODEL_KEY = dict((v, k) for k, v in CANONICAL_DERIVED_MAP.items())
 
 MODULES_ALL = PRIMARY_MODULES_ALL + SUBMODELS_ALL
-ALL_CANONICAL_MODULES = PRIMARY_MODULES_ALL + DERIVED_MODULES_ALL
+ALL_CANONICAL_MODULES = PRIMARY_MODULES_ALL + DERIVED_MODULES_ALL + ["Hargreaves PET"]
 
 SUBMODEL_DEPS = {
     "Heat Index / Thermal Stress [Requires: Temperature, Relative Humidity]": {
@@ -229,16 +234,23 @@ SUBMODEL_DEPS = {
         "modules": ["Temperature", "Precipitation"],
         "params": ["T2M", "PRECTOTCORR"]
     },
-    "FAO-56 Hargreaves PET [Requires: Temperature]": {
-        "short": "Hargreaves_PET",
-        "canonical": "Hargreaves PET",
+    "Evapotranspiration (ET) [Requires: Temperature]": {
+        "short": "Evapotranspiration",
+        "canonical": "Evapotranspiration",
         "fields": [
-            ("PET_Hargreaves_Annual", "Annual Potential Evapotranspiration (Hargreaves)"),
+            ("ET_Annual_Total", "Annual Total Evapotranspiration"),
+            ("ET_Annual_Mean", "Annual Mean Monthly Evapotranspiration"),
+            ("ET_Annual_Range", "Annual Evapotranspiration Range"),
+            ("ET_Seasonal_Range", "Seasonal Evapotranspiration Range"),
+            ("ET_Winter_Total", "Winter Total Evapotranspiration"),
+            ("ET_Spring_Total", "Spring Total Evapotranspiration"),
+            ("ET_Summer_Total", "Summer Total Evapotranspiration"),
+            ("ET_Autumn_Total", "Autumn Total Evapotranspiration"),
         ],
-        "field": "PET_Hargreaves_Annual",
-        "label": "Annual Potential Evapotranspiration (Hargreaves)",
+        "field": "ET_Annual_Total",
+        "label": "Annual Total Evapotranspiration",
         "modules": ["Temperature"],
-        "params": ["T2M"]
+        "params": ["T2M", "T2M_MAX", "T2M_MIN"]
     },
     "UNEP Aridity Index [Requires: Temperature, Precipitation]": {
         "short": "UNEP_Aridity",
@@ -274,7 +286,7 @@ SUBMODEL_DEPS = {
         "params": ["T2M", "PRECTOTCORR"]
     },
     "Trends & Baseline Anomalies [Requires: Temperature, Precipitation]": {
-        "short": "Trends_Anomalies",
+        "short": "Trends_And_Anomalies",
         "canonical": "Trends & Anomalies",
         "fields": [
             ("T_Trend_Decade", "Temperature Trend per Decade"),
@@ -300,19 +312,49 @@ def resolve_module_canonical(name):
     if not name:
         return None
     name_str = name.strip().strip("'\"")
+    def _norm(s):
+        return str(s).strip().strip("'\"").lower().replace("_", " ").replace("-", " ")
+    n_input = _norm(name_str)
+    _DIRECT_ALIASES = {
+        "et": "Evapotranspiration",
+        "evaporation": "Evapotranspiration",
+        "evapotranspiration": "Evapotranspiration",
+        "hargreaves pet": "Evapotranspiration",
+        "hargreaves_pet": "Evapotranspiration",
+        "humidity": "Relative Humidity",
+        "relative humidity": "Relative Humidity",
+        "relative_humidity": "Relative Humidity",
+        "trends anomalies": "Trends & Anomalies",
+        "trends_anomalies": "Trends & Anomalies",
+        "trends and anomalies": "Trends & Anomalies",
+        "trends_and_anomalies": "Trends & Anomalies",
+        "dew point": "Dew Point",
+        "dew_point": "Dew Point",
+    }
+    if n_input in _DIRECT_ALIASES:
+        return _DIRECT_ALIASES[n_input]
     for cm in ALL_CANONICAL_MODULES:
-        if name_str.lower() == cm.lower():
+        if n_input == _norm(cm) or name_str.lower() == cm.lower():
             return cm
     if name_str in CANONICAL_DERIVED_MAP:
         return CANONICAL_DERIVED_MAP[name_str]
     clean = name_str.split(" [")[0].strip().lower()
+    clean_norm = _norm(clean)
+    if clean_norm in _DIRECT_ALIASES:
+        return _DIRECT_ALIASES[clean_norm]
     for sub_key, can_name in CANONICAL_DERIVED_MAP.items():
-        k_clean = sub_key.split(" [")[0].strip().lower()
-        if clean == k_clean or k_clean.startswith(clean) or clean == can_name.lower():
+        k_clean = _norm(sub_key.split(" [")[0])
+        if clean_norm == k_clean or k_clean.startswith(clean_norm) or clean_norm == _norm(can_name):
             return can_name
     for info in SUBMODEL_DEPS.values():
-        if clean == info.get("short", "").lower():
+        if clean_norm == _norm(info.get("short", "")) or clean_norm == _norm(info.get("canonical", "")):
             return info["canonical"]
+    try:
+        for can_name, short_code in MODULE_SHORT.items():
+            if n_input == _norm(short_code):
+                return can_name
+    except Exception:
+        pass
     return None
 
 
@@ -322,18 +364,20 @@ MODULE_SHORT = {
     "Sea Level Pressure": "Sea_Level_Pressure",
     "Surface Pressure": "Surface_Pressure",
     "Wind": "Wind",
-    "Relative Humidity": "Humidity",
+    "Relative Humidity": "Relative_Humidity",
+    "Dew Point": "Dew_Point",
     "Solar Radiation": "Solar_Radiation",
     "UV Index": "UV_Index",
     "Cloud Cover": "Cloud_Cover",
     "Heat Index": "Heat_Index",
     "Wind Chill": "Wind_Chill",
     "De Martonne Aridity": "De_Martonne_Aridity",
-    "Hargreaves PET": "Hargreaves_PET",
+    "Evapotranspiration": "Evapotranspiration",
+    "Hargreaves PET": "Evapotranspiration",
     "UNEP Aridity": "UNEP_Aridity",
     "Water Deficit": "Water_Deficit",
     "Dry Months": "Dry_Months",
-    "Trends & Anomalies": "Trends_Anomalies",
+    "Trends & Anomalies": "Trends_And_Anomalies",
     "Drought & Aridity": "Drought_Aridity",
     "Climate_Models": "Climate_Models",
 }
@@ -344,25 +388,28 @@ MODULE_FOLDER = {
     "Sea Level Pressure": "03_Sea_Level_Pressure",
     "Surface Pressure": "04_Surface_Pressure",
     "Wind": "05_Wind",
-    "Relative Humidity": "06_Humidity",
-    "Solar Radiation": "07_Solar_Radiation",
-    "UV Index": "08_UV_Index",
-    "Cloud Cover": "09_Cloud_Cover",
-    "Heat Index": "10_Heat_Index",
-    "Wind Chill": "11_Wind_Chill",
-    "De Martonne Aridity": "12_De_Martonne_Aridity",
-    "Hargreaves PET": "13_Hargreaves_PET",
-    "UNEP Aridity": "14_UNEP_Aridity",
-    "Water Deficit": "15_Water_Deficit",
-    "Dry Months": "16_Dry_Months",
-    "Trends & Anomalies": "17_Trends_And_Anomalies",
-    "Climate_Models": "10_Climate_Models",
+    "Relative Humidity": "06_Relative_Humidity",
+    "Dew Point": "07_Dew_Point",
+    "Solar Radiation": "08_Solar_Radiation",
+    "UV Index": "09_UV_Index",
+    "Cloud Cover": "10_Cloud_Cover",
+    "Heat Index": "11_Heat_Index",
+    "Wind Chill": "12_Wind_Chill",
+    "De Martonne Aridity": "13_De_Martonne_Aridity",
+    "Evapotranspiration": "14_Evapotranspiration",
+    "Hargreaves PET": "14_Evapotranspiration",
+    "UNEP Aridity": "15_UNEP_Aridity",
+    "Water Deficit": "16_Water_Deficit",
+    "Dry Months": "17_Dry_Months",
+    "Trends & Anomalies": "18_Trends_And_Anomalies",
+    "Climate_Models": "11_Climate_Models",
 }
 
 POWER_PRIMARY_PARAM = {
     "Temperature": "T2M",
     "Precipitation": "PRECTOTCORR",
     "Relative Humidity": "RH2M",
+    "Dew Point": "T2MDEW",
     "Wind": "WS10M",
     "Solar Radiation": "ALLSKY_SFC_SW_DWN",
     "Surface Pressure": "PS",
@@ -375,6 +422,7 @@ COLOR_RAMPS = {
     "Temperature": ["#4575B4", "#74ADD1", "#ABD9E9", "#FFFFBF", "#FDAE61", "#F46D43", "#D73027"],
     "Precipitation": ["#8C510A", "#D8B365", "#F6E8C3", "#C7EAE5", "#80CDC1", "#35978F", "#01665E"],
     "Relative Humidity": ["#FFFFCC", "#C7E9B4", "#7FCDBB", "#41B6C4", "#1D91C0", "#225EA8", "#0C2C84"],
+    "Dew Point": ["#FFFFCC", "#C7E9B4", "#7FCDBB", "#41B6C4", "#1D91C0", "#225EA8", "#0C2C84"],
     "Wind": ["#F7FBFF", "#DEEBF7", "#C6DBEF", "#9ECAE1", "#6BAED6", "#3182BD", "#08519C"],
     "Wind_Speed": ["#F7FBFF", "#DEEBF7", "#C6DBEF", "#9ECAE1", "#6BAED6", "#3182BD", "#08519C"],
     "Wind_Direction": ["#F7F7F7", "#D9D9D9", "#BDBDBD", "#969696", "#737373", "#525252", "#252525"],
@@ -386,6 +434,7 @@ COLOR_RAMPS = {
     "Heat Index": ["#FFFFD4", "#FEE391", "#FEC44F", "#FE9929", "#EC7014", "#CC4C02", "#8C2D04"],
     "Wind Chill": ["#08306B", "#08519C", "#2171B5", "#4292C6", "#6BAED6", "#9ECAE1", "#C6DBEF"],
     "De Martonne Aridity": ["#8C510A", "#D8B365", "#F6E8C3", "#E0E0E0", "#80CDC1", "#35978F", "#01665E"],
+    "Evapotranspiration": ["#FFFFCC", "#D9F0A3", "#ADDD8E", "#78C679", "#41AB5D", "#238443", "#005A32"],
     "Hargreaves PET": ["#FFFFCC", "#D9F0A3", "#ADDD8E", "#78C679", "#41AB5D", "#238443", "#005A32"],
     "UNEP Aridity": ["#D73027", "#FC8D59", "#FEE08B", "#FFFFBF", "#D9EF8B", "#91CF60", "#1A9850"],
     "Water Deficit": ["#B2182B", "#D6604D", "#F4A582", "#FDDBC7", "#D1E5F0", "#92C5DE", "#4393C3"],
@@ -428,8 +477,10 @@ SHP_FIELD_MAP = {
     "RH_Summer_Mean": "RH_SuMean",
     "RH_Winter_Mean": "RH_WnMean",
     "R_Annual_Mean": "R_AnnMean",
+    "R_Annual_Range": "R_AnnRng",
     "R_Annual_Total": "R_AnnTot",
     "R_Autumn_Total": "R_AutTot",
+    "R_Seasonal_Range": "R_SeaRng",
     "R_Spring_Total": "R_SprTot",
     "R_Summer_Total": "R_SumTot",
     "R_Winter_Total": "R_WinTot",
@@ -469,10 +520,21 @@ SHP_FIELD_MAP = {
     "W_Spd_Spring_Mean": "WSp_SpMean",
     "W_Spd_Summer_Mean": "WSp_SuMean",
     "W_Spd_Winter_Mean": "WSp_WnMean",
+    "ET_Annual_Total": "ET_AnnTot",
+    "ET_Annual_Mean": "ET_AnnMean",
+    "ET_Annual_Range": "ET_AnnRng",
+    "ET_Seasonal_Range": "ET_SeaRng",
+    "ET_Winter_Total": "ET_WinTot",
+    "ET_Spring_Total": "ET_SprTot",
+    "ET_Summer_Total": "ET_SumTot",
+    "ET_Autumn_Total": "ET_AutTot",
     "PET_Hargreaves_Annual": "PET_HarAnn",
     "UNEP_Aridity_Annual": "UNEP_Arid",
     "Water_Deficit_Annual": "WatDefAnn",
     "Td_Annual_Mean": "Td_AnnMean",
+    "Td_Annual_Range": "Td_AnnRng",
+    "Td_Autumn_Mean": "Td_AutMean",
+    "Td_Spring_Mean": "Td_SprMean",
     "Td_Summer_Mean": "Td_SumMean",
     "Td_Winter_Mean": "Td_WinMean",
     "WC_Winter_Mean": "WC_WinMean",
@@ -502,13 +564,12 @@ MODULE_INDICATOR_FIELDS = {
         ("T_Min_Winter_Month_Mean", "Minimum Winter Monthly Mean Temperature"),
         ("T_Annual_Max_Mean", "Annual Mean Maximum Temperature"),
         ("T_Annual_Min_Mean", "Annual Mean Minimum Temperature"),
-        ("Td_Annual_Mean", "Annual Mean Dew Point Temperature"),
-        ("Td_Summer_Mean", "Summer Mean Dew Point Temperature"),
-        ("Td_Winter_Mean", "Winter Mean Dew Point Temperature"),
     ],
     "Precipitation": [
         ("R_Annual_Total", "Annual Total Precipitation"),
         ("R_Annual_Mean", "Mean Monthly Precipitation"),
+        ("R_Annual_Range", "Annual Precipitation Range"),
+        ("R_Seasonal_Range", "Seasonal Precipitation Range"),
         ("R_Winter_Total", "Winter Total Precipitation"),
         ("R_Spring_Total", "Spring Total Precipitation"),
         ("R_Summer_Total", "Summer Total Precipitation"),
@@ -521,6 +582,14 @@ MODULE_INDICATOR_FIELDS = {
         ("RH_Summer_Mean", "Summer Mean Relative Humidity"),
         ("RH_Autumn_Mean", "Autumn Mean Relative Humidity"),
         ("RH_Annual_Range", "Annual Relative Humidity Range"),
+    ],
+    "Dew Point": [
+        ("Td_Annual_Mean", "Annual Mean Dew Point Temperature"),
+        ("Td_Winter_Mean", "Winter Mean Dew Point Temperature"),
+        ("Td_Spring_Mean", "Spring Mean Dew Point Temperature"),
+        ("Td_Summer_Mean", "Summer Mean Dew Point Temperature"),
+        ("Td_Autumn_Mean", "Autumn Mean Dew Point Temperature"),
+        ("Td_Annual_Range", "Annual Dew Point Range"),
     ],
     "Wind": [
         ("W_Spd_Annual_Mean", "Annual Mean Wind Speed"),
@@ -592,7 +661,25 @@ MODULE_INDICATOR_FIELDS = {
     "De Martonne Aridity": [
         ("DM_Aridity_Annual", "De Martonne Aridity Index"),
     ],
+    "Evapotranspiration": [
+        ("ET_Annual_Total", "Annual Total Evapotranspiration (Hargreaves)"),
+        ("ET_Annual_Mean", "Annual Mean Monthly Evapotranspiration"),
+        ("ET_Annual_Range", "Annual Evapotranspiration Range"),
+        ("ET_Seasonal_Range", "Seasonal Evapotranspiration Range"),
+        ("ET_Winter_Total", "Winter Total Evapotranspiration"),
+        ("ET_Spring_Total", "Spring Total Evapotranspiration"),
+        ("ET_Summer_Total", "Summer Total Evapotranspiration"),
+        ("ET_Autumn_Total", "Autumn Total Evapotranspiration"),
+    ],
     "Hargreaves PET": [
+        ("ET_Annual_Total", "Annual Total Evapotranspiration (Hargreaves)"),
+        ("ET_Annual_Mean", "Annual Mean Monthly Evapotranspiration"),
+        ("ET_Annual_Range", "Annual Evapotranspiration Range"),
+        ("ET_Seasonal_Range", "Seasonal Evapotranspiration Range"),
+        ("ET_Winter_Total", "Winter Total Evapotranspiration"),
+        ("ET_Spring_Total", "Spring Total Evapotranspiration"),
+        ("ET_Summer_Total", "Summer Total Evapotranspiration"),
+        ("ET_Autumn_Total", "Autumn Total Evapotranspiration"),
         ("PET_Hargreaves_Annual", "Annual Potential Evapotranspiration (Hargreaves)"),
     ],
     "UNEP Aridity": [
@@ -616,6 +703,11 @@ MODULE_INDICATOR_FIELDS = {
         ("R_Anom_Winter_Pct", "Winter Precipitation Anomaly Percent vs 1991-2020"),
     ],
 }
+MODULE_INDICATOR_FIELDS["Humidity"] = MODULE_INDICATOR_FIELDS["Relative Humidity"]
+MODULE_INDICATOR_FIELDS["Relative_Humidity"] = MODULE_INDICATOR_FIELDS["Relative Humidity"]
+MODULE_INDICATOR_FIELDS["Dew_Point"] = MODULE_INDICATOR_FIELDS["Dew Point"]
+MODULE_INDICATOR_FIELDS["Trends_And_Anomalies"] = MODULE_INDICATOR_FIELDS["Trends & Anomalies"]
+MODULE_INDICATOR_FIELDS["Trends & Baseline Anomalies"] = MODULE_INDICATOR_FIELDS["Trends & Anomalies"]
 MODULE_INDICATOR_FIELDS["Climate_Models"] = [
     item for mod_key in DERIVED_MODULES_ALL for item in MODULE_INDICATOR_FIELDS.get(mod_key, [])
 ]
@@ -1191,7 +1283,7 @@ class RasterDataClimateAtlasGenerator(object):
         p_mods.category = "Climate Modules & Models"
         p_mods.description = (
             "Select climate modules and applied bioclimatic models to compute and export. "
-            "Submodels (De Martonne, Hargreaves PET, UNEP, Water Deficit, Walter-Lieth, Heat Index) "
+            "Submodels (De Martonne, Evapotranspiration, UNEP, Water Deficit, Walter-Lieth, Heat Index) "
             "can be selected directly; prerequisite variables are retrieved automatically if not selected."
         )
 
@@ -1873,7 +1965,7 @@ class RasterDataClimateAtlasGenerator(object):
                     arcpy.MakeRasterLayer_management(mem_bands, m_name, band_index=m_i)
                     m_layers[m_i] = Raster(m_name)
 
-                is_sum = (module == "Precipitation")
+                is_sum = (module in ("Precipitation", "Evapotranspiration"))
                 divisor = 1.0 if is_sum else 3.0
                 # Same-year December climatological approximation (see SEASONS note
                 # in the point toolbox: strict WMO DJF uses Dec of previous year).
@@ -1882,18 +1974,29 @@ class RasterDataClimateAtlasGenerator(object):
                 r_sum = (m_layers[6] + m_layers[7] + m_layers[8]) / divisor
                 r_aut = (m_layers[9] + m_layers[10] + m_layers[11]) / divisor
 
-                win_fld = indicator_fields[1][0] if not is_sum else indicator_fields[2][0]
-                spr_fld = indicator_fields[2][0] if not is_sum else indicator_fields[3][0]
-                sum_fld = indicator_fields[3][0] if not is_sum else indicator_fields[4][0]
-                aut_fld = indicator_fields[4][0] if not is_sum else indicator_fields[5][0]
+                win_fld = next((f for f, _ in indicator_fields if "_Winter_" in f or f.endswith("_Winter")), None)
+                spr_fld = next((f for f, _ in indicator_fields if "_Spring_" in f or f.endswith("_Spring")), None)
+                sum_fld = next((f for f, _ in indicator_fields if "_Summer_" in f or f.endswith("_Summer")), None)
+                aut_fld = next((f for f, _ in indicator_fields if "_Autumn_" in f or f.endswith("_Autumn")), None)
 
-                extract_list = [
-                    [r_win, win_fld],
-                    [r_spr, spr_fld],
-                    [r_sum, sum_fld],
-                    [r_aut, aut_fld]
-                ]
-                if is_sum and len(indicator_fields) > 1 and indicator_fields[1][0] == "R_Annual_Mean":
+                extract_list = []
+                if win_fld: extract_list.append([r_win, win_fld])
+                if spr_fld: extract_list.append([r_spr, spr_fld])
+                if sum_fld: extract_list.append([r_sum, sum_fld])
+                if aut_fld: extract_list.append([r_aut, aut_fld])
+
+                if is_sum:
+                    sea_rng_flds = [f for f, _ in indicator_fields if "Seasonal_Range" in f]
+                    if sea_rng_flds:
+                        try:
+                            r_sea_max = CellStatistics([r_win, r_spr, r_sum, r_aut], "MAXIMUM", "DATA")
+                            r_sea_min = CellStatistics([r_win, r_spr, r_sum, r_aut], "MINIMUM", "DATA")
+                            extract_list.append([r_sea_max - r_sea_min, sea_rng_flds[0]])
+                        except Exception:
+                            pass
+
+                ann_mean_flds = [f for f, _ in indicator_fields if f in ("R_Annual_Mean", "ET_Annual_Mean")]
+                if is_sum and ann_mean_flds:
                     # MEAN + DATA skips NoData months; a plain /12 sum would null
                     # the whole year when a single month is NoData.
                     try:
@@ -1902,13 +2005,14 @@ class RasterDataClimateAtlasGenerator(object):
                         r_mean = (m_layers[1] + m_layers[2] + m_layers[3] + m_layers[4] + m_layers[5] +
                                   m_layers[6] + m_layers[7] + m_layers[8] + m_layers[9] + m_layers[10] +
                                   m_layers[11] + m_layers[12]) / 12.0
-                    extract_list.append([r_mean, "R_Annual_Mean"])
+                    for am_fld in ann_mean_flds:
+                        extract_list.append([r_mean, am_fld])
 
                 range_flds = [f for f, _l in indicator_fields
-                              if f.endswith("_Range") and "Dir_" not in f]
+                              if f.endswith("_Range") and "Seasonal_Range" not in f and "Dir_" not in f]
                 min_flds = [f for f, _l in indicator_fields if "_Min_Month" in f]
                 max_flds = [f for f, _l in indicator_fields if "_Max_Month" in f]
-                if (range_flds or min_flds or max_flds) and module != "Precipitation":
+                if (range_flds or min_flds or max_flds):
                     try:
                         _m_list = [m_layers[m_i] for m_i in range(1, 13)]
                         r_max = CellStatistics(_m_list, "MAXIMUM", "DATA")
@@ -1991,6 +2095,7 @@ class RasterDataClimateAtlasGenerator(object):
             "Heat Index": ["Temperature", "Relative Humidity"],
             "Wind Chill": ["Temperature", "Wind"],
             "De Martonne Aridity": ["Temperature", "Precipitation"],
+            "Evapotranspiration": ["Temperature"],
             "Hargreaves PET": ["Temperature"],
             "UNEP Aridity": ["Temperature", "Precipitation"],
             "Water Deficit": ["Temperature", "Precipitation"],
@@ -2105,9 +2210,32 @@ class RasterDataClimateAtlasGenerator(object):
                     if fld == "DM_Aridity_Annual":
                         denom = (t + 10.0) if t is not None else 30.0
                         val = (p / denom) if denom > 0.01 else 0.0
-                    elif fld == "PET_Hargreaves_Annual":
+                    elif fld in ("PET_Hargreaves_Annual", "ET_Annual_Total"):
                         ra = extraterrestrial_radiation_ra(lat, 7)
                         val = 0.0023 * ra * ((t if t is not None else 20.0) + 17.8) * math.sqrt(10.0) * 365.25
+                    elif fld == "ET_Annual_Mean":
+                        ra = extraterrestrial_radiation_ra(lat, 7)
+                        val = (0.0023 * ra * ((t if t is not None else 20.0) + 17.8) * math.sqrt(10.0) * 365.25) / 12.0
+                    elif fld == "ET_Annual_Range":
+                        ra_jul = extraterrestrial_radiation_ra(lat, 7)
+                        ra_jan = extraterrestrial_radiation_ra(lat, 1)
+                        val = abs(0.0023 * (ra_jul - ra_jan) * ((t if t is not None else 20.0) + 17.8) * math.sqrt(10.0) * 30.5)
+                    elif fld == "ET_Seasonal_Range":
+                        ra_jul = extraterrestrial_radiation_ra(lat, 7)
+                        ra_jan = extraterrestrial_radiation_ra(lat, 1)
+                        val = abs(0.0023 * (ra_jul - ra_jan) * ((t if t is not None else 20.0) + 17.8) * math.sqrt(10.0) * 91.25)
+                    elif fld == "ET_Winter_Total":
+                        ra_w = extraterrestrial_radiation_ra(lat, 1)
+                        val = 0.0023 * ra_w * ((t if t is not None else 20.0) + 17.8) * math.sqrt(10.0) * 90.25
+                    elif fld == "ET_Spring_Total":
+                        ra_sp = extraterrestrial_radiation_ra(lat, 4)
+                        val = 0.0023 * ra_sp * ((t if t is not None else 20.0) + 17.8) * math.sqrt(10.0) * 92.0
+                    elif fld == "ET_Summer_Total":
+                        ra_su = extraterrestrial_radiation_ra(lat, 7)
+                        val = 0.0023 * ra_su * ((t if t is not None else 20.0) + 17.8) * math.sqrt(10.0) * 92.0
+                    elif fld == "ET_Autumn_Total":
+                        ra_au = extraterrestrial_radiation_ra(lat, 10)
+                        val = 0.0023 * ra_au * ((t if t is not None else 20.0) + 17.8) * math.sqrt(10.0) * 91.0
                     elif fld == "UNEP_Aridity_Annual":
                         ra = extraterrestrial_radiation_ra(lat, 7)
                         pet = 0.0023 * ra * ((t if t is not None else 20.0) + 17.8) * math.sqrt(10.0) * 365.25
@@ -2308,22 +2436,43 @@ class RasterDataClimateAtlasGenerator(object):
                             t_f, p_f = float(t_val), float(p_val)
                             f["DM_Aridity_Annual"] = round(p_f / (t_f + 10.0), 2) if (t_f + 10.0) > 0.01 else 0.0
 
-                    if any("Hargreaves" in s or "UNEP" in s or "Water Deficit" in s for s in active_submodels):
-                        if f.get("PET_Hargreaves_Annual") is None and t_val is not None and tx_val is not None and tn_val is not None:
+                    if any("Hargreaves" in s or "Evapotranspiration" in s or "UNEP" in s or "Water Deficit" in s for s in active_submodels):
+                        if (f.get("ET_Annual_Total") is None or f.get("PET_Hargreaves_Annual") is None) and t_val is not None and tx_val is not None and tn_val is not None:
                             t_f, tx_f, tn_f = float(t_val), float(tx_val), float(tn_val)
-                            ra_ann = sum(extraterrestrial_radiation_ra(pt_lat, m) for m in range(1, 13))
                             tdiff = max(0.0, tx_f - tn_f)
-                            pet_ann = 0.0023 * ra_ann * 30.4 * (t_f + 17.8) * math.sqrt(tdiff)
-                            f["PET_Hargreaves_Annual"] = round(max(0.0, pet_ann), 1)
+                            days_in_m = [31, 28.25, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+                            m_pet = []
+                            for m in range(1, 13):
+                                ra_m = extraterrestrial_radiation_ra(pt_lat, m)
+                                pet_m = max(0.0, 0.0023 * ra_m * (t_f + 17.8) * math.sqrt(tdiff) * days_in_m[m - 1])
+                                m_pet.append(pet_m)
+                            pet_ann = sum(m_pet)
+                            et_win = m_pet[11] + m_pet[0] + m_pet[1]
+                            et_spr = m_pet[2] + m_pet[3] + m_pet[4]
+                            et_sum = m_pet[5] + m_pet[6] + m_pet[7]
+                            et_aut = m_pet[8] + m_pet[9] + m_pet[10]
+                            et_seas = [et_win, et_spr, et_sum, et_aut]
+
+                            f["ET_Annual_Total"] = round(pet_ann, 1)
+                            f["ET_Annual_Mean"] = round(pet_ann / 12.0, 1)
+                            f["ET_Annual_Range"] = round(max(m_pet) - min(m_pet), 1) if m_pet else 0.0
+                            f["ET_Seasonal_Range"] = round(max(et_seas) - min(et_seas), 1)
+                            f["ET_Winter_Total"] = round(et_win, 1)
+                            f["ET_Spring_Total"] = round(et_spr, 1)
+                            f["ET_Summer_Total"] = round(et_sum, 1)
+                            f["ET_Autumn_Total"] = round(et_aut, 1)
+                            f["PET_Hargreaves_Annual"] = round(pet_ann, 1)
 
                     if any("UNEP" in s for s in active_submodels):
-                        if f.get("UNEP_Aridity_Annual") is None and p_val is not None and f.get("PET_Hargreaves_Annual") is not None:
-                            pet_f = float(f["PET_Hargreaves_Annual"])
+                        pet_val = f.get("ET_Annual_Total") if f.get("ET_Annual_Total") is not None else f.get("PET_Hargreaves_Annual")
+                        if f.get("UNEP_Aridity_Annual") is None and p_val is not None and pet_val is not None:
+                            pet_f = float(pet_val)
                             f["UNEP_Aridity_Annual"] = round(float(p_val) / pet_f, 3) if pet_f > 0.01 else 0.0
 
                     if any("Water Deficit" in s for s in active_submodels):
-                        if f.get("Water_Deficit_Annual") is None and p_val is not None and f.get("PET_Hargreaves_Annual") is not None:
-                            f["Water_Deficit_Annual"] = round(float(p_val) - float(f["PET_Hargreaves_Annual"]), 1)
+                        pet_val = f.get("ET_Annual_Total") if f.get("ET_Annual_Total") is not None else f.get("PET_Hargreaves_Annual")
+                        if f.get("Water_Deficit_Annual") is None and p_val is not None and pet_val is not None:
+                            f["Water_Deficit_Annual"] = round(float(p_val) - float(pet_val), 1)
 
                     if any("Walter-Lieth" in s for s in active_submodels):
                         if f.get("Dry_Months_Count") is None and p_val is not None and t_val is not None:
@@ -2645,6 +2794,14 @@ class RasterDataClimateAtlasGenerator(object):
                 arcpy.env.tileSize = "128 128"
                 arcpy.env.pyramid = "NONE"
                 arcpy.env.rasterStatistics = "STATISTICS 1 1"
+                arcpy.env.parallelProcessingFactor = "0"
+            except Exception:
+                pass
+
+            try:
+                out_dir = os.path.dirname(out_tif)
+                if out_dir and not os.path.exists(out_dir):
+                    os.makedirs(out_dir)
             except Exception:
                 pass
 
@@ -2899,6 +3056,8 @@ class RasterDataClimateAtlasGenerator(object):
             ["Temperature", "T_Annual_Range", "Annual Temperature Range", "deg C", "Gridded Reanalysis"],
             ["Precipitation", "R_Annual_Total", "Annual Accumulated Total Precipitation", "mm/yr", "Gridded Reanalysis"],
             ["Precipitation", "R_Annual_Mean", "Annual Mean Precipitation", "mm/yr", "Gridded Reanalysis"],
+            ["Precipitation", "R_Annual_Range", "Annual Precipitation Range", "mm", "Gridded Reanalysis"],
+            ["Precipitation", "R_Seasonal_Range", "Seasonal Precipitation Range", "mm", "Gridded Reanalysis"],
             ["Precipitation", "R_Winter_Total", "Winter (DJF) Precipitation Total", "mm", "Gridded Reanalysis"],
             ["Precipitation", "R_Spring_Total", "Spring (MAM) Precipitation Total", "mm", "Gridded Reanalysis"],
             ["Precipitation", "R_Summer_Total", "Summer (JJA) Precipitation Total", "mm", "Gridded Reanalysis"],
@@ -2908,6 +3067,12 @@ class RasterDataClimateAtlasGenerator(object):
             ["Relative Humidity", "RH_Spring_Mean", "Spring (MAM) Mean Relative Humidity", "%", "Gridded Reanalysis"],
             ["Relative Humidity", "RH_Summer_Mean", "Summer (JJA) Mean Relative Humidity", "%", "Gridded Reanalysis"],
             ["Relative Humidity", "RH_Autumn_Mean", "Autumn (SON) Mean Relative Humidity", "%", "Gridded Reanalysis"],
+            ["Dew Point", "Td_Annual_Mean", "Annual Mean Dew Point Temperature", "deg C", "Gridded Reanalysis"],
+            ["Dew Point", "Td_Winter_Mean", "Winter (DJF) Mean Dew Point Temperature", "deg C", "Gridded Reanalysis"],
+            ["Dew Point", "Td_Spring_Mean", "Spring (MAM) Mean Dew Point Temperature", "deg C", "Gridded Reanalysis"],
+            ["Dew Point", "Td_Summer_Mean", "Summer (JJA) Mean Dew Point Temperature", "deg C", "Gridded Reanalysis"],
+            ["Dew Point", "Td_Autumn_Mean", "Autumn (SON) Mean Dew Point Temperature", "deg C", "Gridded Reanalysis"],
+            ["Dew Point", "Td_Annual_Range", "Annual Dew Point Range", "deg C", "Gridded Reanalysis"],
             ["Wind", "W_Spd_Annual_Mean", "Annual Mean 10m Wind Speed", "m/s", "Gridded Reanalysis"],
             ["Wind", "W_Spd_Winter_Mean", "Winter (DJF) Mean Wind Speed", "m/s", "Gridded Reanalysis"],
             ["Wind", "W_Spd_Spring_Mean", "Spring (MAM) Mean Wind Speed", "m/s", "Gridded Reanalysis"],
@@ -2954,7 +3119,25 @@ class RasterDataClimateAtlasGenerator(object):
             "De Martonne Aridity": [
                 ["De Martonne Aridity", "DM_Aridity_Annual", "De Martonne Aridity Index", "Index", "Gridded Reanalysis"],
             ],
+            "Evapotranspiration": [
+                ["Evapotranspiration", "ET_Annual_Total", "Annual Total Potential Evapotranspiration (Hargreaves)", "mm/yr", "Gridded Reanalysis"],
+                ["Evapotranspiration", "ET_Annual_Mean", "Annual Mean Monthly Evapotranspiration", "mm/month", "Gridded Reanalysis"],
+                ["Evapotranspiration", "ET_Annual_Range", "Annual Monthly Evapotranspiration Range", "mm/month", "Gridded Reanalysis"],
+                ["Evapotranspiration", "ET_Seasonal_Range", "Seasonal Evapotranspiration Range", "mm", "Gridded Reanalysis"],
+                ["Evapotranspiration", "ET_Winter_Total", "Winter Total Evapotranspiration (DJF)", "mm", "Gridded Reanalysis"],
+                ["Evapotranspiration", "ET_Spring_Total", "Spring Total Evapotranspiration (MAM)", "mm", "Gridded Reanalysis"],
+                ["Evapotranspiration", "ET_Summer_Total", "Summer Total Evapotranspiration (JJA)", "mm", "Gridded Reanalysis"],
+                ["Evapotranspiration", "ET_Autumn_Total", "Autumn Total Evapotranspiration (SON)", "mm", "Gridded Reanalysis"],
+            ],
             "Hargreaves PET": [
+                ["Evapotranspiration", "ET_Annual_Total", "Annual Total Potential Evapotranspiration (Hargreaves)", "mm/yr", "Gridded Reanalysis"],
+                ["Evapotranspiration", "ET_Annual_Mean", "Annual Mean Monthly Evapotranspiration", "mm/month", "Gridded Reanalysis"],
+                ["Evapotranspiration", "ET_Annual_Range", "Annual Monthly Evapotranspiration Range", "mm/month", "Gridded Reanalysis"],
+                ["Evapotranspiration", "ET_Seasonal_Range", "Seasonal Evapotranspiration Range", "mm", "Gridded Reanalysis"],
+                ["Evapotranspiration", "ET_Winter_Total", "Winter Total Evapotranspiration (DJF)", "mm", "Gridded Reanalysis"],
+                ["Evapotranspiration", "ET_Spring_Total", "Spring Total Evapotranspiration (MAM)", "mm", "Gridded Reanalysis"],
+                ["Evapotranspiration", "ET_Summer_Total", "Summer Total Evapotranspiration (JJA)", "mm", "Gridded Reanalysis"],
+                ["Evapotranspiration", "ET_Autumn_Total", "Autumn Total Evapotranspiration (SON)", "mm", "Gridded Reanalysis"],
                 ["Hargreaves PET", "PET_Hargreaves_Annual", "Hargreaves Potential Evapotranspiration", "mm/yr", "Gridded Reanalysis"],
             ],
             "UNEP Aridity": [
@@ -2989,6 +3172,7 @@ class RasterDataClimateAtlasGenerator(object):
             [u"درجة الحرارة", u"T_Winter_Mean", u"متوسط درجة الحرارة لفصل الشتاء", u"مئوية", u"بيانات شبكية"],
             [u"الأمطار", u"R_Annual_Total", u"المجموع السنوي التراكمي للأمطار", u"ملم/سنة", u"بيانات شبكية"],
             [u"الرطوبة النسبية", u"RH_Annual_Mean", u"المتوسط السنوي للرطوبة النسبية", u"%", u"بيانات شبكية"],
+            [u"نقطة الندى", u"Td_Annual_Mean", u"المتوسط السنوي لدرجة حرارة نقطة الندى", u"مئوية", u"بيانات شبكية"],
             [u"الرياح", u"W_Spd_Annual_Mean", u"المتوسط السنوي لسرعة الرياح", u"م/ث", u"بيانات شبكية"],
             [u"الإشعاع الشمسي", u"Sol_Annual_Mean", u"المتوسط السنوي للإشعاع الشمسي", u"ميجاجول/م2/يوم", u"بيانات شبكية"],
             [u"الضغط الجوي السطحي", u"PS_Annual_Mean", u"المتوسط السنوي للضغط السطحي", u"هيكتوباسكال", u"بيانات شبكية"],
@@ -3011,7 +3195,25 @@ class RasterDataClimateAtlasGenerator(object):
             "De Martonne Aridity": [
                 [u"مؤشر دي مارتون", u"DM_Aridity_Annual", u"معامل الجفاف لدي مارتون", u"مؤشر", u"مشتق من بيانات شبكية"],
             ],
+            "Evapotranspiration": [
+                [u"البخر والنتح", u"ET_Annual_Total", u"المجموع السنوي للبخر والنتح الممكن (هارجريفز)", u"ملم/سنة", u"مشتق من بيانات شبكية"],
+                [u"البخر والنتح", u"ET_Annual_Mean", u"المتوسط الشهري السنوي للبخر والنتح", u"ملم/شهر", u"مشتق من بيانات شبكية"],
+                [u"البخر والنتح", u"ET_Annual_Range", u"المدى الشهري السنوي للبخر والنتح", u"ملم/شهر", u"مشتق من بيانات شبكية"],
+                [u"البخر والنتح", u"ET_Seasonal_Range", u"المدى الفصلي للبخر والنتح", u"ملم", u"مشتق من بيانات شبكية"],
+                [u"البخر والنتح", u"ET_Winter_Total", u"مجموع البخر والنتح لفصل الشتاء (DJF)", u"ملم", u"مشتق من بيانات شبكية"],
+                [u"البخر والنتح", u"ET_Spring_Total", u"مجموع البخر والنتح لفصل الربيع (MAM)", u"ملم", u"مشتق من بيانات شبكية"],
+                [u"البخر والنتح", u"ET_Summer_Total", u"مجموع البخر والنتح لفصل الصيف (JJA)", u"ملم", u"مشتق من بيانات شبكية"],
+                [u"البخر والنتح", u"ET_Autumn_Total", u"مجموع البخر والنتح لفصل الخريف (SON)", u"ملم", u"مشتق من بيانات شبكية"],
+            ],
             "Hargreaves PET": [
+                [u"البخر والنتح", u"ET_Annual_Total", u"المجموع السنوي للبخر والنتح الممكن (هارجريفز)", u"ملم/سنة", u"مشتق من بيانات شبكية"],
+                [u"البخر والنتح", u"ET_Annual_Mean", u"المتوسط الشهري السنوي للبخر والنتح", u"ملم/شهر", u"مشتق من بيانات شبكية"],
+                [u"البخر والنتح", u"ET_Annual_Range", u"المدى الشهري السنوي للبخر والنتح", u"ملم/شهر", u"مشتق من بيانات شبكية"],
+                [u"البخر والنتح", u"ET_Seasonal_Range", u"المدى الفصلي للبخر والنتح", u"ملم", u"مشتق من بيانات شبكية"],
+                [u"البخر والنتح", u"ET_Winter_Total", u"مجموع البخر والنتح لفصل الشتاء (DJF)", u"ملم", u"مشتق من بيانات شبكية"],
+                [u"البخر والنتح", u"ET_Spring_Total", u"مجموع البخر والنتح لفصل الربيع (MAM)", u"ملم", u"مشتق من بيانات شبكية"],
+                [u"البخر والنتح", u"ET_Summer_Total", u"مجموع البخر والنتح لفصل الصيف (JJA)", u"ملم", u"مشتق من بيانات شبكية"],
+                [u"البخر والنتح", u"ET_Autumn_Total", u"مجموع البخر والنتح لفصل الخريف (SON)", u"ملم", u"مشتق من بيانات شبكية"],
                 [u"التبخر والنتح", u"PET_Hargreaves_Annual", u"البخر-نتح الممكن السنوي بهارجريفز", u"ملم/سنة", u"مشتق من بيانات شبكية"],
             ],
             "UNEP Aridity": [

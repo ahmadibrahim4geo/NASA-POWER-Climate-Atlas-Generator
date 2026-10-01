@@ -8,7 +8,7 @@
 [![Python Version](https://img.shields.io/badge/Python-3.x%20%7C%202.7-3776ab.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Data Sources](https://img.shields.io/badge/Data%20Sources-NASA%20POWER%20%7C%20Open--Meteo-blue.svg)](https://power.larc.nasa.gov/)
-[![Modular Architecture](https://img.shields.io/badge/Elements-17%20Modular%20Layers-darkgreen.svg)](#٣-العناصر-والمؤشرات-المناخية-الـ-17-الموديلية)
+[![Modular Architecture](https://img.shields.io/badge/Elements-18%20Modular%20Layers-darkgreen.svg)](#٣-العناصر-والمؤشرات-المناخية-الـ-18-الموديلية-والربط-الموحد-11-unified-mapping)
 
 > **إعداد وتطوير:** **أحمد إبراهيم (Ahmad Ibrahim)**  
 > **حساب المطور على GitHub:** [@ahmadibrahim4geo](https://github.com/ahmadibrahim4geo)  
@@ -20,7 +20,7 @@
 - [🇪🇬 دليل الاستخدام والتوثيق الشامل باللغة العربية](#-دليل-الاستخدام-والتوثيق-الشامل-باللغة-العربية)
   - [١. ما هي منظومة أطلس المناخ؟](#١-ما-هي-منظومة-أطلس-المناخ؟)
   - [٢. التوافقية المزدوجة التامة (ArcGIS Pro & ArcMap 10.8)](#٢-التوافقية-المزدوجة-التامة-arcgis-pro--arcmap-108)
-  - [٣. العناصر والمؤشرات المناخية الـ 17 الموديلية](#٣-العناصر-والمؤشرات-المناخية-الـ-17-الموديلية)
+  - [٣. العناصر والمؤشرات المناخية الـ 18 الموديلية والربط الموحد (1:1 Unified Mapping)](#٣-العناصر-والمؤشرات-المناخية-الـ-18-الموديلية-والربط-الموحد-11-unified-mapping)
   - [٤. نمطا التشغيل الرئيسيان (Online & Offline) وسلوك التخطي الذكي](#٤-نمطا-التشغيل-الرئيسيان-online--offline-وسلوك-التخطي-الذكي)
   - [٥. تقنية الضغط القوي فائق الأداء للراستر (Lossless LZW Block Tiling)](#٥-تقنية-الضغط-القوي-فائق-الأداء-للراستر-lossless-lzw-block-tiling)
   - [٦. المعالجة المكانية غير الهدامة والماسك وأسهم الرياح](#٦-المعالجة-المكانية-غير-الهدامة-والماسك-وأسهم-الرياح)
@@ -29,7 +29,7 @@
 - [🇬🇧 English Documentation](#-english-documentation)
   - [Overview & Architecture](#-overview--architecture)
   - [Dual Platform Support (ArcGIS Pro 3.x & Desktop 10.8)](#-dual-platform-support-arcgis-pro-3x--desktop-108)
-  - [The 17 Modular Climate Layers](#-the-17-modular-climate-layers)
+  - [The 18 Modular Climate Layers & 1:1 Standardized Architecture](#-the-18-modular-climate-layers--11-standardized-architecture)
   - [Online Pipeline vs. Offline Precalculated Mode](#-online-pipeline-vs-offline-precalculated-mode)
   - [High-Efficiency Lossless Raster Compression](#-high-efficiency-lossless-raster-compression)
   - [Non-Destructive Spatial Masking & Vector Dynamics](#-non-destructive-spatial-masking--vector-dynamics)
@@ -62,28 +62,62 @@
 
 ---
 
-### ٣. العناصر والمؤشرات المناخية الـ 17 الموديلية
-تمت إعادة هيكلة قواعد البيانات الناتجة بالكامل لتتحول من النمط القديم المدمج إلى **17 طبقة معالم منفصلة ومستقلة (Modular Feature Classes)**، مما يمنح الباحث مرونة قصوى في التحليل الفردي لكل عنصر دون تضخم الجداول:
+### ٣. العناصر والمؤشرات المناخية الـ 18 الموديلية والربط الموحد (1:1 Unified Mapping)
+تمت إعادة هيكلة المنظومة بالكامل لتعتمد معيار **الربط الموحد بنسبة 1:1** بين اسم العنصر في واجهة الأداة (`Climate Modules & Models`)، واسم طبقة المعالم داخل قاعدة البيانات (`Feature Class`)، واسم المجلد المخصص لمخرجات الراستر (`Output Raster Folder`).
 
-| رقم | اسم الطبقة (Feature Class) | التوصيف العلمي والمؤشرات المتضمنة | الوحدة الفيزيائية |
-|:---:|---|---|:---:|
-| **01** | `01_Temperature` | درجات الحرارة: المتوسط السنوي والفصلي (DJF, MAM, JJA, SON)، المدى الحراري، أدفأ الشهور وأبردها، النهايات العظمى والصغرى، ونقطة الندى السنوية والفصلية (Td). | °C |
-| **02** | `02_Precipitation` | التساقط والأمطار: المجموع السنوي، المعدل الشهري، المجاميع الفصلية، أقصى مطر يومي مسجل، وعدد الأيام الممطرة سنوياً. | mm, days |
-| **03** | `03_Sea_Level_Pressure` | ضغط مستوى سطح البحر: المتوسطات السنوية والفصلية والمدى السنوي لضغط الهواء المصحح لمستوى سطح البحر. | hPa / mbar |
-| **04** | `04_Surface_Pressure` | الضغط السطحي الفعلي: الضغط الجوي الحقيقي المحسوب عند الارتفاع الطبوغرافي الفعلي للمحطة. | hPa / mbar |
-| **05** | `05_Wind` | الرياح السطحية: متوسطات السرعة السنوية والفصلية عند ارتفاع 10 أمتار، الاتجاه السائد السنوي والشهري عبر المتوسط الدائري (Circular Mean)، والمدى السنوي. | m/s, degrees (°) |
-| **06** | `06_Relative_Humidity` | الرطوبة النسبية: المتوسطات السنوية والفصلية للرطوبة النسبية عند ارتفاع مترين والمدى السنوي للتذبذب الرطوبي. | % |
-| **07** | `07_Solar_Radiation` | الإشعاع الشمسي: الإشعاع السطحي اليومي المباشر والمنتشر الكلي (All-Sky SW DNI/GHI)، والإجمالي السنوي التراكمي. | kWh/m²/day, kWh/m²/year |
-| **08** | `08_UV_Index` | مؤشر الأشعة فوق البنفسجية: متوسطات شدة الإشعاع الشمسي الفوق بنفسجي عند الظهيرة وفق معايير منظمة الصحة العالمية (WHO). | مؤشر (0–15+) |
-| **09** | `09_Cloud_Cover` | الغطاء السحابي: نسب التغطية الغيمية السنوية والفصلية ومواسم الصفاء الشمسي. | % |
-| **10** | `10_De_Martonne_Aridity` | مؤشر دي مارتون للقحولة: التقييم المناخي للجفاف عبر صيغة $I_{DM} = P / (T + 10)$ والتصنيف من فائق الجفاف إلى رطب. | مؤشر لا بُعدي |
-| **11** | `11_Hargreaves_PET` | التبخر-نتح الكامن بهارجريفز: الحساب التراكمي الفلكي للتبخر وفق معيار منظمة الأغذية والزراعة (FAO-56). | mm/year |
-| **12** | `12_UNEP_Aridity` | مؤشر القحولة العالمي (UNEP): نسبة المطر إلى التبخر $AI = P / PET$ المعتمدة لدى اتفاقية مكافحة التصحر (UNCCD). | نسبة |
-| **13** | `13_Water_Deficit` | العجز / الفائض المائي المناخي: الموازنة المائية الصافية السنوية $WD = P - PET$. | mm/year |
-| **14** | `14_Dry_Months` | الأشهر الجافة بيولوجياً: عدد الشهور التي يتحقق فيها شرط والتر-ليث البيومناخي ($P < 2T$). | شهور (0–12) |
-| **15** | `15_Heat_Index` | مؤشر الحرارة المحسوسة والإجهاد: مؤشر روثفوس وستيدمان (Heat Index)، ومؤشر Humidex الشتوي، ومتوسط الإجهاد الحراري الصيفي المظلل (WBGT). | °C |
-| **16** | `16_Wind_Chill` | مؤشر البرودة الريحية: التبريد المكافئ للرياح في الشتاء والمتوسط السنوي (Osczevski-Bluestein formula). | °C |
-| **17** | `17_Trends_And_Anomalies` | الاتجاهات والشذوذ المناخي: معدل التغير لكل عقد (Decadal Trend) للحرارة والمطر، والشذوذ السنوي والفصلي مقارنة بخط أساس 1991–2020. | °C/decade, mm/decade, % |
+تتكون المنظومة من **18 عنصراً وموديولاً مناخياً وبيومناخياً مستقلاً**:
+
+| رقم | اسم العنصر في واجهة الأداة | اسم طبقة المعالم (Feature Class) | اسم مجلد الراستر (Raster Folder) | عدد المؤشرات | الوحدة الفيزيائية |
+|:---:|---|---|---|:---:|:---:|
+| **01** | `Temperature` | `01_Temperature` | `01_Temperature` | 10 | °C |
+| **02** | `Precipitation` | `02_Precipitation` | `02_Precipitation` | 8 | mm |
+| **03** | `Sea Level Pressure` | `03_Sea_Level_Pressure` | `03_Sea_Level_Pressure` | 6 | hPa / mbar |
+| **04** | `Surface Pressure` | `04_Surface_Pressure` | `04_Surface_Pressure` | 6 | hPa / mbar |
+| **05** | `Wind` | `05_Wind` | `05_Wind` | 13 | m/s, degrees (°) |
+| **06** | `Relative Humidity` | `06_Relative_Humidity` | `06_Relative_Humidity` | 6 | % |
+| **07** | `Dew Point` | `07_Dew_Point` | `07_Dew_Point` | 6 | °C |
+| **08** | `Solar Radiation` | `08_Solar_Radiation` | `08_Solar_Radiation` | 7 | kWh/m²/day, kWh/m²/year |
+| **09** | `UV Index` | `09_UV_Index` | `09_UV_Index` | 6 | مؤشر (0–15+) |
+| **10** | `Cloud Cover` | `10_Cloud_Cover` | `10_Cloud_Cover` | 6 | % |
+| **11** | `Heat Index` | `11_Heat_Index` | `11_Heat_Index` | 5 | °C |
+| **12** | `Wind Chill` | `12_Wind_Chill` | `12_Wind_Chill` | 2 | °C |
+| **13** | `De Martonne Aridity` | `13_De_Martonne_Aridity` | `13_De_Martonne_Aridity` | 1 | مؤشر لا بُعدي |
+| **14** | `Evapotranspiration` | `14_Evapotranspiration` | `14_Evapotranspiration` | 8 | mm/year, mm/month, mm |
+| **15** | `UNEP Aridity` | `15_UNEP_Aridity` | `15_UNEP_Aridity` | 1 | نسبة |
+| **16** | `Water Deficit` | `16_Water_Deficit` | `16_Water_Deficit` | 1 | mm/year |
+| **17** | `Dry Months` | `17_Dry_Months` | `17_Dry_Months` | 1 | شهور (0–12) |
+| **18** | `Trends & Baseline Anomalies` | `18_Trends_And_Anomalies` | `18_Trends_And_Anomalies` | 9 | °C/decade, mm/decade, % |
+
+---
+
+#### 🌟 تفصيل المؤشرات المستحدثة والموحدة:
+
+##### 1. البخر والنتح (Evapotranspiration - ET):
+* **التسمية والرمز**: تم اعتماد مسمى **البخر والنتح (Evapotranspiration)** واختصاره داخل الأداة بـ **`ET`**، ويُنشأ في مجلد وطبقة مستقلة: `14_Evapotranspiration`.
+* **الأساس العلمي والمنهجية**: يعتمد المؤشر كلياً على معادلة **هارجريفز-ساماني (Hargreaves & Samani, 1985)** والمعتمدة رسمياً لدى منظمة الأغذية والزراعة للأمم المتحدة (**FAO**) في الدليل الإرشادي للري والصرف رقم 56 (**FAO Irrigation and Drainage Paper No. 56**)، وهي الصيغة المثلى لحساب البخر والنتح المرجعي ($ET_o$) من بيانات درجات الحرارة والإشعاع الشمسي الفلكي خارج الغلاف الجوي ($R_a$):
+  $$ET_o = 0.0023 \cdot R_a \cdot (T_{mean} + 17.8) \cdot \sqrt{T_{max} - T_{min}} \cdot \text{Days}$$
+* **المؤشرات الثمانية على المستويين السنوي والفصلي**:
+  1. `ET_Annual_Total`: المجموع السنوي للبخر والنتح (ملم/سنة).
+  2. `ET_Annual_Mean`: المتوسط الشهري السنوي للبخر والنتح (ملم/شهر).
+  3. `ET_Annual_Range`: المدى الشهري السنوي للبخر والنتح (أعلى شهر ملم - أدنى شهر ملم).
+  4. `ET_Seasonal_Range`: المدى الفصلي للبخر والنتح (أعلى فصل ملم - أدنى فصل ملم).
+  5. `ET_Winter_Total`: مجموع البخر والنتح لفصل الشتاء (DJF) (ملم).
+  6. `ET_Spring_Total`: مجموع البخر والنتح لفصل الربيع (MAM) (ملم).
+  7. `ET_Summer_Total`: مجموع البخر والنتح لفصل الصيف (JJA) (ملم).
+  8. `ET_Autumn_Total`: مجموع البخر والنتح لفصل الخريف (SON) (ملم).
+  * **التوافق العكسي**: يتم تصدير الحقل الرديف `PET_Hargreaves_Annual` تلقائياً لضمان استمرارية تشغيل أي مشاريع أو أدوات تحليلية سابقة.
+
+##### 2. استقلال نقطة الندى (Dew Point):
+* تم إفراد **نقطة الندى** كعنصر رئيسي مستقل تماماً تحت الرقم **07** (`07_Dew_Point`) بـ 6 مؤشرات متكاملة:
+  - `Td_Annual_Mean`: المتوسط السنوي لنقطة الندى (°C).
+  - `Td_Winter_Mean`: متوسط نقطة الندى لشتاء (DJF).
+  - `Td_Spring_Mean`: متوسط نقطة الندى لربيع (MAM).
+  - `Td_Summer_Mean`: متوسط نقطة الندى لصيف (JJA).
+  - `Td_Autumn_Mean`: متوسط نقطة الندى لخريف (SON).
+  - `Td_Annual_Range`: المدى السنوي لنقطة الندى (°C).
+
+##### 3. تعزيز مؤشرات الأمطار (Precipitation):
+* إضافة المدى السنوي `R_Annual_Range` والمدى الفصلي `R_Seasonal_Range` لمراقبة التفاوت الفصلي والشهري في الهطول مع إزالة الحقول القديمة غير المتوافقة مع نمط الشهر.
 
 ---
 
@@ -186,27 +220,41 @@ Engineered with dual Python 2/3 cross-compatibility:
 
 ---
 
-## 🗺️ The 17 Modular Climate Layers
+## 🗺️ The 18 Modular Climate Layers & 1:1 Standardized Architecture
 
-The system decomposes climatological and bioclimatic indicators into **17 discrete, standalone feature classes**:
+The platform enforces a strict **1:1 unified naming convention** connecting UI parameters, geodatabase feature classes, and raster output folders across all **18 discrete thematic modules**:
 
-1. **`01_Temperature`**: Annual and seasonal means (DJF, MAM, JJA, SON), thermal range, warmest and coldest months, diurnal extremes, and annual/seasonal dew point temperatures (Td).
-2. **`02_Precipitation`**: Annual total, monthly mean rate, seasonal accumulated sums, 24-hour maximum rainfall, and annual rain day count.
-3. **`03_Sea_Level_Pressure`**: Annual, seasonal, and range of atmospheric pressure reduced to mean sea level (MSLP).
-4. **`04_Surface_Pressure`**: True hypsometric surface atmospheric pressure at actual station topography.
-5. **`05_Wind`**: 10-meter wind speed annual/seasonal means, circular vector mean azimuth wind directions, and annual wind speed range.
-6. **`06_Relative_Humidity`**: 2-meter relative humidity annual/seasonal means and annual psychrometric range.
-7. **`07_Solar_Radiation`**: Daily mean and accumulated annual total solar insolation (kWh/m²/year), seasonal variations, and annual range.
-8. **`08_UV_Index`**: Solar noon all-sky UV radiation index according to World Health Organization (WHO) risk thresholds.
-9. **`09_Cloud_Cover`**: Annual and seasonal cloud okta fractions and sunshine duration dynamics.
-10. **`10_De_Martonne_Aridity`**: De Martonne aridity index ($I_{DM} = P / (T + 10)$) and aridity zone classifications.
-11. **`11_Hargreaves_PET`**: FAO-56 Hargreaves-Samani potential evapotranspiration with astronomical extraterrestrial solar radiation calculations.
-12. **`12_UNEP_Aridity`**: United Nations Environment Programme aridity index ($AI = P / PET$) for dryland classification.
-13. **`13_Water_Deficit`**: Net annual climatic water balance ($WD = P - PET$).
-14. **`14_Dry_Months`**: Walter-Lieth bioclimatic dry months count ($P < 2T$).
-15. **`15_Heat_Index`**: Steadman-Rothfusz apparent temperature heat index, winter Humidex, and summer shade wet-bulb globe temperature (WBGT).
-16. **`16_Wind_Chill`**: Osczevski-Bluestein equivalent wind chill temperature index.
-17. **`17_Trends_And_Anomalies`**: Decadal linear climate trends and anomalies relative to the 1991–2020 WMO standard normal.
+| # | Parameter Name (UI) | Feature Class Name | Raster Folder | Indicators | Units |
+|:---:|---|---|---|:---:|:---:|
+| **01** | `Temperature` | `01_Temperature` | `01_Temperature` | 10 | °C |
+| **02** | `Precipitation` | `02_Precipitation` | `02_Precipitation` | 8 | mm |
+| **03** | `Sea Level Pressure` | `03_Sea_Level_Pressure` | `03_Sea_Level_Pressure` | 6 | hPa / mbar |
+| **04** | `Surface Pressure` | `04_Surface_Pressure` | `04_Surface_Pressure` | 6 | hPa / mbar |
+| **05** | `Wind` | `05_Wind` | `05_Wind` | 13 | m/s, degrees (°) |
+| **06** | `Relative Humidity` | `06_Relative_Humidity` | `06_Relative_Humidity` | 6 | % |
+| **07** | `Dew Point` | `07_Dew_Point` | `07_Dew_Point` | 6 | °C |
+| **08** | `Solar Radiation` | `08_Solar_Radiation` | `08_Solar_Radiation` | 7 | kWh/m²/day, kWh/m²/year |
+| **09** | `UV Index` | `09_UV_Index` | `09_UV_Index` | 6 | Index (0–15+) |
+| **10** | `Cloud Cover` | `10_Cloud_Cover` | `10_Cloud_Cover` | 6 | % |
+| **11** | `Heat Index` | `11_Heat_Index` | `11_Heat_Index` | 5 | °C |
+| **12** | `Wind Chill` | `12_Wind_Chill` | `12_Wind_Chill` | 2 | °C |
+| **13** | `De Martonne Aridity` | `13_De_Martonne_Aridity` | `13_De_Martonne_Aridity` | 1 | Dimensionless Index |
+| **14** | `Evapotranspiration` | `14_Evapotranspiration` | `14_Evapotranspiration` | 8 | mm/year, mm/month, mm |
+| **15** | `UNEP Aridity` | `15_UNEP_Aridity` | `15_UNEP_Aridity` | 1 | Ratio |
+| **16** | `Water Deficit` | `16_Water_Deficit` | `16_Water_Deficit` | 1 | mm/year |
+| **17** | `Dry Months` | `17_Dry_Months` | `17_Dry_Months` | 1 | Months (0–12) |
+| **18** | `Trends & Baseline Anomalies` | `18_Trends_And_Anomalies` | `18_Trends_And_Anomalies` | 9 | °C/decade, mm/decade, % |
+
+### Scientific Focus: Evapotranspiration (ET)
+- **Methodological Origin**: Implements the globally recognized **FAO-56 Hargreaves-Samani method** (Hargreaves & Samani, 1985), estimating reference evapotranspiration ($ET_o$) using extraterrestrial solar radiation ($R_a$), mean temperature, and diurnal temperature range:
+  $$ET_o = 0.0023 \cdot R_a \cdot (T_{mean} + 17.8) \cdot \sqrt{T_{max} - T_{min}} \cdot \text{Days}$$
+- **8 Climatological & Seasonal Indicators**:
+  - `ET_Annual_Total`: Total cumulative annual evapotranspiration (mm/year).
+  - `ET_Annual_Mean`: Mean monthly evapotranspiration (mm/month).
+  - `ET_Annual_Range`: Monthly range between peak and minimum ET months (mm/month).
+  - `ET_Seasonal_Range`: Seasonal range between maximum and minimum season totals (mm).
+  - `ET_Winter_Total` / `ET_Spring_Total` / `ET_Summer_Total` / `ET_Autumn_Total`: Seasonal accumulated totals (DJF, MAM, JJA, SON) (mm).
+  - Full backward compatibility maintained via `PET_Hargreaves_Annual`.
 
 ---
 

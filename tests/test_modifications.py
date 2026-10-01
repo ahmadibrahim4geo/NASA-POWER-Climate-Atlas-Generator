@@ -6,6 +6,7 @@ Verification suite for the Climate Toolbox modifications:
 3. Strict boundary masking & clipping (arcpy.env.mask & extent, raster ExtractByMask, wind vector Clip).
 """
 
+import io
 import os
 import sys
 import unittest
@@ -96,27 +97,30 @@ class TestClimateToolboxModifications(unittest.TestCase):
         self.assertNotIn("R_Max_Daily_Month", field_names)
         self.assertNotIn("R_Annual_Rain_Days_Total", field_names)
 
-        # Precipitation fields in FIELD_DEFS must be exactly the 6 core fields
+        # Precipitation fields in FIELD_DEFS must be exactly the 8 core fields
         precip_field_defs = [r[0] for r in pyt_mod.FIELD_DEFS if r[4] == "Precipitation"]
-        expected_6 = [
+        expected_8 = [
             "R_Annual_Total",
             "R_Annual_Mean",
+            "R_Annual_Range",
+            "R_Seasonal_Range",
             "R_Winter_Total",
             "R_Spring_Total",
             "R_Summer_Total",
             "R_Autumn_Total"
         ]
-        self.assertEqual(precip_field_defs, expected_6)
+        self.assertEqual(precip_field_defs, expected_8)
 
         # 2. REQUIRED_COLUMNS
         self.assertNotIn("R_Max_Daily_Month", pyt_mod.REQUIRED_COLUMNS)
         self.assertNotIn("R_Annual_Rain_Days_Total", pyt_mod.REQUIRED_COLUMNS)
         precip_req = [f for f in pyt_mod.REQUIRED_COLUMNS if f.startswith("R_") and "Trend" not in f and "Anom" not in f]
-        self.assertEqual(precip_req, expected_6)
+        self.assertEqual(precip_req, expected_8)
 
         # 3. SHP_FIELD_MAP
         self.assertNotIn("R_Max_Daily_Month", pyt_mod.SHP_FIELD_MAP)
         self.assertNotIn("R_Annual_Rain_Days_Total", pyt_mod.SHP_FIELD_MAP)
+        self.assertIn("R_Seasonal_Range", pyt_mod.SHP_FIELD_MAP)
 
         # 4. compute_point_fields
         monthly = {
@@ -129,27 +133,30 @@ class TestClimateToolboxModifications(unittest.TestCase):
         self.assertNotIn("R_Max_Daily_Month", res)
         self.assertNotIn("R_Annual_Rain_Days_Total", res)
         res_precip_keys = [k for k in res.keys() if k.startswith("R_") and "Trend" not in k and "Anom" not in k]
-        self.assertEqual(sorted(res_precip_keys), sorted(expected_6))
+        self.assertEqual(sorted(res_precip_keys), sorted(expected_8))
 
     def test_02_raster_generator_precipitation_fields_removed(self):
         """Test R_Max_Daily_Month and R_Annual_Rain_Days_Total are removed from raster_atlas_generator."""
         # 1. MODULE_INDICATOR_FIELDS["Precipitation"]
         precip_indicators = [f[0] for f in rag.MODULE_INDICATOR_FIELDS.get("Precipitation", [])]
-        expected_6 = [
+        expected_8 = [
             "R_Annual_Total",
             "R_Annual_Mean",
+            "R_Annual_Range",
+            "R_Seasonal_Range",
             "R_Winter_Total",
             "R_Spring_Total",
             "R_Summer_Total",
             "R_Autumn_Total"
         ]
-        self.assertEqual(precip_indicators, expected_6)
+        self.assertEqual(precip_indicators, expected_8)
         self.assertNotIn("R_Max_Daily_Month", precip_indicators)
         self.assertNotIn("R_Annual_Rain_Days_Total", precip_indicators)
 
         # 2. SHP_FIELD_MAP
         self.assertNotIn("R_Max_Daily_Month", rag.SHP_FIELD_MAP)
         self.assertNotIn("R_Annual_Rain_Days_Total", rag.SHP_FIELD_MAP)
+        self.assertIn("R_Seasonal_Range", rag.SHP_FIELD_MAP)
 
     def test_03_pyt_wind_spacing_parameter(self):
         """Test Wind Vector Spacing parameter displayName and behavior in pyt."""
@@ -207,31 +214,86 @@ class TestClimateToolboxModifications(unittest.TestCase):
     def test_06_wind_vector_standard_naming(self):
         """Verify standard naming for the 5 wind vector layers in code."""
         # Check in POWER_Climate_Atlas_Generator_10_8.pyt
-        with open(PYT_PATH, "r", encoding="utf-8", errors="ignore") as f:
+        with io.open(PYT_PATH, "r", encoding="utf-8", errors="ignore") as f:
             content = f.read()
         self.assertIn('fc = os.path.join(gdb_path, "Wind_Vector_%s" % suffix)', content)
 
         # Check in raster_atlas_generator.py
-        with open(os.path.join(ROOT_DIR, "raster_atlas_generator.py"), "r", encoding="utf-8", errors="ignore") as f:
+        with io.open(os.path.join(ROOT_DIR, "raster_atlas_generator.py"), "r", encoding="utf-8", errors="ignore") as f:
             rag_content = f.read()
         self.assertIn('fc = os.path.join(gdb_path, "Wind_Vector_%s" % suffix)', rag_content)
         self.assertIn('arcpy.analysis.Clip(fish_pts, in_clip_layer, clipped_pts)', rag_content)
 
     def test_07_strict_mask_and_clip_in_code(self):
-        """Verify arcpy.env.mask and arcpy.env.extent and ExtractByMask usage."""
+        """Verify arcpy.env.extent and ExtractByMask usage."""
         # In POWER_Climate_Atlas_Generator_10_8.pyt
-        with open(PYT_PATH, "r", encoding="utf-8", errors="ignore") as f:
+        with io.open(PYT_PATH, "r", encoding="utf-8", errors="ignore") as f:
             pyt_content = f.read()
-        self.assertIn('arcpy.env.mask = mask', pyt_content)
         self.assertIn('arcpy.env.extent = mask', pyt_content)
-        self.assertIn('ExtractByMask(tmpu, mask).save(tmpc)', pyt_content)
+        self.assertIn('ExtractByMask(surf, effective_mask)', pyt_content)
 
         # In raster_atlas_generator.py
-        with open(os.path.join(ROOT_DIR, "raster_atlas_generator.py"), "r", encoding="utf-8", errors="ignore") as f:
+        with io.open(os.path.join(ROOT_DIR, "raster_atlas_generator.py"), "r", encoding="utf-8", errors="ignore") as f:
             rag_content = f.read()
-        self.assertIn('arcpy.env.mask = clip_layer', rag_content)
         self.assertIn('arcpy.env.extent = clip_layer', rag_content)
         self.assertIn('clipped = ExtractByMask(raw_interp, clip_layer)', rag_content)
+
+    def test_08_dew_point_module_separated(self):
+        """Verify Dew Point is an independent module with 6 indicators and own folder."""
+        # Check pyt
+        self.assertIn("Dew Point", pyt_mod.PRIMARY_MODULES_ALL)
+        self.assertEqual(pyt_mod.MODULE_FOLDER.get("Dew Point"), "07_Dew_Point")
+        self.assertEqual(pyt_mod.MODULE_SHORT.get("Dew Point"), "Dew_Point")
+        td_defs = [r[0] for r in pyt_mod.FIELD_DEFS if r[4] == "Dew Point"]
+        expected_td = [
+            "Td_Annual_Mean",
+            "Td_Winter_Mean",
+            "Td_Spring_Mean",
+            "Td_Summer_Mean",
+            "Td_Autumn_Mean",
+            "Td_Annual_Range"
+        ]
+        self.assertEqual(td_defs, expected_td)
+        # Ensure no Td_* in Temperature
+        temp_defs = [r[0] for r in pyt_mod.FIELD_DEFS if r[4] == "Temperature"]
+        self.assertTrue(all(not f.startswith("Td_") for f in temp_defs))
+
+        # Check raster_atlas_generator
+        self.assertIn("Dew Point", rag.PRIMARY_MODULES_ALL)
+        self.assertEqual(rag.MODULE_FOLDER.get("Dew Point"), "07_Dew_Point")
+        self.assertEqual(rag.MODULE_SHORT.get("Dew Point"), "Dew_Point")
+        self.assertIn("Dew Point", rag.MODULE_INDICATOR_FIELDS)
+        rag_td = [f[0] for f in rag.MODULE_INDICATOR_FIELDS["Dew Point"]]
+        self.assertEqual(rag_td, expected_td)
+        rag_temp = [f[0] for f in rag.MODULE_INDICATOR_FIELDS["Temperature"]]
+        self.assertTrue(all(not f.startswith("Td_") for f in rag_temp))
+
+    def test_09_evapotranspiration_unification(self):
+        """Verify Evapotranspiration (ET) unification: 8 seasonal & annual indicators, folder 14_Evapotranspiration."""
+        expected_et = [
+            "ET_Annual_Total",
+            "ET_Annual_Mean",
+            "ET_Annual_Range",
+            "ET_Seasonal_Range",
+            "ET_Winter_Total",
+            "ET_Spring_Total",
+            "ET_Summer_Total",
+            "ET_Autumn_Total"
+        ]
+        # In pyt
+        self.assertIn("Evapotranspiration", pyt_mod.DERIVED_MODULES_ALL)
+        self.assertEqual(pyt_mod.MODULE_FOLDER.get("Evapotranspiration"), "14_Evapotranspiration")
+        self.assertEqual(pyt_mod.MODULE_SHORT.get("Evapotranspiration"), "Evapotranspiration")
+        et_defs = [r[0] for r in pyt_mod.FIELD_DEFS if r[4] == "Evapotranspiration" and r[0] != "PET_Hargreaves_Annual"]
+        self.assertEqual(et_defs, expected_et)
+
+        # In raster_atlas_generator
+        self.assertIn("Evapotranspiration", rag.DERIVED_MODULES_ALL)
+        self.assertEqual(rag.MODULE_FOLDER.get("Evapotranspiration"), "14_Evapotranspiration")
+        self.assertEqual(rag.MODULE_SHORT.get("Evapotranspiration"), "Evapotranspiration")
+        self.assertIn("Evapotranspiration", rag.MODULE_INDICATOR_FIELDS)
+        rag_et = [f[0] for f in rag.MODULE_INDICATOR_FIELDS["Evapotranspiration"]]
+        self.assertEqual(rag_et, expected_et)
 
 
 if __name__ == "__main__":

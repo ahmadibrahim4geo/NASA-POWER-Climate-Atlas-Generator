@@ -22,7 +22,7 @@ arcpy.env.extent = mask
 arcpy.env.mask = mask
 arcpy.env.cellSize = 250
 arcpy.env.compression = "LZW"
-arcpy.env.parallelProcessingFactor = "100%"
+arcpy.env.parallelProcessingFactor = "0"
 
 print("Running pure IDW direct save...")
 t0 = time.time()

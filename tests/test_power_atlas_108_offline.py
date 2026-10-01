@@ -186,7 +186,7 @@ check("HI needs humidity note", True)
 pfd = mod.compute_point_fields(monthly, [2025], ["Precipitation"], "Daily",
                                daily_raw={"PRECTOTCORR": {(2025, 1, 1): 0.5, (2025, 1, 2): 12.7, (2025, 1, 3): -999}})
 precip_keys = [k for k in pfd.keys() if k.startswith("R_") and "Trend" not in k and "Anom" not in k]
-check("precip fields count 6", len(precip_keys) == 6, len(precip_keys))
+check("precip fields count 8", len(precip_keys) == 8, len(precip_keys))
 check("R extremes absent from daily", "R_Max_Daily_Month" not in pfd and "R_Annual_Rain_Days_Total" not in pfd)
 slpv = dict(((2025, m), 100.0 + m) for m in range(1, 13))
 pfr = mod.compute_point_fields({"SLP": slpv}, [2025], ["Sea Level Pressure"], "Monthly")
@@ -197,22 +197,35 @@ check("models fetch WS10M", "WS10M" in mod.MODULE_PARAMS["Climate_Models"])
 check("WC submodel registered", "Wind Chill / Cold Stress [Requires: Temperature, Wind]" in mod.SUBMODELS_ALL)
 check("WC submodel deps", mod.SUBMODEL_DEPS["Wind Chill / Cold Stress [Requires: Temperature, Wind]"]["modules"] == ["Temperature", "Wind"])
 
-rows = mod.metadata_rows_for_modules(["Temperature", "Wind", "Heat Index"])
-check("metadata rows T+W+HI=31", len(rows) == 13 + 13 + 5, len(rows))
+rows = mod.metadata_rows_for_modules(["Temperature", "Dew Point", "Wind", "Heat Index"])
+check("metadata rows T+DP+W+HI=34", len(rows) == 10 + 6 + 13 + 5, len(rows))
 cols = ["Field_Name", "Full_Name_EN", "Name_AR", "NASA_Code", "Module", "Period", "Statistic", "Unit", "Description_AR", "Description_EN", "Calculation", "Source", "Notes"]
 check("metadata cols", all(all(c in r for c in cols) for r in rows))
-check("REQUIRED 102", len(mod.REQUIRED_COLUMNS) == 102, len(mod.REQUIRED_COLUMNS))
+check("REQUIRED 115", len(mod.REQUIRED_COLUMNS) == 115, len(mod.REQUIRED_COLUMNS))
 check("R extremes absent from REQUIRED_COLUMNS", "R_Max_Daily_Month" not in mod.REQUIRED_COLUMNS and "R_Annual_Rain_Days_Total" not in mod.REQUIRED_COLUMNS)
 check("all fielddefs in REQUIRED", all(r[0] in mod.REQUIRED_COLUMNS for r in mod.FIELD_DEFS))
+
+# Evapotranspiration tests
+et_res = mod.compute_drought_fields(mt, mx, mn, dict(((2025, m), 50.0) for m in range(1, 13)), lat=30.0)
+check("ET fields computed", all(k in et_res for k in [
+    "ET_Annual_Total", "ET_Annual_Mean", "ET_Annual_Range", "ET_Seasonal_Range",
+    "ET_Winter_Total", "ET_Spring_Total", "ET_Summer_Total", "ET_Autumn_Total",
+    "PET_Hargreaves_Annual"
+]), et_res)
+check("ET annual total > 0", et_res["ET_Annual_Total"] > 0, et_res["ET_Annual_Total"])
+check("ET seasonal range > 0", et_res["ET_Seasonal_Range"] > 0, et_res["ET_Seasonal_Range"])
+check("ET winter + spring + summer + autumn ~= annual total",
+      abs((et_res["ET_Winter_Total"] + et_res["ET_Spring_Total"] + et_res["ET_Summer_Total"] + et_res["ET_Autumn_Total"]) - et_res["ET_Annual_Total"]) < 0.5,
+      (et_res["ET_Winter_Total"], et_res["ET_Spring_Total"], et_res["ET_Summer_Total"], et_res["ET_Autumn_Total"], et_res["ET_Annual_Total"]))
 
 allf = [r[0] for r in mod.FIELD_DEFS] + [a[0] for a in mod.ADMIN_FIELDS]
 bad = [f for f in allf if len(f) > 10]
 check("long names all mapped", all(b in mod.SHP_FIELD_MAP for b in bad), bad[:3])
-check("shp map 91 unique<=10", len(mod.SHP_FIELD_MAP) == 91
+check("shp map 104 unique<=10", len(mod.SHP_FIELD_MAP) == 104
       and all(len(v) <= 10 for v in mod.SHP_FIELD_MAP.values())
-      and len(set(mod.SHP_FIELD_MAP.values())) == 91)
+      and len(set(mod.SHP_FIELD_MAP.values())) == 104)
 check("shp map covers climate", all(f in mod.SHP_FIELD_MAP for r in mod.FIELD_DEFS for f in [r[0]]))
-check("ramps 7", all(len(mod.COLOR_RAMPS[k]) == 7 for k in ["Temperature", "Precipitation", "Sea Level Pressure", "Relative Humidity", "Solar Radiation", "Cloud Cover"]))
+check("ramps 7", all(len(mod.COLOR_RAMPS[k]) == 7 for k in ["Temperature", "Precipitation", "Sea Level Pressure", "Relative Humidity", "Dew Point", "Solar Radiation", "Cloud Cover"]))
 check("UV 5 classes", len(mod.COLOR_RAMPS["UV Index"]) == 5)
 b = mod.equal_interval_breaks(0, 70, 7)
 check("breaks 8 edges", len(b) == 8 and abs(b[0]) < 1e-9 and abs(b[-1] - 70) < 1e-9, b)

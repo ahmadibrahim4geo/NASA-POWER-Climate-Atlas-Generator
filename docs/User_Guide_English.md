@@ -12,7 +12,7 @@
 1. [Overview & Engineering Goals](#1-overview--engineering-goals)
 2. [Dual Architecture: ArcGIS Pro & ArcMap 10.8](#2-dual-architecture-arcgis-pro--arcmap-108)
 3. [The Dual-Tool Workflow Architecture](#3-the-dual-tool-workflow-architecture)
-4. [The 17 Modular Climate Layers](#4-the-17-modular-climate-layers)
+4. [The 18 Modular Climate Layers & 1:1 Standardized Architecture](#4-the-18-modular-climate-layers--11-standardized-architecture)
 5. [Dual Operation Modes & Smart Skip Execution](#5-dual-operation-modes--smart-skip-execution)
    - [A. Online Pipeline (Download & Generate Atlas)](#a-online-pipeline-download--generate-atlas)
    - [B. Offline Pipeline (Interpolate & Map Existing Data)](#b-offline-pipeline-interpolate--map-existing-data)
@@ -60,8 +60,8 @@ The codebase features a cross-compatible hybrid engine providing seamless operat
 The platform operates via two complementary tools:
 1. **`POWER_Climate_Atlas_Generator_10_8.pyt` (Feature Atlas Generator)**:
    - Primary user-facing Geoprocessing Toolbox.
-   - Handles API communications, rate-limiting, quality control, calendar GUI interactions, and 92 climatological indicators.
-   - Generates the authoritative `Climate_Database.gdb` with 17 structured feature classes.
+   - Handles API communications, rate-limiting, quality control, calendar GUI interactions, and 96 climatological indicators.
+   - Generates the authoritative `Climate_Database.gdb` with 18 structured feature classes.
 2. **`raster_atlas_generator.py` (Raster Surface Engine)**:
    - Core backend spatial processing engine.
    - Executes spatial surface interpolation (IDW with smooth power profiles, Ordinary Kriging, Spline with Tension, Natural Neighbor).
@@ -69,29 +69,30 @@ The platform operates via two complementary tools:
 
 ---
 
-## 4. The 17 Modular Climate Layers
+## 4. The 18 Modular Climate Layers & 1:1 Standardized Architecture
 
-Legacy bundled outputs have been fully refactored into **17 discrete, standalone feature classes**:
+Outputs are organized via a strict **1:1 unified naming mapping** across UI parameter selection, geodatabase feature classes, and output raster folders:
 
-| # | Feature Class | Scientific Description | Units |
-|:---:|---|---|:---:|
-| **01** | `01_Temperature` | Annual/seasonal means (DJF, MAM, JJA, SON), thermal range, summer/winter extremes, and dew point temperatures (Td). | °C |
-| **02** | `02_Precipitation` | Annual total, monthly mean, seasonal accumulated totals, 1-day maximum, and annual rain day frequency. | mm, days |
-| **03** | `03_Sea_Level_Pressure` | Atmospheric pressure reduced to mean sea level (MSLP) annual/seasonal means and range. | hPa / mbar |
-| **04** | `04_Surface_Pressure` | True atmospheric pressure at actual station topographic elevation. | hPa / mbar |
-| **05** | `05_Wind` | 10-meter wind speed means, circular mean vector wind directions, and annual wind range. | m/s, degrees (°) |
-| **06** | `06_Relative_Humidity` | 2-meter relative humidity annual/seasonal means and annual psychrometric range. | % |
-| **07** | `07_Solar_Radiation` | All-sky shortwave downward solar irradiance daily means and accumulated annual totals. | kWh/m²/day, kWh/m²/year |
-| **08** | `08_UV_Index` | Solar noon all-sky UV radiation index adhering to World Health Organization (WHO) risk scales. | index (0–15+) |
-| **09** | `09_Cloud_Cover` | Annual and seasonal all-sky cloud fractions and sunshine duration dynamics. | % |
-| **10** | `10_De_Martonne_Aridity` | De Martonne aridity index ($I_{DM} = P / (T + 10)$) and bioclimatic aridity classifications. | dimensionless index |
-| **11** | `11_Hargreaves_PET` | FAO-56 Hargreaves-Samani potential evapotranspiration computed with astronomical solar radiation ($R_a$). | mm/year |
-| **12** | `12_UNEP_Aridity` | United Nations Environment Programme aridity ratio ($AI = P / PET$) for dryland classification. | ratio |
-| **13** | `13_Water_Deficit` | Annual net climatic water balance ($WD = P - PET$). | mm/year |
-| **14** | `14_Dry_Months` | Walter-Lieth biologically dry months count ($P < 2T$). | months (0–12) |
-| **15** | `15_Heat_Index` | Steadman-Rothfusz apparent temperature (Heat Index), winter Humidex, and summer shade WBGT heat stress. | °C |
-| **16** | `16_Wind_Chill` | Osczevski-Bluestein equivalent wind chill temperature index. | °C |
-| **17** | `17_Trends_And_Anomalies` | Decadal linear climate trends and annual/seasonal anomalies relative to the 1991–2020 WMO normal. | °C/decade, mm/decade, % |
+| # | Feature Class Name | Raster Output Folder | Scientific Description | Indicators | Units |
+|:---:|---|---|---|:---:|:---:|
+| **01** | `01_Temperature` | `01_Temperature` | Annual/seasonal means (DJF, MAM, JJA, SON), thermal range, summer/winter extremes, diurnal max/min. | 10 | °C |
+| **02** | `02_Precipitation` | `02_Precipitation` | Annual total, monthly mean rate, seasonal accumulated sums, annual range, seasonal range. | 8 | mm |
+| **03** | `03_Sea_Level_Pressure` | `03_Sea_Level_Pressure` | Atmospheric pressure reduced to mean sea level (MSLP) annual/seasonal means and range. | 6 | hPa / mbar |
+| **04** | `04_Surface_Pressure` | `04_Surface_Pressure` | True atmospheric pressure at actual station topographic elevation annual/seasonal means and range. | 6 | hPa / mbar |
+| **05** | `05_Wind` | `05_Wind` | 10-meter wind speed means/ranges, circular mean vector wind directions (annual & seasonal). | 13 | m/s, degrees (°) |
+| **06** | `06_Relative_Humidity` | `06_Relative_Humidity` | 2-meter relative humidity annual/seasonal means and annual psychrometric range. | 6 | % |
+| **07** | `07_Dew_Point` | `07_Dew_Point` | Standalone dew point temperature annual/seasonal means and annual range. | 6 | °C |
+| **08** | `08_Solar_Radiation` | `08_Solar_Radiation` | All-sky shortwave downward solar irradiance daily means and accumulated annual totals. | 7 | kWh/m²/day, kWh/m²/year |
+| **09** | `09_UV_Index` | `09_UV_Index` | Solar noon all-sky UV radiation index adhering to World Health Organization (WHO) risk scales. | 6 | index (0–15+) |
+| **10** | `10_Cloud_Cover` | `10_Cloud_Cover` | Annual and seasonal all-sky cloud fractions and sunshine duration dynamics. | 6 | % |
+| **11** | `11_Heat_Index` | `11_Heat_Index` | Steadman-Rothfusz apparent temperature (Heat Index), winter Humidex, and summer shade WBGT. | 5 | °C |
+| **12** | `12_Wind_Chill` | `12_Wind_Chill` | Osczevski-Bluestein equivalent wind chill temperature index (winter & annual). | 2 | °C |
+| **13** | `13_De_Martonne_Aridity` | `13_De_Martonne_Aridity` | De Martonne aridity index ($I_{DM} = P / (T + 10)$) and bioclimatic classifications. | 1 | dimensionless index |
+| **14** | `14_Evapotranspiration` | `14_Evapotranspiration` | FAO-56 Hargreaves-Samani potential evapotranspiration ($ET_o$) with 8 seasonal and annual indicators. | 8 | mm/year, mm/month, mm |
+| **15** | `15_UNEP_Aridity` | `15_UNEP_Aridity` | United Nations Environment Programme aridity ratio ($AI = P / ET$) for dryland classification. | 1 | ratio |
+| **16** | `16_Water_Deficit` | `16_Water_Deficit` | Annual net climatic water balance ($WD = P - ET$). | 1 | mm/year |
+| **17** | `17_Dry_Months` | `17_Dry_Months` | Walter-Lieth biologically dry months count ($P < 2T$). | 1 | months (0–12) |
+| **18** | `18_Trends_And_Anomalies` | `18_Trends_And_Anomalies` | Decadal linear climate trends and annual/seasonal anomalies relative to the 1991–2020 normal. | 9 | °C/decade, mm/decade, % |
 
 ---
 
