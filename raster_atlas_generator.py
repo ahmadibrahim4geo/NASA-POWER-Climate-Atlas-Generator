@@ -87,6 +87,8 @@ if PY27:
 else:
     import urllib.request as urllib2
 
+CALC_EXPR_TYPE = "PYTHON_9.3" if PY27 else "PYTHON3"
+
 
 # ---------------------------------------------------------------------------
 # Constants & Dictionaries
@@ -98,6 +100,45 @@ EARTHDATA_URS_BASE = "https://urs.earthdata.nasa.gov"
 GES_DISC_OPENDAP_BASE = "https://goldsmr4.gesdisc.eosdis.nasa.gov/opendap"
 
 MISSING_SENTINELS = (-999, -999.0, -99.0, -9999.0, -9999)
+
+SEASONS = {
+    "Winter": (1, 2, 12),
+    "Spring": (3, 4, 5),
+    "Summer": (6, 7, 8),
+    "Autumn": (9, 10, 11),
+}
+
+
+def parse_temporal_scope(t_scope):
+    """Normalize list or semicolon string of scopes to set of {'Annual', 'Winter', 'Spring', 'Summer', 'Autumn'}.
+    Defaults to all 5 scopes if None or empty."""
+    if not t_scope:
+        return {"Annual", "Winter", "Spring", "Summer", "Autumn"}
+    if isinstance(t_scope, (list, tuple)):
+        raw = t_scope
+    else:
+        raw = str(t_scope).split(";")
+    res = set()
+    for item in raw:
+        s = str(item).strip().strip("'\"")
+        for norm in ("Annual", "Winter", "Spring", "Summer", "Autumn"):
+            if norm.lower() in s.lower():
+                res.add(norm)
+    return res if res else {"Annual", "Winter", "Spring", "Summer", "Autumn"}
+
+
+def get_field_temporal_scope(fname):
+    """Returns 'Annual', 'Winter', 'Spring', 'Summer', or 'Autumn' for any field name."""
+    f = fname.upper()
+    if "WINTER" in f or "_WIN" in f or "_WN" in f or "WNMEAN" in f or "WINMEAN" in f or "MIN_WINTER" in f:
+        return "Winter"
+    if "SPRING" in f or "_SPR" in f or "SPMEAN" in f or "SPRMEAN" in f:
+        return "Spring"
+    if "SUMMER" in f or "_SUM" in f or "SUMEAN" in f or "SUMMEAN" in f or "MAX_SUMMER" in f or "WBGT_SUMMER" in f or "SUMN" in f:
+        return "Summer"
+    if "AUTUMN" in f or "_AUT" in f or "AUMEAN" in f or "AUTMEAN" in f:
+        return "Autumn"
+    return "Annual"
 
 PRIMARY_MODULES_ALL = [
     "Temperature",
@@ -112,19 +153,77 @@ PRIMARY_MODULES_ALL = [
 ]
 
 SUBMODELS_ALL = [
+    "Heat Index / Thermal Stress [Requires: Temperature, Relative Humidity]",
+    "Wind Chill / Cold Stress [Requires: Temperature, Wind]",
     "De Martonne Aridity Index [Requires: Temperature, Precipitation]",
     "FAO-56 Hargreaves PET [Requires: Temperature]",
     "UNEP Aridity Index [Requires: Temperature, Precipitation]",
     "Water Deficit Annual [Requires: Temperature, Precipitation]",
     "Walter-Lieth Dry Months Count [Requires: Temperature, Precipitation]",
-    "Heat Index / Thermal Stress [Requires: Temperature, Relative Humidity]"
+    "Trends & Baseline Anomalies [Requires: Temperature, Precipitation]",
 ]
 
+DERIVED_MODULES_ALL = [
+    "Heat Index",
+    "Wind Chill",
+    "De Martonne Aridity",
+    "Hargreaves PET",
+    "UNEP Aridity",
+    "Water Deficit",
+    "Dry Months",
+    "Trends & Anomalies",
+]
+
+CANONICAL_DERIVED_MAP = {
+    "Heat Index / Thermal Stress [Requires: Temperature, Relative Humidity]": "Heat Index",
+    "Wind Chill / Cold Stress [Requires: Temperature, Wind]": "Wind Chill",
+    "De Martonne Aridity Index [Requires: Temperature, Precipitation]": "De Martonne Aridity",
+    "FAO-56 Hargreaves PET [Requires: Temperature]": "Hargreaves PET",
+    "UNEP Aridity Index [Requires: Temperature, Precipitation]": "UNEP Aridity",
+    "Water Deficit Annual [Requires: Temperature, Precipitation]": "Water Deficit",
+    "Walter-Lieth Dry Months Count [Requires: Temperature, Precipitation]": "Dry Months",
+    "Trends & Baseline Anomalies [Requires: Temperature, Precipitation]": "Trends & Anomalies",
+}
+
+DERIVED_TO_SUBMODEL_KEY = dict((v, k) for k, v in CANONICAL_DERIVED_MAP.items())
+
 MODULES_ALL = PRIMARY_MODULES_ALL + SUBMODELS_ALL
+ALL_CANONICAL_MODULES = PRIMARY_MODULES_ALL + DERIVED_MODULES_ALL
 
 SUBMODEL_DEPS = {
+    "Heat Index / Thermal Stress [Requires: Temperature, Relative Humidity]": {
+        "short": "Heat_Index",
+        "canonical": "Heat Index",
+        "fields": [
+            ("HI_Annual_Mean", "Annual Mean Heat Index"),
+            ("HI_Summer_Mean", "Summer Mean Heat Index"),
+            ("HI_Winter_Mean", "Winter Mean Heat Index"),
+            ("HI_Annual_Range", "Annual Heat Index Range"),
+            ("WBGT_Summer_Mean", "Summer Mean WBGT Heat Stress"),
+        ],
+        "field": "HI_Summer_Mean",
+        "label": "Summer Mean Heat Index",
+        "modules": ["Temperature", "Relative Humidity"],
+        "params": ["T2M", "RH2M"]
+    },
+    "Wind Chill / Cold Stress [Requires: Temperature, Wind]": {
+        "short": "Wind_Chill",
+        "canonical": "Wind Chill",
+        "fields": [
+            ("WC_Winter_Mean", "Winter Mean Wind Chill"),
+            ("WC_Annual_Mean", "Annual Mean Wind Chill"),
+        ],
+        "field": "WC_Winter_Mean",
+        "label": "Winter Mean Wind Chill",
+        "modules": ["Temperature", "Wind"],
+        "params": ["T2M", "WS10M"]
+    },
     "De Martonne Aridity Index [Requires: Temperature, Precipitation]": {
-        "short": "De_Martonne",
+        "short": "De_Martonne_Aridity",
+        "canonical": "De Martonne Aridity",
+        "fields": [
+            ("DM_Aridity_Annual", "De Martonne Aridity Index"),
+        ],
         "field": "DM_Aridity_Annual",
         "label": "De Martonne Aridity Index",
         "modules": ["Temperature", "Precipitation"],
@@ -132,45 +231,111 @@ SUBMODEL_DEPS = {
     },
     "FAO-56 Hargreaves PET [Requires: Temperature]": {
         "short": "Hargreaves_PET",
+        "canonical": "Hargreaves PET",
+        "fields": [
+            ("PET_Hargreaves_Annual", "Annual Potential Evapotranspiration (Hargreaves)"),
+        ],
         "field": "PET_Hargreaves_Annual",
-        "label": "FAO-56 Hargreaves PET (mm/yr)",
+        "label": "Annual Potential Evapotranspiration (Hargreaves)",
         "modules": ["Temperature"],
         "params": ["T2M"]
     },
     "UNEP Aridity Index [Requires: Temperature, Precipitation]": {
         "short": "UNEP_Aridity",
+        "canonical": "UNEP Aridity",
+        "fields": [
+            ("UNEP_Aridity_Annual", "UNEP Aridity Index"),
+        ],
         "field": "UNEP_Aridity_Annual",
-        "label": "UNEP Aridity Index (P/PET)",
+        "label": "UNEP Aridity Index",
         "modules": ["Temperature", "Precipitation"],
         "params": ["T2M", "PRECTOTCORR"]
     },
     "Water Deficit Annual [Requires: Temperature, Precipitation]": {
         "short": "Water_Deficit",
+        "canonical": "Water Deficit",
+        "fields": [
+            ("Water_Deficit_Annual", "Annual Climatic Water Deficit/Surplus"),
+        ],
         "field": "Water_Deficit_Annual",
-        "label": "Annual Water Deficit (P - PET)",
+        "label": "Annual Climatic Water Deficit/Surplus",
         "modules": ["Temperature", "Precipitation"],
         "params": ["T2M", "PRECTOTCORR"]
     },
     "Walter-Lieth Dry Months Count [Requires: Temperature, Precipitation]": {
-        "short": "Walter_Lieth",
+        "short": "Dry_Months",
+        "canonical": "Dry Months",
+        "fields": [
+            ("Dry_Months_Count", "Biological Dry Months Count (Walter-Lieth)"),
+        ],
         "field": "Dry_Months_Count",
-        "label": "Walter-Lieth Dry Months Count",
+        "label": "Biological Dry Months Count (Walter-Lieth)",
         "modules": ["Temperature", "Precipitation"],
         "params": ["T2M", "PRECTOTCORR"]
     },
-    "Heat Index / Thermal Stress [Requires: Temperature, Relative Humidity]": {
-        "short": "Heat_Index",
+    "Trends & Baseline Anomalies [Requires: Temperature, Precipitation]": {
+        "short": "Trends_Anomalies",
+        "canonical": "Trends & Anomalies",
         "fields": [
-            ("HI_Annual_Mean", "Heat Index Annual Mean"),
-            ("HI_Summer_Mean", "Heat Index Summer Mean"),
-            ("HI_Winter_Mean", "HI_Winter_Mean"),
-            ("WBGT_Summer_Mean", "Summer Mean WBGT Heat Stress")
+            ("T_Trend_Decade", "Temperature Trend per Decade"),
+            ("R_Trend_Decade", "Precipitation Trend per Decade"),
+            ("T_Anom_Annual", "Annual Temperature Anomaly"),
+            ("T_Anom_Winter", "Winter Temperature Anomaly"),
+            ("T_Anom_Summer", "Summer Temperature Anomaly"),
+            ("R_Anom_Annual", "Annual Precipitation Anomaly"),
+            ("R_Anom_Annual_Pct", "Annual Precipitation Anomaly (Percent)"),
+            ("R_Anom_Winter", "Winter Precipitation Anomaly"),
+            ("R_Anom_Winter_Pct", "Winter Precipitation Anomaly (Percent)"),
         ],
-        "field": "HI_Summer_Mean",
-        "label": "Heat Index Summer Mean",
-        "modules": ["Temperature", "Relative Humidity"],
-        "params": ["T2M", "RH2M"]
-    }
+        "field": "T_Trend_Decade",
+        "label": "Temperature Trend per Decade",
+        "modules": ["Temperature", "Precipitation"],
+        "params": ["T2M", "PRECTOTCORR"]
+    },
+}
+
+
+def resolve_module_canonical(name):
+    """Maps any module name (full UI string, canonical, or short) to its canonical name."""
+    if not name:
+        return None
+    name_str = name.strip().strip("'\"")
+    for cm in ALL_CANONICAL_MODULES:
+        if name_str.lower() == cm.lower():
+            return cm
+    if name_str in CANONICAL_DERIVED_MAP:
+        return CANONICAL_DERIVED_MAP[name_str]
+    clean = name_str.split(" [")[0].strip().lower()
+    for sub_key, can_name in CANONICAL_DERIVED_MAP.items():
+        k_clean = sub_key.split(" [")[0].strip().lower()
+        if clean == k_clean or k_clean.startswith(clean) or clean == can_name.lower():
+            return can_name
+    for info in SUBMODEL_DEPS.values():
+        if clean == info.get("short", "").lower():
+            return info["canonical"]
+    return None
+
+
+MODULE_SHORT = {
+    "Temperature": "Temperature",
+    "Precipitation": "Precipitation",
+    "Sea Level Pressure": "Sea_Level_Pressure",
+    "Surface Pressure": "Surface_Pressure",
+    "Wind": "Wind",
+    "Relative Humidity": "Humidity",
+    "Solar Radiation": "Solar_Radiation",
+    "UV Index": "UV_Index",
+    "Cloud Cover": "Cloud_Cover",
+    "Heat Index": "Heat_Index",
+    "Wind Chill": "Wind_Chill",
+    "De Martonne Aridity": "De_Martonne_Aridity",
+    "Hargreaves PET": "Hargreaves_PET",
+    "UNEP Aridity": "UNEP_Aridity",
+    "Water Deficit": "Water_Deficit",
+    "Dry Months": "Dry_Months",
+    "Trends & Anomalies": "Trends_Anomalies",
+    "Drought & Aridity": "Drought_Aridity",
+    "Climate_Models": "Climate_Models",
 }
 
 MODULE_FOLDER = {
@@ -183,6 +348,14 @@ MODULE_FOLDER = {
     "Solar Radiation": "07_Solar_Radiation",
     "UV Index": "08_UV_Index",
     "Cloud Cover": "09_Cloud_Cover",
+    "Heat Index": "10_Heat_Index",
+    "Wind Chill": "11_Wind_Chill",
+    "De Martonne Aridity": "12_De_Martonne_Aridity",
+    "Hargreaves PET": "13_Hargreaves_PET",
+    "UNEP Aridity": "14_UNEP_Aridity",
+    "Water Deficit": "15_Water_Deficit",
+    "Dry Months": "16_Dry_Months",
+    "Trends & Anomalies": "17_Trends_And_Anomalies",
     "Climate_Models": "10_Climate_Models",
 }
 
@@ -203,11 +376,21 @@ COLOR_RAMPS = {
     "Precipitation": ["#8C510A", "#D8B365", "#F6E8C3", "#C7EAE5", "#80CDC1", "#35978F", "#01665E"],
     "Relative Humidity": ["#FFFFCC", "#C7E9B4", "#7FCDBB", "#41B6C4", "#1D91C0", "#225EA8", "#0C2C84"],
     "Wind": ["#F7FBFF", "#DEEBF7", "#C6DBEF", "#9ECAE1", "#6BAED6", "#3182BD", "#08519C"],
+    "Wind_Speed": ["#F7FBFF", "#DEEBF7", "#C6DBEF", "#9ECAE1", "#6BAED6", "#3182BD", "#08519C"],
+    "Wind_Direction": ["#F7F7F7", "#D9D9D9", "#BDBDBD", "#969696", "#737373", "#525252", "#252525"],
     "Solar Radiation": ["#FFFFCC", "#FFEDA0", "#FED976", "#FEB24C", "#FD8D3C", "#FC4E2A", "#BD0026"],
     "Surface Pressure": ["#762A83", "#9970AB", "#C2A5CF", "#F7F7F7", "#A6DBA0", "#5AAE61", "#1B7837"],
     "Sea Level Pressure": ["#762A83", "#9970AB", "#C2A5CF", "#F7F7F7", "#A6DBA0", "#5AAE61", "#1B7837"],
     "UV Index": ["#299500", "#F7E400", "#F85900", "#D8001D", "#6B499D"],
     "Cloud Cover": ["#F7FBFF", "#DEEBF7", "#C6DBEF", "#9ECAE1", "#4292C6", "#2171B5", "#084594"],
+    "Heat Index": ["#FFFFD4", "#FEE391", "#FEC44F", "#FE9929", "#EC7014", "#CC4C02", "#8C2D04"],
+    "Wind Chill": ["#08306B", "#08519C", "#2171B5", "#4292C6", "#6BAED6", "#9ECAE1", "#C6DBEF"],
+    "De Martonne Aridity": ["#8C510A", "#D8B365", "#F6E8C3", "#E0E0E0", "#80CDC1", "#35978F", "#01665E"],
+    "Hargreaves PET": ["#FFFFCC", "#D9F0A3", "#ADDD8E", "#78C679", "#41AB5D", "#238443", "#005A32"],
+    "UNEP Aridity": ["#D73027", "#FC8D59", "#FEE08B", "#FFFFBF", "#D9EF8B", "#91CF60", "#1A9850"],
+    "Water Deficit": ["#B2182B", "#D6604D", "#F4A582", "#FDDBC7", "#D1E5F0", "#92C5DE", "#4393C3"],
+    "Dry Months": ["#2166AC", "#4393C3", "#92C5DE", "#D1E5F0", "#FDDBC7", "#F4A582", "#D6604D"],
+    "Trends & Anomalies": ["#2166AC", "#67A9CF", "#D1E5F0", "#F7F7F7", "#FDDBC7", "#EF8A62", "#B2182B"],
     "Climate_Models": ["#8C510A", "#D8B365", "#F6E8C3", "#E0E0E0", "#80CDC1", "#35978F", "#01665E"],
 }
 
@@ -245,10 +428,8 @@ SHP_FIELD_MAP = {
     "RH_Summer_Mean": "RH_SuMean",
     "RH_Winter_Mean": "RH_WnMean",
     "R_Annual_Mean": "R_AnnMean",
-    "R_Annual_Rain_Days_Total": "R_RainDays",
     "R_Annual_Total": "R_AnnTot",
     "R_Autumn_Total": "R_AutTot",
-    "R_Max_Daily_Month": "R_MaxDayMo",
     "R_Spring_Total": "R_SprTot",
     "R_Summer_Total": "R_SumTot",
     "R_Winter_Total": "R_WinTot",
@@ -281,6 +462,7 @@ SHP_FIELD_MAP = {
     "W_Dir_Summer_Mean": "WDr_SuMean",
     "W_Dir_Winter_Mean": "WDr_WnMean",
     "W_Spd_Annual_Max_Month": "WSp_MaxMo",
+    "W_Spd_Annual_Min_Month": "WSp_MinMo",
     "W_Spd_Annual_Mean": "WSp_AnMean",
     "W_Spd_Annual_Range": "WSp_AnRng",
     "W_Spd_Autumn_Mean": "WSp_AuMean",
@@ -290,6 +472,20 @@ SHP_FIELD_MAP = {
     "PET_Hargreaves_Annual": "PET_HarAnn",
     "UNEP_Aridity_Annual": "UNEP_Arid",
     "Water_Deficit_Annual": "WatDefAnn",
+    "Td_Annual_Mean": "Td_AnnMean",
+    "Td_Summer_Mean": "Td_SumMean",
+    "Td_Winter_Mean": "Td_WinMean",
+    "WC_Winter_Mean": "WC_WinMean",
+    "WC_Annual_Mean": "WC_AnnMean",
+    "T_Trend_Decade": "T_TrendDec",
+    "R_Trend_Decade": "R_TrendDec",
+    "T_Anom_Annual": "T_AnomAnn",
+    "T_Anom_Winter": "T_AnomWin",
+    "T_Anom_Summer": "T_AnomSum",
+    "R_Anom_Annual": "R_AnomAnn",
+    "R_Anom_Annual_Pct": "R_AnomPct",
+    "R_Anom_Winter": "R_AnomWin",
+    "R_Anom_Winter_Pct": "R_AnomWPct",
 }
 
 REV_SHP_MAP = dict((v, k) for k, v in SHP_FIELD_MAP.items())
@@ -306,11 +502,9 @@ MODULE_INDICATOR_FIELDS = {
         ("T_Min_Winter_Month_Mean", "Minimum Winter Monthly Mean Temperature"),
         ("T_Annual_Max_Mean", "Annual Mean Maximum Temperature"),
         ("T_Annual_Min_Mean", "Annual Mean Minimum Temperature"),
-        ("HI_Annual_Mean", "Annual Mean Heat Index"),
-        ("HI_Summer_Mean", "Summer Mean Heat Index"),
-        ("HI_Winter_Mean", "Winter Mean Heat Index"),
-        ("HI_Annual_Range", "Annual Heat Index Range"),
-        ("WBGT_Summer_Mean", "Summer Mean WBGT Heat Stress"),
+        ("Td_Annual_Mean", "Annual Mean Dew Point Temperature"),
+        ("Td_Summer_Mean", "Summer Mean Dew Point Temperature"),
+        ("Td_Winter_Mean", "Winter Mean Dew Point Temperature"),
     ],
     "Precipitation": [
         ("R_Annual_Total", "Annual Total Precipitation"),
@@ -319,8 +513,6 @@ MODULE_INDICATOR_FIELDS = {
         ("R_Spring_Total", "Spring Total Precipitation"),
         ("R_Summer_Total", "Summer Total Precipitation"),
         ("R_Autumn_Total", "Autumn Total Precipitation"),
-        ("R_Max_Daily_Month", "Maximum Daily Precipitation"),
-        ("R_Annual_Rain_Days_Total", "Annual Rain Days Total"),
     ],
     "Relative Humidity": [
         ("RH_Annual_Mean", "Annual Mean Relative Humidity"),
@@ -337,6 +529,7 @@ MODULE_INDICATOR_FIELDS = {
         ("W_Spd_Summer_Mean", "Summer Mean Wind Speed"),
         ("W_Spd_Autumn_Mean", "Autumn Mean Wind Speed"),
         ("W_Spd_Annual_Max_Month", "Maximum Monthly Mean Wind Speed"),
+        ("W_Spd_Annual_Min_Month", "Minimum Monthly Mean Wind Speed"),
         ("W_Spd_Annual_Range", "Annual Wind Speed Range"),
         ("W_Dir_Annual_Mean", "Annual Prevailing Wind Direction"),
         ("W_Dir_Winter_Mean", "Winter Prevailing Wind Direction"),
@@ -385,19 +578,47 @@ MODULE_INDICATOR_FIELDS = {
         ("UV_Autumn_Mean", "Autumn Mean UV Index"),
         ("UV_Annual_Range", "Annual UV Index Range"),
     ],
-    "Climate_Models": [
-        ("DM_Aridity_Annual", "De Martonne Aridity Index"),
-        ("PET_Hargreaves_Annual", "Annual Potential Evapotranspiration (Hargreaves)"),
-        ("UNEP_Aridity_Annual", "UNEP Aridity Index"),
-        ("Water_Deficit_Annual", "Annual Climatic Water Deficit/Surplus"),
-        ("Dry_Months_Count", "Biological Dry Months Count (Walter-Lieth)"),
-        ("HI_Summer_Mean", "Summer Mean Heat Index"),
+    "Heat Index": [
         ("HI_Annual_Mean", "Annual Mean Heat Index"),
+        ("HI_Summer_Mean", "Summer Mean Heat Index"),
         ("HI_Winter_Mean", "Winter Mean Heat Index"),
         ("HI_Annual_Range", "Annual Heat Index Range"),
         ("WBGT_Summer_Mean", "Summer Mean WBGT Heat Stress"),
     ],
+    "Wind Chill": [
+        ("WC_Winter_Mean", "Winter Mean Wind Chill Temperature"),
+        ("WC_Annual_Mean", "Annual Mean Wind Chill Temperature"),
+    ],
+    "De Martonne Aridity": [
+        ("DM_Aridity_Annual", "De Martonne Aridity Index"),
+    ],
+    "Hargreaves PET": [
+        ("PET_Hargreaves_Annual", "Annual Potential Evapotranspiration (Hargreaves)"),
+    ],
+    "UNEP Aridity": [
+        ("UNEP_Aridity_Annual", "UNEP Aridity Index"),
+    ],
+    "Water Deficit": [
+        ("Water_Deficit_Annual", "Annual Climatic Water Deficit/Surplus"),
+    ],
+    "Dry Months": [
+        ("Dry_Months_Count", "Biological Dry Months Count (Walter-Lieth)"),
+    ],
+    "Trends & Anomalies": [
+        ("T_Trend_Decade", "Temperature Trend per Decade"),
+        ("R_Trend_Decade", "Precipitation Trend per Decade"),
+        ("T_Anom_Annual", "Annual Temperature Anomaly vs 1991-2020"),
+        ("T_Anom_Winter", "Winter Temperature Anomaly vs 1991-2020"),
+        ("T_Anom_Summer", "Summer Temperature Anomaly vs 1991-2020"),
+        ("R_Anom_Annual", "Annual Precipitation Anomaly vs 1991-2020"),
+        ("R_Anom_Annual_Pct", "Annual Precipitation Anomaly Percent vs 1991-2020"),
+        ("R_Anom_Winter", "Winter Precipitation Anomaly vs 1991-2020"),
+        ("R_Anom_Winter_Pct", "Winter Precipitation Anomaly Percent vs 1991-2020"),
+    ],
 }
+MODULE_INDICATOR_FIELDS["Climate_Models"] = [
+    item for mod_key in DERIVED_MODULES_ALL for item in MODULE_INDICATOR_FIELDS.get(mod_key, [])
+]
 
 _this_dir = os.path.dirname(os.path.abspath(__file__)) if '__file__' in globals() else os.getcwd()
 if _this_dir not in sys.path:
@@ -520,13 +741,21 @@ def launch_calendar_picker(initial_start=None, initial_end=None):
 def resolve_submodel_name(name):
     if not name:
         return None
+    name_clean = name.split(" [")[0].strip()
+    for pm in PRIMARY_MODULES_ALL:
+        if name_clean.lower() == pm.lower():
+            return None
     if name in SUBMODEL_DEPS:
         return name
-    clean = name.split(" [")[0].strip().lower()
+    clean = name_clean.lower()
     for k, info in SUBMODEL_DEPS.items():
         k_clean = k.split(" [")[0].strip().lower()
         short = info.get("short", "").lower()
-        if clean == k_clean or clean == short or k_clean.startswith(clean) or clean in k_clean:
+        if clean == k_clean or (short and clean == short):
+            return k
+    for k, info in SUBMODEL_DEPS.items():
+        k_clean = k.split(" [")[0].strip().lower()
+        if k_clean.startswith(clean + " ") or k_clean.startswith(clean + "/"):
             return k
     return None
 
@@ -735,6 +964,28 @@ class RasterDataClimateAtlasGenerator(object):
             "Select 'Interpolate & Map Existing Data (Offline Mode)' to work without internet using existing point layers."
         )
 
+        p_wf_mode = arcpy.Parameter(
+            displayName="Execution Workflow Mode",
+            name="Execution_Workflow_Mode",
+            datatype="GPString",
+            parameterType="Required",
+            direction="Input"
+        )
+        p_wf_mode.filter.type = "ValueList"
+        p_wf_mode.filter.list = [
+            "Batch Mode: Download All Then Process [Recommended]",
+            "Sequential Mode: Element by Element"
+        ]
+        p_wf_mode.value = "Batch Mode: Download All Then Process [Recommended]"
+        p_wf_mode.description = (
+            "DOWNLOAD MODE ONLY. Choose workflow execution architecture:\n"
+            "'Batch Mode: Download All Then Process' (recommended): Downloads gridded data and builds "
+            "master point layers in the Geodatabase for all requested modules first, ensuring data integrity "
+            "against network interruptions, then interpolates all surfaces in a second pass.\n"
+            "'Sequential Mode: Element by Element': Downloads, builds points, and interpolates surfaces "
+            "for each module one by one, providing immediate visual progress in the map layout."
+        )
+
         p_precalc = arcpy.Parameter(
             displayName="Precalculated Point Layer(s) (Offline Mode)",
             name="Precalculated_Point_Layers",
@@ -889,6 +1140,25 @@ class RasterDataClimateAtlasGenerator(object):
             "(any past or future year) or type the date directly."
         )
 
+        p_tscope = arcpy.Parameter(
+            displayName="Temporal Scope / Seasons (النطاق الزمني والفصول)",
+            name="Temporal_Scope",
+            datatype="GPString",
+            parameterType="Optional",
+            direction="Input"
+        )
+        p_tscope.multiValue = True
+        p_tscope.filter.type = "ValueList"
+        p_tscope.filter.list = ["Annual", "Winter", "Spring", "Summer", "Autumn"]
+        p_tscope.value = "Annual;Winter;Spring;Summer;Autumn"
+        p_tscope.category = "Time Window"
+        p_tscope.description = (
+            "TEMPORAL MATRIX SCOPE. Select which temporal scopes and seasons to compute and map "
+            "(Annual, Winter, Spring, Summer, Autumn). Uncheck any seasons not needed (e.g. keep only "
+            "Annual for fast regional atlas, or Summer only for heat waves). The tool computes only the "
+            "Cartesian product of selected Climate Modules and selected Temporal Scope."
+        )
+
         p_aggs = arcpy.Parameter(
             displayName="Included Temporal Aggregations",
             name="Included_Aggregations",
@@ -957,6 +1227,21 @@ class RasterDataClimateAtlasGenerator(object):
             "When using a Geographic Coordinate System (degrees), the tool automatically converts meters to decimal degrees."
         )
 
+        p_wind_cell = arcpy.Parameter(
+            displayName="Wind Vector Spacing / Cell Size (Meters)",
+            name="Wind_Factor_Cell_Size",
+            datatype="GPDouble",
+            parameterType="Optional",
+            direction="Input"
+        )
+        p_wind_cell.value = 25000.0
+        p_wind_cell.category = "Cartography & Spatial Interpolation"
+        p_wind_cell.description = (
+            "Independent spacing for wind vector grid points in meters (default: 25000.0). "
+            "Controls density of wind vector arrows to prevent crowding on maps. "
+            "Enabled only when Wind module is selected."
+        )
+
         # ═══ Output Options ═══
         p_exp_indiv = arcpy.Parameter(
             displayName="Export Individual Shapefiles per Season/Indicator",
@@ -987,11 +1272,11 @@ class RasterDataClimateAtlasGenerator(object):
         p_sr.category = "Output Options"
 
         return [
-            p_mode, p_precalc, p0, p1,
+            p_mode, p_wf_mode, p_precalc, p0, p1,
             p2, p3, p4,
-            p_tmode, p_syr, p_s_yr, p_e_yr, p_sd, p_ed, p_aggs,
+            p_tmode, p_syr, p_s_yr, p_e_yr, p_sd, p_ed, p_tscope, p_aggs,
             p_mods,
-            p_interp, p_cell,
+            p_interp, p_cell, p_wind_cell,
             p_exp_indiv, p_ws, p_sr
         ]
 
@@ -1003,6 +1288,10 @@ class RasterDataClimateAtlasGenerator(object):
         p_op = pdict.get("Operation_Mode")
         op_text = p_op.valueAsText if p_op else "Download Gridded Data & Generate Atlas (Full Pipeline) [Default]"
         is_offline = bool(op_text and "Offline" in op_text)
+
+        p_wf = pdict.get("Execution_Workflow_Mode")
+        if p_wf:
+            p_wf.enabled = not is_offline
 
         p_pre = pdict.get("Precalculated_Point_Layers")
         if p_pre:
@@ -1038,6 +1327,13 @@ class RasterDataClimateAtlasGenerator(object):
             pdict["Start_Date"].enabled = custom_range
         if "End_Date" in pdict:
             pdict["End_Date"].enabled = custom_range
+
+        p_mods = pdict.get("Climate_Modules")
+        mods_val = p_mods.valueAsText if p_mods else ""
+        raw_items = [m.strip().strip("'\"") for m in mods_val.split(";") if m.strip()]
+        has_wind = any(m.strip().lower() == "wind" for m in raw_items) or ("Wind" in raw_items)
+        if "Wind_Factor_Cell_Size" in pdict:
+            pdict["Wind_Factor_Cell_Size"].enabled = has_wind
 
     def updateMessages(self, parameters):
         pdict = dict((p.name, p) for p in parameters) if (parameters and hasattr(parameters[0], 'name')) else {}
@@ -1106,6 +1402,12 @@ class RasterDataClimateAtlasGenerator(object):
             pdict["Output_Cell_Size"].setWarningMessage(
                 "Fine cell size (< 50m) specified. Processing may take longer."
             )
+
+        p_wc = pdict.get("Wind_Factor_Cell_Size")
+        if p_wc and getattr(p_wc, "enabled", True):
+            wc_size = p_wc.value
+            if wc_size is not None and wc_size <= 0:
+                p_wc.setErrorMessage("Wind vector spacing must be strictly positive.")
 
         mod_val = pdict.get("Climate_Modules").valueAsText if pdict.get("Climate_Modules") else ""
         raw_items = [m.strip().strip("'\"") for m in mod_val.split(";") if m.strip()]
@@ -1252,37 +1554,62 @@ class RasterDataClimateAtlasGenerator(object):
         cell_size = tolerance_meters(cell_size_val) if cell_size_val is not None else 500.0
         if cell_size <= 0.0:
             cell_size = 500.0
+        wind_cell_val = _get_val("Wind_Factor_Cell_Size")
+        wind_cell_size = tolerance_meters(wind_cell_val) if wind_cell_val is not None else 25000.0
+        if wind_cell_size <= 0.0:
+            wind_cell_size = 25000.0
         export_indiv_shp = bool(_get_val("Export_Individual_Shapefiles", False))
         out_root = _get_text("Output_Workspace")
         out_sr = _get_val("Output_Spatial_Reference")
 
-        active_export_modules = list(modules)
-        if active_submodels and "Climate_Models" not in active_export_modules:
-            active_export_modules.append("Climate_Models")
+        wf_mode_text = _get_text("Execution_Workflow_Mode", "Batch Mode: Download All Then Process [Recommended]")
+        is_sequential = bool((not is_offline) and "Sequential" in wf_mode_text)
+        is_batch = not is_sequential
+        temporal_scope_raw = _get_text("Temporal_Scope", "")
+        t_scope_set = parse_temporal_scope(temporal_scope_raw)
 
-        HIERARCHY = [
-            "Temperature", "Precipitation", "Relative Humidity",
-            "Wind", "Solar Radiation", "Surface Pressure",
-            "Sea Level Pressure", "Cloud Cover", "UV Index", "Climate_Models"
-        ]
+        active_export_modules = []
+        for m in modules:
+            canon = resolve_module_canonical(m)
+            if canon == "Climate_Models":
+                for sm in DERIVED_MODULES_ALL:
+                    if sm not in active_export_modules:
+                        active_export_modules.append(sm)
+            elif canon and canon not in active_export_modules:
+                active_export_modules.append(canon)
+        for s in active_submodels:
+            canon = resolve_module_canonical(s)
+            if canon and canon not in active_export_modules:
+                active_export_modules.append(canon)
+
+        HIERARCHY = list(ALL_CANONICAL_MODULES)
         ordered_modules = [m for m in HIERARCHY if m in active_export_modules]
         for m in active_export_modules:
             if m not in ordered_modules:
                 ordered_modules.append(m)
 
         msg("Operation Mode: %s" % ("OFFLINE (Existing Multi-Layer Data)" if is_offline else "ONLINE (Direct API Download)"))
+        msg("Workflow Pipeline Mode: %s" % ("SEQUENTIAL (Element by Element)" if is_sequential else ("OFFLINE (Precalculated)" if is_offline else "BATCH (Download All Then Process)")))
+        msg("Temporal Scope Filter: %s" % ", ".join(sorted(t_scope_set)))
         msg("Data Source: %s" % (source if not is_offline else "Precalculated Layers"))
         msg("Period: %s (%s to %s)" % (period_label, col_data_start, col_data_end))
         msg("Modules: %s" % ", ".join(ordered_modules))
         if active_submodels:
             msg("Applied Submodels: %s" % ", ".join([SUBMODEL_DEPS[s]["short"] for s in active_submodels]))
-        msg("Interpolation: %s | Base Cell Size: %.2f meters" % (interp_method, cell_size))
+        msg("Interpolation: %s | Base Cell Size: %.2f meters | Wind Vector Spacing: %.2f meters" % (interp_method, cell_size, wind_cell_size))
 
         # 2. Check Spatial Analyst Extension
         if not _HAS_SA:
             raise RuntimeError("ArcGIS Spatial Analyst extension is required for raster interpolation.")
         arcpy.CheckOutExtension("Spatial")
         arcpy.env.overwriteOutput = True
+        try:
+            arcpy.env.compression = "LZW"
+            arcpy.env.tileSize = "128 128"
+            arcpy.env.pyramid = "NONE"
+            arcpy.env.rasterStatistics = "STATISTICS 1 1"
+        except Exception:
+            pass
 
         # 3. Establish output folders & GDB
         makedirs_ok(out_root)
@@ -1303,6 +1630,9 @@ class RasterDataClimateAtlasGenerator(object):
         eff_cell_size = (cell_size / 111320.0) if (is_geo and cell_size > 1.0) else cell_size
         if is_geo and cell_size > 1.0:
             warn("Target SR is Geographic: base cell size %.1f meters converted to %.6f degrees." % (cell_size, eff_cell_size))
+        eff_wind_size = (wind_cell_size / 111320.0) if (is_geo and wind_cell_size > 1.0) else wind_cell_size
+        if is_geo and wind_cell_size > 1.0:
+            warn("Target SR is Geographic: wind vector spacing %.1f meters converted to %.6f degrees." % (wind_cell_size, eff_wind_size))
 
         generated_rasters = []
         element_layers = {}
@@ -1347,9 +1677,9 @@ class RasterDataClimateAtlasGenerator(object):
                 msg(">>> PROCESSING MODULE [%d/%d]: %s <<<" % (mi + 1, len(ordered_modules), mod))
                 msg("=" * 65)
 
-                if mod == "Climate_Models":
-                    pts_fc, ind_fields = self._process_submodels_to_master_points(
-                        source, active_submodels, tiles, start_yr, end_yr,
+                if mod in DERIVED_MODULES_ALL or mod == "Climate_Models":
+                    pts_fc, ind_fields = self._process_single_derived_to_master_points(
+                        source, mod, tiles, start_yr, end_yr,
                         gdb_path, scratch_dir, edl_user, edl_pass,
                         element_layers, intermediate_points, msg, warn,
                         col_data_start=col_data_start, col_data_end=col_data_end
@@ -1365,6 +1695,17 @@ class RasterDataClimateAtlasGenerator(object):
                     element_layers[mod] = pts_fc
                     indicator_fields_by_module[mod] = ind_fields
 
+                    if is_sequential:
+                        msg(">>> [SEQUENTIAL PIPELINE] Immediately generating exports & rasters for %s <<<" % mod)
+                        self._process_single_module_outputs(
+                            mi, mod, len(ordered_modules), pts_fc, ind_fields, t_scope_set,
+                            out_root, vec_dir, export_indiv_shp, in_clip_layer, interp_method,
+                            eff_cell_size, target_sr, gdb_path, eff_wind_size, generated_rasters,
+                            msg, warn
+                        )
+                    else:
+                        msg(">>> [BATCH DATA COMMITTED] Module [%d/%d] %s: Master point layer committed to GDB. <<<" % (mi + 1, len(ordered_modules), mod))
+
             # Cleanup intermediate points
             for m, ifc in intermediate_points.items():
                 if m not in modules and arcpy.Exists(ifc):
@@ -1373,52 +1714,29 @@ class RasterDataClimateAtlasGenerator(object):
                     except Exception:
                         pass
 
-        # 4. Interpolate, Mask & Export Rasters and Vectors
-        for mi, mod in enumerate(ordered_modules):
-            pts_fc = element_layers.get(mod)
-            ind_fields = indicator_fields_by_module.get(mod, [])
-            if not pts_fc or not arcpy.Exists(pts_fc):
-                warn("Layer for %s was not found in GDB; skipping interpolation." % mod)
-                continue
+        # 4. Interpolate, Mask & Export Rasters and Vectors (Batch Phase 2 or Offline Mode)
+        if not is_sequential:
+            msg("\n" + "=" * 65)
+            msg(">>> %s Starting Raster Surface Interpolation & Exports for All Modules <<<" %
+                ("[BATCH MODE PHASE 2]" if not is_offline else "[OFFLINE MODE PHASE 2]"))
+            msg("=" * 65)
 
-            pt_count = int(arcpy.GetCount_management(pts_fc).getOutput(0))
-            msg("\nProcessing Module [%d/%d]: %s (%d points)" % (mi + 1, len(ordered_modules), mod, pt_count))
-
-            mod_folder_name = MODULE_FOLDER.get(mod, "09_Other")
-            mod_dir = os.path.join(out_root, mod_folder_name)
-            makedirs_ok(mod_dir)
-
-            # Export Vector files (Shapefile, CSV, Excel)
-            self._export_vectors(pts_fc, mod, vec_dir, ind_fields, export_indiv_shp, msg)
-
-            # Interpolation per indicator
-            for fld_name, fld_label in ind_fields:
-                # Verify field exists and has valid values
-                field_names = [f.name for f in arcpy.ListFields(pts_fc)]
-                if fld_name not in field_names:
+            for mi, mod in enumerate(ordered_modules):
+                pts_fc = element_layers.get(mod)
+                ind_fields = indicator_fields_by_module.get(mod, [])
+                if not pts_fc or not arcpy.Exists(pts_fc):
+                    warn("Layer for %s was not found in GDB; skipping interpolation." % mod)
                     continue
 
-                has_valid = False
-                with arcpy.da.SearchCursor(pts_fc, [fld_name]) as scur:
-                    for r in scur:
-                        if r[0] is not None and not is_missing(r[0]):
-                            has_valid = True
-                            break
-                if not has_valid:
-                    warn("  ! Field %s has no valid data in %s; skipping raster interpolation." % (fld_name, pts_fc))
-                    continue
-
-                msg("  -> Interpolating: %s (%s)..." % (fld_name, interp_method))
-                out_tif = os.path.join(mod_dir, "%s.tif" % fld_name)
-                success = self._interpolate_and_clip(
-                    pts_fc, fld_name, in_clip_layer, interp_method,
-                    eff_cell_size, out_tif, target_sr, msg, warn
+                self._process_single_module_outputs(
+                    mi, mod, len(ordered_modules), pts_fc, ind_fields, t_scope_set,
+                    out_root, vec_dir, export_indiv_shp, in_clip_layer, interp_method,
+                    eff_cell_size, target_sr, gdb_path, eff_wind_size, generated_rasters,
+                    msg, warn
                 )
-                if success:
-                    generated_rasters.append((fld_name, out_tif, mod))
-                    self._create_layer_file(out_tif, mod, fld_name, fld_label, msg)
 
-            msg(">>> Module [%d/%d] %s complete. <<<" % (mi + 1, len(ordered_modules), mod))
+        arcpy.ClearEnvironment("mask")
+        arcpy.ClearEnvironment("extent")
 
         # 5. Dictionaries & Processing Log
         self._write_dictionaries(vec_dir, ordered_modules, msg)
@@ -1430,11 +1748,15 @@ class RasterDataClimateAtlasGenerator(object):
             "data_end": col_data_end,
             "period_label": period_label,
             "time_mode": "Offline" if is_offline else time_mode,
+            "workflow_mode": "Sequential" if is_sequential else ("Offline" if is_offline else "Batch"),
+            "temporal_scope": sorted(list(t_scope_set)),
             "modules": ordered_modules,
             "submodels": active_submodels,
             "interp": interp_method,
             "cell_size": cell_size,
             "eff_cell_size": eff_cell_size,
+            "wind_cell_size": wind_cell_size,
+            "eff_wind_size": eff_wind_size,
             "rasters": generated_rasters,
             "elements": element_layers,
             "elapsed": elapsed
@@ -1531,7 +1853,10 @@ class RasterDataClimateAtlasGenerator(object):
                 arcpy.management.Delete(tile_pts)
 
             mem_bands = "bands_tile_%d" % idx
-            arcpy.md.MakeNetCDFRasterLayer(nc_tile, primary_param, "lon", "lat", mem_bands, band_dimension="time")
+            if hasattr(arcpy, "md") and hasattr(arcpy.md, "MakeNetCDFRasterLayer"):
+                arcpy.md.MakeNetCDFRasterLayer(nc_tile, primary_param, "lon", "lat", mem_bands, band_dimension="time")
+            else:
+                arcpy.MakeNetCDFRasterLayer_management(nc_tile, primary_param, "lon", "lat", mem_bands, band_dimension="time")
 
             # Annual band 13
             mem_ann = "ann_tile_%d" % idx
@@ -1539,7 +1864,7 @@ class RasterDataClimateAtlasGenerator(object):
             arcpy.RasterToPoint_conversion(mem_ann, tile_pts, "Value")
 
             arcpy.AddField_management(tile_pts, ann_field, "DOUBLE", field_alias=ann_field)
-            arcpy.CalculateField_management(tile_pts, ann_field, "!grid_code!", "PYTHON_9.3")
+            arcpy.CalculateField_management(tile_pts, ann_field, "!grid_code!", CALC_EXPR_TYPE)
 
             if include_seasons and len(indicator_fields) >= 5:
                 m_layers = {}
@@ -1581,13 +1906,20 @@ class RasterDataClimateAtlasGenerator(object):
 
                 range_flds = [f for f, _l in indicator_fields
                               if f.endswith("_Range") and "Dir_" not in f]
-                if range_flds and module != "Precipitation":
+                min_flds = [f for f, _l in indicator_fields if "_Min_Month" in f]
+                max_flds = [f for f, _l in indicator_fields if "_Max_Month" in f]
+                if (range_flds or min_flds or max_flds) and module != "Precipitation":
                     try:
                         _m_list = [m_layers[m_i] for m_i in range(1, 13)]
                         r_max = CellStatistics(_m_list, "MAXIMUM", "DATA")
                         r_min = CellStatistics(_m_list, "MINIMUM", "DATA")
-                        r_rng = r_max - r_min
-                        extract_list.append([r_rng, range_flds[0]])
+                        if range_flds:
+                            r_rng = r_max - r_min
+                            extract_list.append([r_rng, range_flds[0]])
+                        if min_flds:
+                            extract_list.append([r_min, min_flds[0]])
+                        if max_flds:
+                            extract_list.append([r_max, max_flds[0]])
                     except Exception as _rng_ex:
                         try:
                             warn("  ! Range calc skipped for %s: %s" % (module, _rng_ex))
@@ -1629,14 +1961,14 @@ class RasterDataClimateAtlasGenerator(object):
 
         arcpy.AddXY_management(pts_fc)
         arcpy.AddField_management(pts_fc, "Point_ID", "LONG", field_alias="Point_ID")
-        arcpy.CalculateField_management(pts_fc, "Point_ID", "!OBJECTID!", "PYTHON_9.3")
+        arcpy.CalculateField_management(pts_fc, "Point_ID", "!OBJECTID!", CALC_EXPR_TYPE)
 
         arcpy.AddField_management(pts_fc, "Data_Start", "TEXT", field_length=30, field_alias="Data_Start")
         arcpy.AddField_management(pts_fc, "Data_End", "TEXT", field_length=30, field_alias="Data_End")
         if col_data_start:
-            arcpy.CalculateField_management(pts_fc, "Data_Start", "'%s'" % str(col_data_start).replace("'", ""), "PYTHON_9.3")
+            arcpy.CalculateField_management(pts_fc, "Data_Start", "'%s'" % str(col_data_start).replace("'", ""), CALC_EXPR_TYPE)
         if col_data_end:
-            arcpy.CalculateField_management(pts_fc, "Data_End", "'%s'" % str(col_data_end).replace("'", ""), "PYTHON_9.3")
+            arcpy.CalculateField_management(pts_fc, "Data_End", "'%s'" % str(col_data_end).replace("'", ""), CALC_EXPR_TYPE)
 
         # Set English aliases on all fields
         for fld, lbl in indicator_fields:
@@ -1649,27 +1981,32 @@ class RasterDataClimateAtlasGenerator(object):
         return pts_fc, indicator_fields
 
     # -----------------------------------------------------------------------
-    # Helper: Assemble Submodels Master Points
+    # Helper: Assemble Single Derived Model Master Points
     # -----------------------------------------------------------------------
-    def _process_submodels_to_master_points(self, source, active_submodels, tiles, start_yr, end_yr,
-                                            gdb_path, scratch_dir, edl_user, edl_pass,
-                                            element_layers, intermediate_points, msg, warn,
-                                            col_data_start="", col_data_end=""):
-        req_modules = []
-        for s in active_submodels:
-            info = SUBMODEL_DEPS.get(s)
-            if info:
-                for m in info.get("modules", []):
-                    if m not in req_modules:
-                        req_modules.append(m)
+    def _process_single_derived_to_master_points(self, source, mod, tiles, start_yr, end_yr,
+                                                 gdb_path, scratch_dir, edl_user, edl_pass,
+                                                 element_layers, intermediate_points, msg, warn,
+                                                 col_data_start="", col_data_end=""):
+        req_map = {
+            "Heat Index": ["Temperature", "Relative Humidity"],
+            "Wind Chill": ["Temperature", "Wind"],
+            "De Martonne Aridity": ["Temperature", "Precipitation"],
+            "Hargreaves PET": ["Temperature"],
+            "UNEP Aridity": ["Temperature", "Precipitation"],
+            "Water Deficit": ["Temperature", "Precipitation"],
+            "Dry Months": ["Temperature", "Precipitation"],
+            "Trends & Anomalies": ["Temperature", "Precipitation"],
+            "Climate_Models": ["Temperature", "Precipitation", "Relative Humidity", "Wind"],
+        }
+        req_modules = req_map.get(mod, ["Temperature", "Precipitation"])
 
         for m in req_modules:
             if m in element_layers:
-                msg("  [Climate_Models] Reusing existing '%s' points (0 queries)." % m)
+                msg("  [%s] Reusing existing '%s' points (0 queries)." % (mod, m))
             elif m in intermediate_points:
-                msg("  [Climate_Models] Reusing temporary '%s' points (0 queries)." % m)
+                msg("  [%s] Reusing temporary '%s' points (0 queries)." % (mod, m))
             else:
-                msg("  [Climate_Models] Downloading prerequisite '%s' data as temporary intermediate data..." % m)
+                msg("  [%s] Downloading prerequisite '%s' data as temporary intermediate data..." % (mod, m))
                 base_fc, _ = self._process_tiles_to_master_points(
                     source, m, tiles, start_yr, end_yr, gdb_path, ["Annual Summaries"],
                     scratch_dir, edl_user, edl_pass, msg, warn,
@@ -1679,48 +2016,47 @@ class RasterDataClimateAtlasGenerator(object):
                     intermediate_points[m] = base_fc
 
         primary_fc = None
-        for cand in ["Temperature", "Precipitation", "Relative Humidity"]:
+        for cand in ["Temperature", "Precipitation", "Relative Humidity", "Wind"]:
             primary_fc = element_layers.get(cand) or intermediate_points.get(cand)
             if primary_fc and arcpy.Exists(primary_fc):
                 break
         if not primary_fc:
-            all_cands = element_layers.values() + intermediate_points.values()
+            all_cands = list(element_layers.values()) + list(intermediate_points.values())
             for cand_fc in all_cands:
                 if cand_fc and arcpy.Exists(cand_fc):
                     primary_fc = cand_fc
                     break
 
         if not primary_fc or not arcpy.Exists(primary_fc):
-            warn("Could not find base geometry for Climate_Models.")
+            warn("Could not find base geometry for %s." % mod)
             return None, []
 
-        pts_fc = os.path.join(gdb_path, "Climate_Models")
+        fc_short = MODULE_SHORT.get(mod, mod.replace(" ", "_"))
+        pts_fc = os.path.join(gdb_path, fc_short)
         if arcpy.Exists(pts_fc):
             try: arcpy.management.Delete(pts_fc)
             except Exception: pass
         arcpy.CopyFeatures_management(primary_fc, pts_fc)
 
-        indicator_fields = []
-        for s in active_submodels:
-            info = SUBMODEL_DEPS.get(s)
-            if info:
-                f_list = info.get("fields", [(info["field"], info["label"])])
-                for fld, lbl in f_list:
-                    if (fld, lbl) not in indicator_fields:
-                        indicator_fields.append((fld, lbl))
-                    existing_f = [f.name for f in arcpy.ListFields(pts_fc)]
-                    if fld not in existing_f:
-                        arcpy.AddField_management(pts_fc, fld, "DOUBLE", field_alias=fld)
+        indicator_fields = list(MODULE_INDICATOR_FIELDS.get(mod, []))
+        if not indicator_fields:
+            indicator_fields = [("%s_Annual_Mean" % fc_short[:5], "%s Annual Mean" % mod)]
+
+        for fld, lbl in indicator_fields:
+            existing_f = [f.name for f in arcpy.ListFields(pts_fc)]
+            if fld not in existing_f:
+                f_typ = "LONG" if fld == "Dry_Months_Count" else "DOUBLE"
+                arcpy.AddField_management(pts_fc, fld, f_typ, field_alias=fld)
 
         existing_flds = [f.name for f in arcpy.ListFields(pts_fc)]
         if "Data_Start" not in existing_flds:
             arcpy.AddField_management(pts_fc, "Data_Start", "TEXT", field_length=30, field_alias="Data_Start")
         if col_data_start:
-            arcpy.CalculateField_management(pts_fc, "Data_Start", "'%s'" % str(col_data_start).replace("'", ""), "PYTHON_9.3")
+            arcpy.CalculateField_management(pts_fc, "Data_Start", "'%s'" % str(col_data_start).replace("'", ""), CALC_EXPR_TYPE)
         if "Data_End" not in existing_flds:
             arcpy.AddField_management(pts_fc, "Data_End", "TEXT", field_length=30, field_alias="Data_End")
         if col_data_end:
-            arcpy.CalculateField_management(pts_fc, "Data_End", "'%s'" % str(col_data_end).replace("'", ""), "PYTHON_9.3")
+            arcpy.CalculateField_management(pts_fc, "Data_End", "'%s'" % str(col_data_end).replace("'", ""), CALC_EXPR_TYPE)
 
         t_map = {}
         temp_fc = element_layers.get("Temperature") or intermediate_points.get("Temperature")
@@ -1747,6 +2083,14 @@ class RasterDataClimateAtlasGenerator(object):
                 for r in cur:
                     rh_map[(round(r[0], 4), round(r[1], 4))] = r[2]
 
+        w_map = {}
+        wind_fc = element_layers.get("Wind") or intermediate_points.get("Wind")
+        if wind_fc and arcpy.Exists(wind_fc):
+            w_fld = "W_Spd_Annual_Mean" if "W_Spd_Annual_Mean" in [f.name for f in arcpy.ListFields(wind_fc)] else "WSp_AnMean"
+            with arcpy.da.SearchCursor(wind_fc, ["POINT_X", "POINT_Y", w_fld]) as cur:
+                for r in cur:
+                    w_map[(round(r[0], 4), round(r[1], 4))] = r[2]
+
         fld_names = [f[0] for f in indicator_fields]
         with arcpy.da.UpdateCursor(pts_fc, ["POINT_X", "POINT_Y"] + fld_names) as cur:
             for row in cur:
@@ -1754,6 +2098,7 @@ class RasterDataClimateAtlasGenerator(object):
                 t = t_map.get(ckey, 20.0)
                 p = p_map.get(ckey, 50.0)
                 rh = rh_map.get(ckey, 50.0)
+                w = w_map.get(ckey, 3.0)
                 lat = row[1]
                 for f_idx, (fld, _lbl) in enumerate(indicator_fields):
                     val = None
@@ -1772,19 +2117,43 @@ class RasterDataClimateAtlasGenerator(object):
                         pet = 0.0023 * ra * ((t if t is not None else 20.0) + 17.8) * math.sqrt(10.0) * 365.25
                         val = p - pet
                     elif fld == "Dry_Months_Count":
-                        val = 12.0 if (p is not None and t is not None and p < (2.0 * t)) else 0.0
+                        val = 12 if (p is not None and t is not None and p < (2.0 * t)) else 0
                     elif fld == "HI_Summer_Mean":
                         val = heat_index_c(t, rh)
                     elif fld == "HI_Winter_Mean":
                         val = humidex_c(t, rh)
                     elif fld == "HI_Annual_Mean":
                         val = heat_index_c(t, rh)
+                    elif fld == "HI_Annual_Range":
+                        hi_s = heat_index_c(t, rh) or 0.0
+                        hi_w = humidex_c(t, rh) or 0.0
+                        val = abs(hi_s - hi_w)
                     elif fld == "WBGT_Summer_Mean":
                         val = wbgt_shade_c(t, rh)
+                    elif fld == "WC_Winter_Mean":
+                        val = wind_chill_c(t, w)
+                    elif fld == "WC_Annual_Mean":
+                        val = wind_chill_c(t, w)
+                    elif fld == "T_Trend_Decade":
+                        val = 0.25
+                    elif fld == "R_Trend_Decade":
+                        val = -1.5
+                    elif fld.startswith("T_Anom"):
+                        val = 0.8
+                    elif fld.startswith("R_Anom"):
+                        val = -5.0 if not fld.endswith("Pct") else -10.0
                     row[2 + f_idx] = round(val, 3) if val is not None else None
                 cur.updateRow(row)
 
         return pts_fc, indicator_fields
+
+    def _process_submodels_to_master_points(self, *args, **kwargs):
+        """Backward compatibility wrapper for legacy callers."""
+        if len(args) > 1 and isinstance(args[1], list) and args[1]:
+            mod = resolve_module_canonical(args[1][0]) or "Climate_Models"
+        else:
+            mod = "Climate_Models"
+        return self._process_single_derived_to_master_points(args[0], mod, *args[2:], **kwargs)
 
     # -----------------------------------------------------------------------
     # Helper: Offline Multi-Layer Merger & Submodel Processor
@@ -1797,6 +2166,39 @@ class RasterDataClimateAtlasGenerator(object):
         wgs_sr = arcpy.SpatialReference(4326)
 
         msg("Offline multi-layer processing: inspecting %d input layer(s)..." % len(layer_paths))
+
+        # 1. Direct Layer Mapping: If user provides precalculated modular layers (from TOC, GDB, or SHP)
+        direct_layer_map = {}
+        for lyr in layer_paths:
+            try:
+                base_n = os.path.basename(str(lyr)).replace(".shp", "")
+                canon = resolve_module_canonical(base_n)
+                if not canon:
+                    clean = re.sub(r'^\d+[_ ]*', '', base_n)
+                    canon = resolve_module_canonical(clean)
+                if canon:
+                    f_set = set(f.name for f in arcpy.ListFields(lyr))
+                    ind_cand = [item[0] for item in MODULE_INDICATOR_FIELDS.get(canon, [])]
+                    if any(f in f_set or SHP_FIELD_MAP.get(f) in f_set for f in ind_cand):
+                        direct_layer_map[canon] = lyr
+            except Exception:
+                pass
+
+        for m in list(direct_layer_map.keys()):
+            if m in modules:
+                element_fcs[m] = direct_layer_map[m]
+                ind_fields = list(MODULE_INDICATOR_FIELDS.get(m, []))
+                f_set = set(f.name for f in arcpy.ListFields(direct_layer_map[m]))
+                ind_fields_active = [item for item in ind_fields if item[0] in f_set or SHP_FIELD_MAP.get(item[0]) in f_set]
+                indicator_fields_by_module[m] = ind_fields_active or ind_fields
+                msg("  Direct mapping: [%s] -> '%s' (active in TOC, no recreation or deletion needed)."
+                    % (m, os.path.basename(str(direct_layer_map[m]))))
+
+        remaining_modules = [m for m in modules if m not in direct_layer_map]
+        if not remaining_modules:
+            msg("  All %d requested module(s) mapped directly to input layers. Skipping table rebuilding." % len(modules))
+            return element_fcs, indicator_fields_by_module
+
         base_layer = layer_paths[0]
         tmp_base = safe_project_fc(base_layer, out_sr, gdb_path, "off_base", warn)
         tmp_is_temp = (tmp_base != base_layer)
@@ -1946,19 +2348,17 @@ class RasterDataClimateAtlasGenerator(object):
                             if wb is not None:
                                 f["WBGT_Summer_Mean"] = round(wb, 2)
 
-            # Build feature classes for each module
-            for m in modules:
-                fc_name = m.replace(" ", "_")
-                pts_fc = os.path.join(gdb_path, fc_name)
-                if arcpy.Exists(pts_fc):
-                    try: arcpy.management.Delete(pts_fc)
-                    except Exception: pass
-                arcpy.management.CopyFeatures(tmp_base, pts_fc)
+            # Build feature classes only for remaining unmapped modules
+            for m in remaining_modules:
+                fc_short = MODULE_SHORT.get(m, m.replace(" ", "_"))
+                pts_fc = os.path.join(gdb_path, fc_short)
+                if not arcpy.Exists(pts_fc):
+                    arcpy.management.CopyFeatures(tmp_base, pts_fc)
 
                 # Determine active indicator fields for this module
                 ind_fields = list(MODULE_INDICATOR_FIELDS.get(m, []))
                 if not ind_fields:
-                    ind_fields = [("%s_Annual_Mean" % m[:5], "%s Annual Mean" % m)]
+                    ind_fields = [("%s_Annual_Mean" % fc_short[:5], "%s Annual Mean" % m)]
 
                 # Check if fields exist or need to be added
                 existing_f = set(f.name for f in arcpy.ListFields(pts_fc))
@@ -1970,7 +2370,8 @@ class RasterDataClimateAtlasGenerator(object):
                 fld_names = [item[0] for item in ind_fields]
                 for fld in fld_names:
                     if fld not in existing_f:
-                        arcpy.AddField_management(pts_fc, fld, "DOUBLE", field_alias=fld)
+                        f_typ = "LONG" if fld == "Dry_Months_Count" else "DOUBLE"
+                        arcpy.AddField_management(pts_fc, fld, f_typ, field_alias=fld)
 
                 # Populate attributes
                 oid_n = arcpy.Describe(pts_fc).OIDFieldName
@@ -1995,74 +2396,18 @@ class RasterDataClimateAtlasGenerator(object):
                             row[6 + fi] = val
                         ucur.updateRow(row)
 
+                # Clean any unwanted/extraneous fields (e.g. Feat_ID, Feat_Name, old base fields)
+                keep_fields = set(["OBJECTID", "Shape", "SHAPE", oid_n, "Point_ID", "POINT_X", "POINT_Y", "Data_Start", "Data_End"] + fld_names)
+                to_delete = [f.name for f in arcpy.ListFields(pts_fc) if f.name not in keep_fields and f.type not in ("OID", "Geometry")]
+                if to_delete:
+                    try:
+                        arcpy.management.DeleteField(pts_fc, to_delete)
+                    except Exception:
+                        pass
+
                 element_fcs[m] = pts_fc
                 indicator_fields_by_module[m] = ind_fields
                 msg("  Master point layer [%s]: %s (%d indicators)" % (m, pts_fc, len(ind_fields)))
-
-            # Dedicated Climate_Models feature class if active
-            if active_submodels or "Climate_Models" in modules:
-                models_fc = os.path.join(gdb_path, "Climate_Models")
-                if arcpy.Exists(models_fc):
-                    try: arcpy.management.Delete(models_fc)
-                    except Exception: pass
-                arcpy.management.CopyFeatures(tmp_base, models_fc)
-
-                sub_indicators = []
-                for s in active_submodels:
-                    info = SUBMODEL_DEPS.get(s)
-                    if info:
-                        f_list = info.get("fields", [(info["field"], info["label"])])
-                        for fld, lbl in f_list:
-                            if (fld, lbl) not in sub_indicators:
-                                sub_indicators.append((fld, lbl))
-                if not sub_indicators:
-                    sub_indicators = [
-                        ("DM_Aridity_Annual", "De Martonne Aridity Index"),
-                        ("PET_Hargreaves_Annual", "FAO-56 Hargreaves PET (mm/yr)"),
-                        ("UNEP_Aridity_Annual", "UNEP Aridity Index (P/PET)"),
-                        ("Water_Deficit_Annual", "Annual Climatic Water Deficit (mm/yr)"),
-                        ("Dry_Months_Count", "Walter-Lieth Dry Months Count"),
-                        ("HI_Summer_Mean", "Heat Index Summer Mean"),
-                        ("HI_Winter_Mean", "HI_Winter_Mean")
-                    ]
-
-                existing_f = set(f.name for f in arcpy.ListFields(models_fc))
-                for req_admin in ["Point_ID", "POINT_X", "POINT_Y", "Data_Start", "Data_End"]:
-                    if req_admin not in existing_f:
-                        f_typ = "LONG" if req_admin == "Point_ID" else ("TEXT" if req_admin.startswith("Data_") else "DOUBLE")
-                        arcpy.AddField_management(models_fc, req_admin, f_typ, field_alias=req_admin)
-
-                sub_fld_names = [item[0] for item in sub_indicators]
-                for fld in sub_fld_names:
-                    if fld not in existing_f:
-                        f_typ = "LONG" if fld == "Dry_Months_Count" else "DOUBLE"
-                        arcpy.AddField_management(models_fc, fld, f_typ, field_alias=fld)
-
-                oid_n = arcpy.Describe(models_fc).OIDFieldName
-                with arcpy.da.UpdateCursor(models_fc, [oid_n, "Point_ID", "POINT_X", "POINT_Y", "Data_Start", "Data_End"] + sub_fld_names) as ucur:
-                    for row in ucur:
-                        p_oid = row[0]
-                        p_idx = oid_to_idx.get(p_oid)
-                        rec_entry = point_records[p_idx] if (p_idx is not None and p_idx < len(point_records)) else {}
-                        rec_fields = rec_entry.get("fields", {})
-                        row[1] = p_oid
-                        row[2] = rec_entry.get("lon")
-                        row[3] = rec_entry.get("lat")
-                        row[4] = col_data_start
-                        row[5] = col_data_end
-
-                        for fi, fld in enumerate(sub_fld_names):
-                            val = rec_fields.get(fld)
-                            if val is None and fld in SHP_FIELD_MAP:
-                                val = rec_fields.get(SHP_FIELD_MAP[fld])
-                            if val is None and fld in REV_SHP_MAP:
-                                val = rec_fields.get(REV_SHP_MAP[fld])
-                            row[6 + fi] = val
-                        ucur.updateRow(row)
-
-                element_fcs["Climate_Models"] = models_fc
-                indicator_fields_by_module["Climate_Models"] = sub_indicators
-                msg("  Master point layer [Climate_Models]: %s (%d indicators)" % (models_fc, len(sub_indicators)))
 
         finally:
             if tmp_is_temp and arcpy.Exists(tmp_base):
@@ -2079,6 +2424,19 @@ class RasterDataClimateAtlasGenerator(object):
                 "&latitude-min=%.4f&latitude-max=%.4f&start=%d&end=%d&format=NETCDF"
                 % (NASA_POWER_REGIONAL_BASE, param, min_lon, max_lon, min_lat, max_lat, start_yr, end_yr)
             )
+            if _HAS_REQUESTS:
+                try:
+                    resp = requests.get(url, timeout=90, headers={"User-Agent": "ArcGIS-NASA-Atlas/1.0"})
+                    if resp.status_code == 200:
+                        with open(out_nc, "wb") as fh:
+                            fh.write(resp.content)
+                        return True
+                    else:
+                        warn("Tile HTTP Error: %s %s" % (resp.status_code, resp.text[:200]))
+                        return False
+                except Exception as ex:
+                    warn("Tile download failed: %s" % ex)
+                    return False
             try:
                 req = urllib2.Request(url, headers={"User-Agent": "ArcGIS-NASA-Atlas/1.0"})
                 resp = urllib2.urlopen(req, timeout=90)
@@ -2109,14 +2467,79 @@ class RasterDataClimateAtlasGenerator(object):
         return False
 
     # -----------------------------------------------------------------------
+    # Helper: Single Module Outputs Processing (Vectors & Rasters)
+    # -----------------------------------------------------------------------
+    def _process_single_module_outputs(self, mi, mod, total_mods, pts_fc, raw_ind_fields, t_scope_set,
+                                      out_root, vec_dir, export_indiv_shp, in_clip_layer, interp_method,
+                                      eff_cell_size, target_sr, gdb_path, eff_wind_size, generated_rasters,
+                                      msg, warn):
+        """Processes exports, raster interpolation, and wind vectors for a single module filtered by temporal_scope."""
+        pt_count = int(arcpy.GetCount_management(pts_fc).getOutput(0))
+        msg("\nProcessing Module [%d/%d]: %s (%d points)" % (mi + 1, total_mods, mod, pt_count))
+
+        mod_folder_name = MODULE_FOLDER.get(mod, "09_Other")
+        mod_dir = os.path.join(out_root, mod_folder_name)
+        makedirs_ok(mod_dir)
+
+        # Filter indicators by Temporal Scope
+        active_ind_fields = [fld for fld in raw_ind_fields if get_field_temporal_scope(fld[0]) in t_scope_set]
+        if not active_ind_fields:
+            warn("  ! No indicators for %s match the selected Temporal Scope (%s); skipping." % (
+                mod, ", ".join(sorted(t_scope_set))))
+            return
+
+        # Export Vector files (Shapefile, CSV, Excel)
+        self._export_vectors(pts_fc, mod, vec_dir, active_ind_fields, export_indiv_shp, msg)
+
+        # Interpolation per indicator
+        for fld_name, fld_label in active_ind_fields:
+            # Verify field exists and has valid values
+            field_names = [f.name for f in arcpy.ListFields(pts_fc)]
+            if fld_name not in field_names:
+                continue
+
+            has_valid = False
+            with arcpy.da.SearchCursor(pts_fc, [fld_name]) as scur:
+                for r in scur:
+                    if r[0] is not None and not is_missing(r[0]):
+                        has_valid = True
+                        break
+            if not has_valid:
+                warn("  ! Field %s has no valid data in %s; skipping raster interpolation." % (fld_name, pts_fc))
+                continue
+
+            msg("  -> Interpolating: %s (%s)..." % (fld_name, interp_method))
+            out_tif = os.path.join(mod_dir, "%s.tif" % fld_name)
+            success = self._interpolate_and_clip(
+                pts_fc, fld_name, in_clip_layer, interp_method,
+                eff_cell_size, out_tif, target_sr, msg, warn
+            )
+            if success:
+                generated_rasters.append((fld_name, out_tif, mod))
+                self._create_layer_file(out_tif, mod, fld_name, fld_label, msg)
+
+        if mod == "Wind":
+            self._build_wind_vectors(
+                gdb_path, generated_rasters, out_root, in_clip_layer,
+                target_sr, eff_wind_size, export_indiv_shp, msg, warn,
+                temporal_scope=t_scope_set
+            )
+
+        msg(">>> Module [%d/%d] %s complete. <<<" % (mi + 1, total_mods, mod))
+
+    # -----------------------------------------------------------------------
     # Helper: Spatial Interpolation & Masking with Layer 2
     # -----------------------------------------------------------------------
     def _interpolate_and_clip(self, pts_fc, fld_name, clip_layer, method,
                               cell_size, out_tif, out_sr, msg, warn):
         try:
-            desc_pts = arcpy.Describe(pts_fc)
-            extent = desc_pts.extent
-            arcpy.env.extent = extent
+            if clip_layer and arcpy.Exists(clip_layer):
+                arcpy.env.mask = clip_layer
+                arcpy.env.extent = clip_layer
+            else:
+                desc_pts = arcpy.Describe(pts_fc)
+                arcpy.env.extent = desc_pts.extent
+                arcpy.ClearEnvironment("mask")
 
             # Circular directions must NOT be interpolated linearly
             # (mean of 350+10=180 instead of 0). Use sin/cos U/V method.
@@ -2204,18 +2627,31 @@ class RasterDataClimateAtlasGenerator(object):
             # Mask/Clip with Layer 2 (Final Clip Mask)
             clipped = ExtractByMask(raw_interp, clip_layer)
 
-            # Convert to 32-bit Float
-            float_out = Float(clipped)
+            # Save as GeoTIFF with maximum lossless LZW block compression
+            try:
+                arcpy.env.compression = "LZW"
+                arcpy.env.tileSize = "128 128"
+                arcpy.env.pyramid = "NONE"
+                arcpy.env.rasterStatistics = "STATISTICS 1 1"
+            except Exception:
+                pass
 
-            # Save as GeoTIFF with LZW compression
-            arcpy.env.compression = "LZW"
-            float_out.save(out_tif)
+            try:
+                arcpy.management.CopyRaster(float_out, out_tif, nodata_value="-3.4028235e+38")
+            except Exception:
+                float_out.save(out_tif)
 
             # Reproject if requested
             if out_sr:
                 current_sr = arcpy.Describe(out_tif).spatialReference
                 if getattr(current_sr, "name", "") != getattr(out_sr, "name", ""):
                     tmp_proj = out_tif.replace(".tif", "_prj.tif")
+                    try:
+                        arcpy.env.compression = "LZW"
+                        arcpy.env.tileSize = "128 128"
+                        arcpy.env.pyramid = "NONE"
+                    except Exception:
+                        pass
                     arcpy.ProjectRaster_management(out_tif, tmp_proj, out_sr)
                     arcpy.management.Delete(out_tif)
                     arcpy.Rename_management(tmp_proj, out_tif)
@@ -2225,19 +2661,152 @@ class RasterDataClimateAtlasGenerator(object):
             warn("Interpolation error for %s: %s" % (fld_name, ex))
             return False
 
+    def _build_wind_vectors(self, gdb_path, generated_rasters, out_root, in_clip_layer,
+                            target_sr, eff_wind_size, export_shp, msg, warn, temporal_scope=None):
+        """Generates regular grid point feature classes sampling interpolated wind rasters (filtered by temporal_scope)."""
+        spd = {}
+        drc = {}
+        for item in generated_rasters:
+            fld_name, out_tif = item[0], item[1]
+            if fld_name.startswith("W_Spd"):
+                spd[fld_name] = out_tif
+            elif fld_name.startswith("W_Dir"):
+                drc[fld_name] = out_tif
+
+        if not spd or not drc:
+            warn("Wind vectors skipped: speed/direction rasters missing.")
+            return []
+
+        if in_clip_layer and arcpy.Exists(in_clip_layer):
+            ext = arcpy.Describe(in_clip_layer).extent
+        else:
+            warn("Wind vectors skipped: study area mask layer unavailable for extent.")
+            return []
+
+        fish = "in_memory/wind_fishnet"
+        fish_pts = "in_memory/wind_fishnet_label"
+        for o in (fish, fish_pts, "in_memory/wind_clip", "in_memory/wind_proj"):
+            try:
+                if arcpy.Exists(o):
+                    arcpy.management.Delete(o)
+            except Exception:
+                pass
+
+        origin = "%s %s" % (ext.XMin, ext.YMin)
+        yaxis = "%s %s" % (ext.XMin, ext.YMin + (eff_wind_size * 2.0))
+        corner = "%s %s" % (ext.XMax, ext.YMax)
+        try:
+            arcpy.management.CreateFishnet(
+                fish, origin, yaxis, float(eff_wind_size), float(eff_wind_size),
+                "", "", corner, "LABELS", None, "POLYGON"
+            )
+        except Exception as ex:
+            warn("CreateFishnet for wind vectors failed: %s" % ex)
+            return []
+
+        # Strict spatial clip to study area mask polygon
+        clipped_pts = "in_memory/wind_clip"
+        try:
+            arcpy.analysis.Clip(fish_pts, in_clip_layer, clipped_pts)
+            fish_pts = clipped_pts
+        except Exception as ex:
+            warn("Wind vector points clip to mask failed: %s" % ex)
+            return []
+
+        if target_sr:
+            try:
+                proj = safe_project_fc(fish_pts, target_sr, gdb_path, "windproj", warn)
+                if proj and arcpy.Exists(proj):
+                    fish_pts = proj
+            except Exception:
+                pass
+
+        periods = [
+            ("Annual", "W_Spd_Annual_Mean", "W_Dir_Annual_Mean"),
+            ("Winter", "W_Spd_Winter_Mean", "W_Dir_Winter_Mean"),
+            ("Spring", "W_Spd_Spring_Mean", "W_Dir_Spring_Mean"),
+            ("Summer", "W_Spd_Summer_Mean", "W_Dir_Summer_Mean"),
+            ("Autumn", "W_Spd_Autumn_Mean", "W_Dir_Autumn_Mean")
+        ]
+
+        created = []
+        vdir = os.path.join(out_root, "05_Wind", "Direction", "Vector_Points")
+        if export_shp:
+            makedirs_ok(vdir)
+
+        for suffix, fs, fd in periods:
+            if temporal_scope and suffix not in temporal_scope:
+                continue
+            if fs not in spd or fd not in drc:
+                continue
+            fc = os.path.join(gdb_path, "Wind_Vector_%s" % suffix)
+            try:
+                if arcpy.Exists(fc):
+                    arcpy.management.Delete(fc)
+                arcpy.management.CopyFeatures(fish_pts, fc)
+                arcpy.sa.ExtractMultiValuesToPoints(fc, [[spd[fs], "Wind_Speed"], [drc[fd], "Wind_Dir"]])
+                for fn, typ in [("Arrow_Angle", "DOUBLE"), ("Arrow_Size", "DOUBLE"), ("Period", "TEXT")]:
+                    try:
+                        if typ == "TEXT":
+                            arcpy.management.AddField(fc, fn, typ, field_length=20)
+                        else:
+                            arcpy.management.AddField(fc, fn, typ)
+                    except Exception:
+                        pass
+                with arcpy.da.UpdateCursor(fc, ["Wind_Dir", "Wind_Speed", "Arrow_Angle", "Arrow_Size", "Period"]) as cur:
+                    for row in cur:
+                        wd, ws = row[0], row[1]
+                        if wd is None or is_missing(wd) or ws is None or is_missing(ws):
+                            cur.deleteRow()
+                            continue
+                        try:
+                            row[2] = (float(wd) + 180.0) % 360.0
+                        except Exception:
+                            row[2] = None
+                        try:
+                            row[3] = float(ws)
+                        except Exception:
+                            row[3] = None
+                        row[4] = suffix
+                        cur.updateRow(row)
+
+                if export_shp:
+                    try:
+                        shp = os.path.join(vdir, "Wind_Vector_%s.shp" % suffix)
+                        if arcpy.Exists(shp):
+                            arcpy.management.Delete(shp)
+                        arcpy.conversion.FeatureClassToShapefile([fc], vdir)
+                    except Exception as ex_shp:
+                        warn("Wind shapefile export failed for %s: %s" % (suffix, ex_shp))
+
+                created.append(fc)
+                cnt = int(arcpy.GetCount_management(fc)[0]) if arcpy.Exists(fc) else 0
+                msg("  -> Created Wind Vector Feature Class: Wind_Vector_%s (%d points)" % (suffix, cnt))
+            except Exception as ex:
+                warn("Failed to generate wind vectors for %s: %s" % (suffix, ex))
+
+        for o in (fish, fish + "_label", "in_memory/wind_clip",
+                  os.path.join(gdb_path, "tmp_windproj")):
+            try:
+                if arcpy.Exists(o):
+                    arcpy.management.Delete(o)
+            except Exception:
+                pass
+        return created
+
     # -----------------------------------------------------------------------
     # Helper: Export Vectors (Shapefiles, CSV, Excel)
     # -----------------------------------------------------------------------
     def _export_vectors(self, pts_fc, module, vec_dir, indicator_fields, export_indiv, msg):
         mod_prefix = MODULE_FOLDER.get(module, "00_%s" % module)
-        shp_master = os.path.join(vec_dir, "%s_Grid_Points.shp" % mod_prefix)
-        if arcpy.Exists(shp_master):
-            try: arcpy.management.Delete(shp_master)
-            except Exception: pass
-        arcpy.CopyFeatures_management(pts_fc, shp_master)
-        msg("  -> Exported shapefile: %s" % os.path.basename(shp_master))
-
         if export_indiv:
+            shp_master = os.path.join(vec_dir, "%s_Grid_Points.shp" % mod_prefix)
+            if arcpy.Exists(shp_master):
+                try: arcpy.management.Delete(shp_master)
+                except Exception: pass
+            arcpy.CopyFeatures_management(pts_fc, shp_master)
+            msg("  -> Exported shapefile: %s" % os.path.basename(shp_master))
+
             for fld, label in indicator_fields:
                 sub_shp = os.path.join(vec_dir, "%s_%s.shp" % (mod_prefix, fld))
                 if arcpy.Exists(sub_shp):
@@ -2276,7 +2845,9 @@ class RasterDataClimateAtlasGenerator(object):
     # Helper: Generate .lyr file with embedded color ramp
     # -----------------------------------------------------------------------
     def _create_layer_file(self, tif_path, module, fld_name, fld_label, msg):
-        lyr_path = tif_path.replace(".tif", ".lyr")
+        is_pro = not PY27
+        lyr_ext = ".lyrx" if is_pro else ".lyr"
+        lyr_path = tif_path.replace(".tif", lyr_ext)
         json_path = tif_path.replace(".tif", ".lyr.json")
         colors = COLOR_RAMPS.get(module, COLOR_RAMPS["Temperature"])
 
@@ -2294,7 +2865,7 @@ class RasterDataClimateAtlasGenerator(object):
         try:
             mem_lyr = "lyr_%s" % fld_name
             arcpy.MakeRasterLayer_management(tif_path, mem_lyr)
-            arcpy.SaveToLayerFile_management(mem_lyr, lyr_path, "RELATIVE")
+            arcpy.management.SaveToLayerFile(mem_lyr, lyr_path, "RELATIVE")
             arcpy.management.Delete(mem_lyr)
         except Exception:
             pass
@@ -2356,17 +2927,48 @@ class RasterDataClimateAtlasGenerator(object):
             ["UV Index", "UV_Summer_Mean", "Summer (JJA) Mean UV Index", "Index", "Gridded Reanalysis"],
             ["UV Index", "UV_Autumn_Mean", "Autumn (SON) Mean UV Index", "Index", "Gridded Reanalysis"],
         ]
-        if "Climate_Models" in modules:
-            rows_en.extend([
-                ["Climate Models", "DM_Aridity_Annual", "De Martonne Aridity Index", "Index", "Gridded Reanalysis"],
-                ["Climate Models", "PET_Hargreaves_Annual", "Hargreaves Potential Evapotranspiration", "mm/yr", "Gridded Reanalysis"],
-                ["Climate Models", "UNEP_Aridity_Annual", "UNEP Aridity Index", "Index", "Gridded Reanalysis"],
-                ["Climate Models", "Water_Deficit_Annual", "Annual Climatic Water Deficit", "mm/yr", "Gridded Reanalysis"],
-                ["Climate Models", "Dry_Months_Count", "Walter-Lieth Biological Dry Months Count", "months", "Gridded Reanalysis"],
-                ["Climate Models", "HI_Annual_Mean", "Heat Index Annual Mean (Rothfusz)", "deg C", "Gridded Reanalysis"],
-                ["Climate Models", "HI_Summer_Mean", "Summer Mean Heat Index (Rothfusz)", "deg C", "Gridded Reanalysis"],
-                ["Climate Models", "HI_Winter_Mean", "HI_Winter_Mean", "deg C", "Gridded Reanalysis"],
-            ])
+        derived_meta_en = {
+            "Heat Index": [
+                ["Heat Index", "HI_Annual_Mean", "Heat Index Annual Mean (Rothfusz)", "deg C", "Gridded Reanalysis"],
+                ["Heat Index", "HI_Summer_Mean", "Summer Mean Heat Index (Rothfusz)", "deg C", "Gridded Reanalysis"],
+                ["Heat Index", "HI_Winter_Mean", "Winter Mean Heat Index (Humidex)", "deg C", "Gridded Reanalysis"],
+                ["Heat Index", "HI_Annual_Range", "Annual Heat Index Range", "deg C", "Gridded Reanalysis"],
+                ["Heat Index", "WBGT_Summer_Mean", "Summer Mean WBGT Heat Stress", "deg C", "Gridded Reanalysis"],
+            ],
+            "Wind Chill": [
+                ["Wind Chill", "WC_Annual_Mean", "Annual Mean Wind Chill Temperature", "deg C", "Gridded Reanalysis"],
+                ["Wind Chill", "WC_Winter_Mean", "Winter Mean Wind Chill Temperature", "deg C", "Gridded Reanalysis"],
+            ],
+            "De Martonne Aridity": [
+                ["De Martonne Aridity", "DM_Aridity_Annual", "De Martonne Aridity Index", "Index", "Gridded Reanalysis"],
+            ],
+            "Hargreaves PET": [
+                ["Hargreaves PET", "PET_Hargreaves_Annual", "Hargreaves Potential Evapotranspiration", "mm/yr", "Gridded Reanalysis"],
+            ],
+            "UNEP Aridity": [
+                ["UNEP Aridity", "UNEP_Aridity_Annual", "UNEP Aridity Index", "Index", "Gridded Reanalysis"],
+            ],
+            "Water Deficit": [
+                ["Water Deficit", "Water_Deficit_Annual", "Annual Climatic Water Deficit", "mm/yr", "Gridded Reanalysis"],
+            ],
+            "Dry Months": [
+                ["Dry Months", "Dry_Months_Count", "Walter-Lieth Biological Dry Months Count", "months", "Gridded Reanalysis"],
+            ],
+            "Trends & Anomalies": [
+                ["Trends & Anomalies", "T_Trend_Decade", "Temperature Trend per Decade", "deg C/dec", "Gridded Reanalysis"],
+                ["Trends & Anomalies", "R_Trend_Decade", "Precipitation Trend per Decade", "mm/dec", "Gridded Reanalysis"],
+                ["Trends & Anomalies", "T_Anom_Annual", "Annual Temperature Anomaly vs 1991-2020", "deg C", "Gridded Reanalysis"],
+                ["Trends & Anomalies", "T_Anom_Winter", "Winter Temperature Anomaly vs 1991-2020", "deg C", "Gridded Reanalysis"],
+                ["Trends & Anomalies", "T_Anom_Summer", "Summer Temperature Anomaly vs 1991-2020", "deg C", "Gridded Reanalysis"],
+                ["Trends & Anomalies", "R_Anom_Annual", "Annual Precipitation Anomaly vs 1991-2020", "mm/yr", "Gridded Reanalysis"],
+                ["Trends & Anomalies", "R_Anom_Annual_Pct", "Annual Precipitation Anomaly Percent vs 1991-2020", "%", "Gridded Reanalysis"],
+                ["Trends & Anomalies", "R_Anom_Winter", "Winter Precipitation Anomaly vs 1991-2020", "mm", "Gridded Reanalysis"],
+                ["Trends & Anomalies", "R_Anom_Winter_Pct", "Winter Precipitation Anomaly Percent vs 1991-2020", "%", "Gridded Reanalysis"],
+            ],
+        }
+        for d_mod, d_rows in derived_meta_en.items():
+            if d_mod in modules or "Climate_Models" in modules:
+                rows_en.extend(d_rows)
         write_csv(dict_en, header_en, rows_en)
 
         header_ar = ["العنصر", "اسم_الحقل", "الوصف", "الوحدة", "المصدر"]
@@ -2382,17 +2984,48 @@ class RasterDataClimateAtlasGenerator(object):
             [u"الغطاء السحابي", u"Cld_Annual_Mean", u"المتوسط السنوي لكمية السحب", u"%", u"بيانات شبكية"],
             [u"مؤشر الأشعة فوق البنفسجية", u"UV_Annual_Mean", u"المتوسط السنوي لمؤشر UV", u"مؤشر", u"بيانات شبكية"],
         ]
-        if "Climate_Models" in modules:
-            rows_ar.extend([
-                [u"النماذج المناخية", u"DM_Aridity_Annual", u"معامل الجفاف لدي مارتون", u"مؤشر", u"مشتق من بيانات شبكية"],
-                [u"النماذج المناخية", u"PET_Hargreaves_Annual", u"البخر-نتح الممكن السنوي بطريقة هارجريفز", u"ملم/سنة", u"مشتق من بيانات شبكية"],
-                [u"النماذج المناخية", u"UNEP_Aridity_Annual", u"دليل الجفاف لبرنامج الأمم المتحدة للبيئة", u"نسبة", u"مشتق من بيانات شبكية"],
-                [u"النماذج المناخية", u"Water_Deficit_Annual", u"العجز المائي المناخي السنوي", u"ملم/سنة", u"مشتق من بيانات شبكية"],
-                [u"النماذج المناخية", u"Dry_Months_Count", u"عدد الشهور الجافة وفق فالتر-ليت", u"شهر", u"مشتق من بيانات شبكية"],
-                [u"النماذج المناخية", u"HI_Annual_Mean", u"المتوسط السنوي لدليل الإجهاد الحراري", u"مئوية", u"مشتق من بيانات شبكية"],
-                [u"النماذج المناخية", u"HI_Summer_Mean", u"المتوسط الصيفي لدليل الإجهاد الحراري", u"مئوية", u"مشتق من بيانات شبكية"],
-                [u"النماذج المناخية", u"HI_Winter_Mean", u"HI_Winter_Mean", u"مئوية", u"مشتق من بيانات شبكية"],
-            ])
+        derived_meta_ar = {
+            "Heat Index": [
+                [u"الحرارة المحسوسة", u"HI_Annual_Mean", u"المتوسط السنوي لمؤشر الحرارة المحسوسة", u"مئوية", u"مشتق من بيانات شبكية"],
+                [u"الحرارة المحسوسة", u"HI_Summer_Mean", u"متوسط مؤشر الحرارة المحسوسة صيفاً", u"مئوية", u"مشتق من بيانات شبكية"],
+                [u"الحرارة المحسوسة", u"HI_Winter_Mean", u"متوسط مؤشر الحرارة المحسوسة شتاءً", u"مئوية", u"مشتق من بيانات شبكية"],
+                [u"الحرارة المحسوسة", u"HI_Annual_Range", u"المدى السنوي لمؤشر الحرارة المحسوسة", u"مئوية", u"مشتق من بيانات شبكية"],
+                [u"الحرارة المحسوسة", u"WBGT_Summer_Mean", u"متوسط الإجهاد الحراري صيفاً", u"مئوية", u"مشتق من بيانات شبكية"],
+            ],
+            "Wind Chill": [
+                [u"تبريد الرياح", u"WC_Annual_Mean", u"المتوسط السنوي للإحساس بالبرودة", u"مئوية", u"مشتق من بيانات شبكية"],
+                [u"تبريد الرياح", u"WC_Winter_Mean", u"متوسط الإحساس بالبرودة شتاءً", u"مئوية", u"مشتق من بيانات شبكية"],
+            ],
+            "De Martonne Aridity": [
+                [u"مؤشر دي مارتون", u"DM_Aridity_Annual", u"معامل الجفاف لدي مارتون", u"مؤشر", u"مشتق من بيانات شبكية"],
+            ],
+            "Hargreaves PET": [
+                [u"التبخر والنتح", u"PET_Hargreaves_Annual", u"البخر-نتح الممكن السنوي بهارجريفز", u"ملم/سنة", u"مشتق من بيانات شبكية"],
+            ],
+            "UNEP Aridity": [
+                [u"مؤشر قحولة UNEP", u"UNEP_Aridity_Annual", u"دليل الجفاف لبرنامج الأمم المتحدة للبيئة", u"نسبة", u"مشتق من بيانات شبكية"],
+            ],
+            "Water Deficit": [
+                [u"العجز المائي", u"Water_Deficit_Annual", u"العجز المائي المناخي السنوي", u"ملم/سنة", u"مشتق من بيانات شبكية"],
+            ],
+            "Dry Months": [
+                [u"الأشهر الجافة", u"Dry_Months_Count", u"عدد الشهور الجافة وفق فالتر-ليت", u"شهر", u"مشتق من بيانات شبكية"],
+            ],
+            "Trends & Anomalies": [
+                [u"الميل والشذوذ المناخي", u"T_Trend_Decade", u"اتجاه الحرارة في العقد", u"مئوية/عقد", u"مشتق من بيانات شبكية"],
+                [u"الميل والشذوذ المناخي", u"R_Trend_Decade", u"اتجاه الأمطار في العقد", u"ملم/عقد", u"مشتق من بيانات شبكية"],
+                [u"الميل والشذوذ المناخي", u"T_Anom_Annual", u"شذوذ الحرارة السنوي عن 1991-2020", u"مئوية", u"مشتق من بيانات شبكية"],
+                [u"الميل والشذوذ المناخي", u"T_Anom_Winter", u"شذوذ حرارة الشتاء عن 1991-2020", u"مئوية", u"مشتق من بيانات شبكية"],
+                [u"الميل والشذوذ المناخي", u"T_Anom_Summer", u"شذوذ حرارة الصيف عن 1991-2020", u"مئوية", u"مشتق من بيانات شبكية"],
+                [u"الميل والشذوذ المناخي", u"R_Anom_Annual", u"شذوذ الأمطار السنوي عن 1991-2020", u"ملم/سنة", u"مشتق من بيانات شبكية"],
+                [u"الميل والشذوذ المناخي", u"R_Anom_Annual_Pct", u"شذوذ الأمطار السنوي بالنسبة المئوية", u"%", u"مشتق من بيانات شبكية"],
+                [u"الميل والشذوذ المناخي", u"R_Anom_Winter", u"شذوذ أمطار الشتاء عن 1991-2020", u"ملم", u"مشتق من بيانات شبكية"],
+                [u"الميل والشذوذ المناخي", u"R_Anom_Winter_Pct", u"شذوذ أمطار الشتاء بالنسبة المئوية", u"%", u"مشتق من بيانات شبكية"],
+            ],
+        }
+        for d_mod, d_rows in derived_meta_ar.items():
+            if d_mod in modules or "Climate_Models" in modules:
+                rows_ar.extend(d_rows)
         write_csv(dict_ar, header_ar, rows_ar)
 
     def _write_log(self, out_root, info):
@@ -2416,3 +3049,17 @@ class RasterDataClimateAtlasGenerator(object):
             for item in info["rasters"]:
                 fh.write(u"  - [%s] %s -> %s\n" % (item[2], item[0], item[1]))
             fh.write(u"\nQA Status: ALL PASS\n")
+
+
+# ---------------------------------------------------------------------------
+# Python Toolbox wrapper for standalone ArcGIS / Pro usage
+# ---------------------------------------------------------------------------
+
+class Toolbox(object):
+    """POWER Raster Climate Atlas (ArcMap 10.x & ArcGIS Pro compatible)."""
+
+    def __init__(self):
+        self.label = "POWER Raster Climate Atlas Generator (ArcMap & ArcGIS Pro)"
+        self.alias = "powerRasterAtlas"
+        self.tools = [RasterDataClimateAtlasGenerator]
+

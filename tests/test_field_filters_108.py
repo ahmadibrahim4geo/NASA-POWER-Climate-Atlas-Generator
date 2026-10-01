@@ -27,7 +27,7 @@ print("=== 1. Candidate Fields Generation (get_candidate_fields) ===")
 # All candidates for Temperature
 c_temp = mod.get_candidate_fields(["Temperature"])
 check("Temperature has 13 candidate fields", len(c_temp) == 13, len(c_temp))
-check("Temperature contains HI_Winter_Mean", "HI_Winter_Mean" in [c[0] for c in c_temp])
+check("Temperature contains Td_Winter_Mean", "Td_Winter_Mean" in [c[0] for c in c_temp])
 
 # Summer only for Temperature
 c_sum = mod.get_candidate_fields(["Temperature"], ["Seasonal Summaries"], ["Summer (JJA)"])
@@ -35,15 +35,15 @@ sum_names = [c[0] for c in c_sum]
 check("Summer only has 3 temperature fields", len(sum_names) == 3, sum_names)
 check("Summer contains T_Summer_Mean", "T_Summer_Mean" in sum_names)
 check("Summer contains T_Max_Summer_Month_Mean", "T_Max_Summer_Month_Mean" in sum_names)
-check("Summer contains HI_Summer_Mean", "HI_Summer_Mean" in sum_names)
+check("Summer contains Td_Summer_Mean", "Td_Summer_Mean" in sum_names)
 check("Summer excludes T_Winter_Mean", "T_Winter_Mean" not in sum_names)
-check("Summer excludes HI_Winter_Mean", "HI_Winter_Mean" not in sum_names)
+check("Summer excludes Td_Winter_Mean", "Td_Winter_Mean" not in sum_names)
 
 # Winter only for Temperature
 c_win_t = mod.get_candidate_fields(["Temperature"], ["Seasonal Summaries"], ["Winter (DJF)"])
 win_t_names = [c[0] for c in c_win_t]
 check("Winter temperature has 3 fields", len(win_t_names) == 3, win_t_names)
-check("Winter contains HI_Winter_Mean", "HI_Winter_Mean" in win_t_names)
+check("Winter contains Td_Winter_Mean", "Td_Winter_Mean" in win_t_names)
 
 # Winter only for Precipitation
 c_win_p = mod.get_candidate_fields(["Precipitation"], ["Seasonal Summaries"], ["Winter (DJF)"])
@@ -73,7 +73,7 @@ res_sum = mod.resolve_filtered_fields(
     seasons=["Summer (JJA)"]
 )
 check("Seasons filter: Temperature has summer fields",
-      res_sum["Temperature"] == ["T_Summer_Mean", "T_Max_Summer_Month_Mean", "HI_Summer_Mean"],
+      res_sum["Temperature"] == ["T_Summer_Mean", "T_Max_Summer_Month_Mean", "Td_Summer_Mean"],
       res_sum["Temperature"])
 check("Seasons filter: Precipitation has summer total",
       res_sum["Precipitation"] == ["R_Summer_Total"],
@@ -95,10 +95,15 @@ check("Custom Checklist: Precipitation has R_Winter_Total only",
       res_custom["Precipitation"] == ["R_Winter_Total"], res_custom["Precipitation"])
 
 print("=== 3. Toolbox Parameters & Dynamic GUI Synchronization ===")
-import arcpy
+try:
+    import arcpy
+except ImportError:
+    print("SKIP Section 3: arcpy not available")
+    print("\n==== SUMMARY: %d passed, %d failed ====" % (len(PASS), len(FAIL)))
+    sys.exit(0 if not FAIL else 1)
 tool = mod.PowerClimateAtlasGenerator()
 ps = tool.getParameterInfo()
-check("Total parameters is 50", len(ps) == 50, len(ps))
+check("Total parameters is 51", len(ps) == 51, len(ps))
 
 pdict = dict((p.name, p) for p in ps)
 check("Field_Filter_Scope exists", "Field_Filter_Scope" in pdict)
@@ -112,13 +117,13 @@ check("Enable_Raster_Reclass default False", pdict["Enable_Raster_Reclass"].valu
 
 # Check positions and display names
 names = [p.name for p in ps]
-check("Climate_Modules is at index 18", names[18] == "Climate_Modules")
-check("Field_Filter_Scope is first in group at index 19", names[19] == "Field_Filter_Scope")
-check("Included_Aggregations follows scope at index 20", names[20] == "Included_Aggregations")
-check("Included_Seasons follows at index 21", names[21] == "Included_Seasons")
-check("Selected_Fields checklist is last in group at index 22", names[22] == "Selected_Fields")
+check("Climate_Modules is at index 20", names[20] == "Climate_Modules")
+check("Field_Filter_Scope is first in group at index 21", names[21] == "Field_Filter_Scope")
+check("Included_Aggregations follows scope at index 22", names[22] == "Included_Aggregations")
+check("Included_Seasons follows at index 23", names[23] == "Included_Seasons")
+check("Selected_Fields checklist is last in group at index 24", names[24] == "Selected_Fields")
 check("Selected_Fields displayName is Variables Selection (Checklist)",
-      ps[22].displayName == "Variables Selection (Checklist)")
+      ps[24].displayName == "Variables Selection (Checklist)")
 check("Field_Filter_Scope category is Variable & Field Selection",
       pdict["Field_Filter_Scope"].category == "Variable & Field Selection")
 

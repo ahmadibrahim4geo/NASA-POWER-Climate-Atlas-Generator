@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Offline QA tests for POWER_Climate_Atlas_Generator_10_8.pyt (new 89-column schema).
+"""Offline QA tests for POWER_Climate_Atlas_Generator_10_8.pyt (new 104-column schema).
 Runs with ArcMap 10.x python (2.7) WITHOUT network and WITHOUT arcpy.
 Covers: seasons, missing values, circular mean, precip monthly/daily + rain days,
 solar, pressure conversion + ranges, temperature range, Heat Index, wind
@@ -89,6 +89,51 @@ check("HI below threshold", mod.heat_index_c(20.0, 50.0) == 20.0)
 _hot = mod.heat_index_c(35.0, 60.0)
 check("HI exceeds air temp when hot", _hot is not None and 40.0 < _hot < 50.0, _hot)
 check("HI missing inputs", mod.heat_index_c(None, 50.0) is None and mod.heat_index_c(30.0, None) is None)
+_wc0 = mod.windchill_c(0.0, 10.0 / 3.6)
+check("WC freezing wind cools", _wc0 is not None and -3.5 < _wc0 < -3.1, _wc0)
+check("WC warm passthrough", mod.windchill_c(20.0, 5.0) == 20.0)
+check("WC calm passthrough", mod.windchill_c(0.0, 0.5) == 0.0)
+check("WC missing inputs", mod.windchill_c(None, 5.0) is None and mod.windchill_c(0.0, None) is None)
+check("Td None without input", tf.get("Td_Annual_Mean") is None and tf.get("Td_Summer_Mean") is None
+      and tf.get("Td_Winter_Mean") is None)
+mtd = dict(((2025, m), 12.0) for m in range(1, 13))
+tfd = mod.compute_temperature_fields(mt, mx, mn, mrh, mtd)
+check("Td means follow input", abs(tfd["Td_Annual_Mean"] - 12.0) < 1e-9
+      and abs(tfd["Td_Summer_Mean"] - 12.0) < 1e-9 and abs(tfd["Td_Winter_Mean"] - 12.0) < 1e-9,
+      (tfd["Td_Annual_Mean"], tfd["Td_Summer_Mean"], tfd["Td_Winter_Mean"]))
+mws = dict(((2025, m), 5.0) for m in range(1, 13))
+mtc = dict(((2025, m), 5.0) for m in range(1, 13))
+pfwc = mod.compute_point_fields({"T2M": mtc, "WS10M": mws}, [2025], ["Climate_Models"], "Monthly")
+check("WC winter below air temp", pfwc.get("WC_Winter_Mean") is not None
+      and 0.5 < pfwc["WC_Winter_Mean"] < 5.0, pfwc.get("WC_Winter_Mean"))
+check("WC annual present", pfwc.get("WC_Annual_Mean") is not None, pfwc.get("WC_Annual_Mean"))
+
+# --- Trends & baseline anomalies: exact-slope warming series 2015-2025 ---
+mtt = dict(((y, m), 20.0 + 0.1 * (y - 2015)) for y in range(2015, 2026) for m in range(1, 13))
+mpt = dict(((y, m), 100.0 + 2.0 * (y - 2015)) for y in range(2015, 2026) for m in range(1, 13))
+pftr = mod.compute_point_fields({"T2M": mtt, "PRECTOTCORR": mpt}, list(range(2015, 2026)),
+                                ["Climate_Models"], "Monthly", precip_totals=True)
+check("T trend +1.0/decade", abs(pftr["T_Trend_Decade"] - 1.0) < 1e-9, pftr["T_Trend_Decade"])
+check("R trend +240/decade", abs(pftr["R_Trend_Decade"] - 240.0) < 1e-6, pftr["R_Trend_Decade"])
+check("no baseline short series", pftr["T_Anom_Annual"] is None and pftr["R_Anom_Annual"] is None)
+pf1y = mod.compute_trend_anomaly_fields(dict(((2025, m), 20.0) for m in range(1, 13)),
+                                        dict(((2025, m), 10.0) for m in range(1, 13)))
+check("single year all None", all(v is None for v in pf1y.values()), pf1y)
+
+# --- 1991-2025 step climate: 20C/120mm baseline, 21C/144mm since 2021 ---
+mta = dict(((y, m), 20.0 if y <= 2020 else 21.0) for y in range(1991, 2026) for m in range(1, 13))
+mpa = dict(((y, m), 10.0 if y <= 2020 else 12.0) for y in range(1991, 2026) for m in range(1, 13))
+pfa = mod.compute_point_fields({"T2M": mta, "PRECTOTCORR": mpa}, list(range(1991, 2026)),
+                               ["Climate_Models"], "Monthly", precip_totals=True)
+check("T anomaly +0.5", abs(pfa["T_Anom_Annual"] - 0.5) < 1e-9, pfa["T_Anom_Annual"])
+check("T anomaly winter +0.5", abs(pfa["T_Anom_Winter"] - 0.5) < 1e-9, pfa["T_Anom_Winter"])
+check("T anomaly summer +0.5", abs(pfa["T_Anom_Summer"] - 0.5) < 1e-9, pfa["T_Anom_Summer"])
+check("T trend step ~+0.21", abs(pfa["T_Trend_Decade"] - 0.21) < 0.01, pfa["T_Trend_Decade"])
+check("R anomaly +12mm", abs(pfa["R_Anom_Annual"] - 12.0) < 1e-9, pfa["R_Anom_Annual"])
+check("R anomaly +10pct", abs(pfa["R_Anom_Annual_Pct"] - 10.0) < 1e-9, pfa["R_Anom_Annual_Pct"])
+check("R winter anomaly +3mm/+10pct", abs(pfa["R_Anom_Winter"] - 3.0) < 1e-9
+      and abs(pfa["R_Anom_Winter_Pct"] - 10.0) < 1e-9, (pfa["R_Anom_Winter"], pfa["R_Anom_Winter_Pct"]))
+check("anom submodel registered", "Trends & Baseline Anomalies [Requires: Temperature, Precipitation]" in mod.SUBMODELS_ALL)
 check("monthly range", abs(mod.monthly_range(mt) - 11.0) < 1e-9)
 check("monthly range const is 0", mod.monthly_range(dict(((2025, m), 5.0) for m in range(1, 13))) == 0.0)
 
@@ -99,9 +144,11 @@ check("wind speed ann", abs(wf["W_Spd_Annual_Mean"] - 5.0) < 1e-9)
 check("wind dir winter ~350", abs(wf["W_Dir_Winter_Mean"] - 350.0) < 1.0, wf["W_Dir_Winter_Mean"])
 check("wind max/range const", wf["W_Spd_Annual_Max_Month"] == 5.0 and wf["W_Spd_Annual_Range"] == 0.0,
       (wf["W_Spd_Annual_Max_Month"], wf["W_Spd_Annual_Range"]))
+check("wind min month const", wf["W_Spd_Annual_Min_Month"] == 5.0, wf["W_Spd_Annual_Min_Month"])
 spd2 = dict(((2025, m), float(m)) for m in range(1, 13))
 wf2 = mod.compute_wind_fields(spd2, drc)
 check("wind max month", abs(wf2["W_Spd_Annual_Max_Month"] - 12.0) < 1e-9)
+check("wind min month", abs(wf2["W_Spd_Annual_Min_Month"] - 1.0) < 1e-9, wf2["W_Spd_Annual_Min_Month"])
 check("wind range", abs(wf2["W_Spd_Annual_Range"] - 11.0) < 1e-9)
 
 tot = dict(((2025, m), 10.0 * calendar.monthrange(2025, m)[1]) for m in range(1, 13))
@@ -130,7 +177,7 @@ check("PSL converted", abs(pf["PSL_Annual_Mean"] - 1013.0) < 1e-9, pf["PSL_Annua
 check("PSL range const is 0", pf["PSL_Annual_Range"] == 0.0)
 check("R annual total 365", abs(pf["R_Annual_Total"] - 365.0) < 1e-9, pf["R_Annual_Total"])
 check("R annual mean 365/12", abs(pf["R_Annual_Mean"] - 365.0 / 12) < 1e-9, pf["R_Annual_Mean"])
-check("R extremes None monthly", pf["R_Max_Daily_Month"] is None and pf["R_Annual_Rain_Days_Total"] is None)
+check("R extremes absent from monthly", "R_Max_Daily_Month" not in pf and "R_Annual_Rain_Days_Total" not in pf)
 check("RH range const is 0", pf.get("RH_Annual_Range") == 0.0, pf.get("RH_Annual_Range"))
 check("UV range const is 0", pf.get("UV_Annual_Range") == 0.0, pf.get("UV_Annual_Range"))
 check("Cld range const is 0", pf.get("Cld_Annual_Range") == 0.0, pf.get("Cld_Annual_Range"))
@@ -138,26 +185,32 @@ check("Sol range const is 0", pf.get("Sol_Annual_Range") == 0.0, pf.get("Sol_Ann
 check("HI needs humidity note", True)
 pfd = mod.compute_point_fields(monthly, [2025], ["Precipitation"], "Daily",
                                daily_raw={"PRECTOTCORR": {(2025, 1, 1): 0.5, (2025, 1, 2): 12.7, (2025, 1, 3): -999}})
-check("R max daily", abs(pfd["R_Max_Daily_Month"] - 12.7) < 1e-9, pfd["R_Max_Daily_Month"])
-check("rain days count", abs(pfd["R_Annual_Rain_Days_Total"] - 1.0) < 1e-9, pfd["R_Annual_Rain_Days_Total"])
+precip_keys = [k for k in pfd.keys() if k.startswith("R_") and "Trend" not in k and "Anom" not in k]
+check("precip fields count 6", len(precip_keys) == 6, len(precip_keys))
+check("R extremes absent from daily", "R_Max_Daily_Month" not in pfd and "R_Annual_Rain_Days_Total" not in pfd)
 slpv = dict(((2025, m), 100.0 + m) for m in range(1, 13))
 pfr = mod.compute_point_fields({"SLP": slpv}, [2025], ["Sea Level Pressure"], "Monthly")
 check("PSL range varying", abs(pfr["PSL_Annual_Range"] - 110.0) < 1e-9, pfr["PSL_Annual_Range"])
 check("temp fetches RH2M", "RH2M" in mod.MODULE_PARAMS["Temperature"])
+check("temp fetches T2MDEW", "T2MDEW" in mod.MODULE_PARAMS["Temperature"])
+check("models fetch WS10M", "WS10M" in mod.MODULE_PARAMS["Climate_Models"])
+check("WC submodel registered", "Wind Chill / Cold Stress [Requires: Temperature, Wind]" in mod.SUBMODELS_ALL)
+check("WC submodel deps", mod.SUBMODEL_DEPS["Wind Chill / Cold Stress [Requires: Temperature, Wind]"]["modules"] == ["Temperature", "Wind"])
 
-rows = mod.metadata_rows_for_modules(["Temperature", "Wind"])
-check("metadata rows T+W=27", len(rows) == 15 + 12, len(rows))
+rows = mod.metadata_rows_for_modules(["Temperature", "Wind", "Heat Index"])
+check("metadata rows T+W+HI=31", len(rows) == 13 + 13 + 5, len(rows))
 cols = ["Field_Name", "Full_Name_EN", "Name_AR", "NASA_Code", "Module", "Period", "Statistic", "Unit", "Description_AR", "Description_EN", "Calculation", "Source", "Notes"]
 check("metadata cols", all(all(c in r for c in cols) for r in rows))
-check("REQUIRED 89", len(mod.REQUIRED_COLUMNS) == 89, len(mod.REQUIRED_COLUMNS))
+check("REQUIRED 102", len(mod.REQUIRED_COLUMNS) == 102, len(mod.REQUIRED_COLUMNS))
+check("R extremes absent from REQUIRED_COLUMNS", "R_Max_Daily_Month" not in mod.REQUIRED_COLUMNS and "R_Annual_Rain_Days_Total" not in mod.REQUIRED_COLUMNS)
 check("all fielddefs in REQUIRED", all(r[0] in mod.REQUIRED_COLUMNS for r in mod.FIELD_DEFS))
 
 allf = [r[0] for r in mod.FIELD_DEFS] + [a[0] for a in mod.ADMIN_FIELDS]
 bad = [f for f in allf if len(f) > 10]
 check("long names all mapped", all(b in mod.SHP_FIELD_MAP for b in bad), bad[:3])
-check("shp map 78 unique<=10", len(mod.SHP_FIELD_MAP) == 78
+check("shp map 91 unique<=10", len(mod.SHP_FIELD_MAP) == 91
       and all(len(v) <= 10 for v in mod.SHP_FIELD_MAP.values())
-      and len(set(mod.SHP_FIELD_MAP.values())) == 78)
+      and len(set(mod.SHP_FIELD_MAP.values())) == 91)
 check("shp map covers climate", all(f in mod.SHP_FIELD_MAP for r in mod.FIELD_DEFS for f in [r[0]]))
 check("ramps 7", all(len(mod.COLOR_RAMPS[k]) == 7 for k in ["Temperature", "Precipitation", "Sea Level Pressure", "Relative Humidity", "Solar Radiation", "Cloud Cover"]))
 check("UV 5 classes", len(mod.COLOR_RAMPS["UV Index"]) == 5)

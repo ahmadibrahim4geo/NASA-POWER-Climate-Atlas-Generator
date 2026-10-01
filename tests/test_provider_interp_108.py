@@ -32,11 +32,17 @@ def check(name, cond, detail=""):
 d, h = mod.om_var_sets(mod.MODULES_ALL)
 check("om daily has temp/precip/solar", all(v in d for v in
       ["temperature_2m_mean", "precipitation_sum", "shortwave_radiation_sum"]), d)
-check("om hourly has pressure/humidity/cloud/wind",
+check("om hourly has pressure/humidity/cloud/wind/dewpoint",
       all(v in h for v in ["pressure_msl", "surface_pressure",
-                           "relative_humidity_2m", "cloud_cover", "wind_speed_10m"]), h)
-d2, h2 = mod.om_var_sets(["Temperature"])
-check("temp needs hourly RH for HI", h2 == ["relative_humidity_2m"] and len(d2) == 3, (d2, h2))
+                           "relative_humidity_2m", "cloud_cover", "wind_speed_10m",
+                           "dew_point_2m"]), h)
+d2, h2 = mod.om_var_sets(["Temperature", "Heat Index"])
+check("temp+HI needs hourly RH+Dew for HI/Td", "relative_humidity_2m" in h2 and "dew_point_2m" in h2 and len(d2) == 3, (d2, h2))
+d_pure_t, h_pure_t = mod.om_var_sets(["Temperature"])
+check("pure temp needs hourly Dew", h_pure_t == ["dew_point_2m"] and len(d_pure_t) == 3, (d_pure_t, h_pure_t))
+check("dewpoint canon T2MDEW", mod.OM_CANON.get("dew_point_2m") == "T2MDEW")
+d3, h3 = mod.om_var_sets(["Climate_Models"])
+check("models hourly has wind for WC", "wind_speed_10m" in h3 and "dew_point_2m" in h3, h3)
 
 u = mod.om_url(30.0, 31.0, 2015, 2025, ["temperature_2m_mean"], [])
 check("om url base+dates", "archive-api.open-meteo.com/v1/archive" in u
@@ -131,7 +137,7 @@ if not _HAS_ARCPY:
 
 # ---------------- 5. toolbox params + dynamic enabling ----------------
 ps = tool.getParameterInfo()
-check("46 params", len(ps) == 46, len(ps))
+check("53 params", len(ps) == 53, len(ps))
 pdict = dict((p.name, p) for p in ps)
 check("provider default NASA", pdict["Climate_Data_Source"].value == "NASA POWER API"
       and "Open-Meteo Historical API (ERA5 Reanalysis)" in pdict["Climate_Data_Source"].filter.list,

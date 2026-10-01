@@ -60,20 +60,24 @@ class TestModesAndInputs(unittest.TestCase):
 
     def test_parameter_count_and_indices(self):
         params = self.tool.getParameterInfo()
-        self.assertEqual(len(params), 46, "Expected 46 parameters, got %d" % len(params))
+        self.assertEqual(len(params), 51, "Expected 51 parameters, got %d" % len(params))
 
         # Index 0: Operation_Mode
         self.assertEqual(params[0].name, "Operation_Mode")
         self.assertEqual(params[0].value, "Download & Generate Atlas (Full Pipeline) [Default]")
         self.assertIn("Interpolate & Map Existing Data (Offline Mode - No Internet)", params[0].filter.list)
 
-        # Index 1: Input_Point_Features
-        self.assertEqual(params[1].name, "Input_Point_Features")
+        # Index 1: Download_Only (run scope switch, next to Operation_Mode)
+        self.assertEqual(params[1].name, "Download_Only")
         self.assertEqual(params[1].parameterType, "Optional")
 
-        # Index 2: Precalculated_Point_Layer
-        self.assertEqual(params[2].name, "Precalculated_Point_Layer")
+        # Index 2: Input_Point_Features
+        self.assertEqual(params[2].name, "Input_Point_Features")
         self.assertEqual(params[2].parameterType, "Optional")
+
+        # Index 3: Precalculated_Point_Layers
+        self.assertEqual(params[3].name, "Precalculated_Point_Layers")
+        self.assertEqual(params[3].parameterType, "Optional")
 
     def test_update_parameters_download_mode(self):
         params = self.tool.getParameterInfo()
@@ -83,7 +87,7 @@ class TestModesAndInputs(unittest.TestCase):
         self.tool.updateParameters(params)
 
         self.assertTrue(pdict["Input_Point_Features"].enabled, "Input_Point_Features should be enabled in Download mode")
-        self.assertFalse(pdict["Precalculated_Point_Layer"].enabled, "Precalculated_Point_Layer should be disabled in Download mode")
+        self.assertFalse(pdict["Precalculated_Point_Layers"].enabled, "Precalculated_Point_Layer should be disabled in Download mode")
         self.assertTrue(pdict["Climate_Data_Source"].enabled, "Climate_Data_Source should be enabled in Download mode")
         self.assertTrue(pdict["Time_Mode"].enabled, "Time_Mode should be enabled in Download mode")
         self.assertTrue(pdict["Download_Only"].enabled, "Download_Only should be enabled in Download mode")
@@ -96,7 +100,7 @@ class TestModesAndInputs(unittest.TestCase):
         self.tool.updateParameters(params)
 
         self.assertFalse(pdict["Input_Point_Features"].enabled, "Input_Point_Features should be disabled in Offline mode")
-        self.assertTrue(pdict["Precalculated_Point_Layer"].enabled, "Precalculated_Point_Layer should be enabled in Offline mode")
+        self.assertTrue(pdict["Precalculated_Point_Layers"].enabled, "Precalculated_Point_Layer should be enabled in Offline mode")
         self.assertFalse(pdict["Climate_Data_Source"].enabled, "Climate_Data_Source should be disabled in Offline mode")
         self.assertFalse(pdict["Time_Mode"].enabled, "Time_Mode should be disabled in Offline mode")
         self.assertFalse(pdict["Download_Only"].enabled, "Download_Only should be disabled in Offline mode")
@@ -116,9 +120,9 @@ class TestModesAndInputs(unittest.TestCase):
 
         # 2. Offline mode without precalculated layer should trigger error
         pdict["Operation_Mode"].value = "Interpolate & Map Existing Data (Offline Mode - No Internet)"
-        pdict["Precalculated_Point_Layer"].value = None
+        pdict["Precalculated_Point_Layers"].value = None
         self.tool.updateMessages(params)
-        self.assertTrue(pdict["Precalculated_Point_Layer"].hasError(), "Expected error for missing Precalculated_Point_Layer in Offline mode")
+        self.assertTrue(pdict["Precalculated_Point_Layers"].hasError(), "Expected error for missing Precalculated_Point_Layer in Offline mode")
 
 
 if __name__ == "__main__":

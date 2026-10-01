@@ -1,207 +1,180 @@
 # Comprehensive Scientific and Technical Guide
-# NASA POWER & Open-Meteo Climate Atlas Generator (ArcGIS 10.8)
+# NASA POWER & Open-Meteo Climate Atlas Generator
+## Native Dual Compatibility for ArcGIS Pro (Python 3) & ArcMap 10.8 (Python 2.7)
+
+[![Developer](https://img.shields.io/badge/Developer-Ahmad%20Ibrahim-1F4E79.svg?style=for-the-badge&logo=github)](https://github.com/ahmadibrahim4geo)
+[![Platform](https://img.shields.io/badge/Platform-ArcGIS%20Pro%20%7C%20ArcMap%2010.8-0079c1.svg)](https://www.esri.com/)
+[![Repository](https://img.shields.io/badge/Repository-NASA--POWER--Climate--Atlas--Generator-blue.svg)](https://github.com/ahmadibrahim4geo/NASA-POWER-Climate-Atlas-Generator)
 
 ---
 
 ## Table of Contents
 1. [Overview & Engineering Goals](#1-overview--engineering-goals)
-2. [Dual Operation Modes](#2-dual-operation-modes)
-   - [A. Online Pipeline: Download & Generate Atlas](#a-online-pipeline-download--generate-atlas)
-   - [B. Offline Mode: Interpolate & Map Existing Data](#b-offline-mode-interpolate--map-existing-data)
-3. [WMO 30-Year Climatological Normals Standards](#3-wmo-30-year-climatological-normals-standards)
-   - [Definition of 30-Year Climatological Normals](#definition-of-30-year-climatological-normals)
-   - [Reference Periods: 1991–2020 vs. 1961–1990](#reference-periods-19912020-vs-19611990)
-   - [Statistical Filtering of Interannual Noise](#statistical-filtering-of-interannual-noise)
-4. [The 10 Climate Modules & Meteorological Seasons](#4-the-10-climate-modules--meteorological-seasons)
-   - [Standard WMO Meteorological Seasons (DJF, MAM, JJA, SON)](#standard-wmo-meteorological-seasons-djf-mam-jja-son)
-   - [Module Architecture & Indicator Coverage](#module-architecture--indicator-coverage)
-5. [Drought & Aridity Indices with Auto-Dependency Resolution](#5-drought--aridity-indices-with-auto-dependency-resolution)
-   - [De Martonne Aridity Index](#de-martonne-aridity-index)
-   - [FAO-56 Hargreaves-Samani Potential Evapotranspiration (PET)](#fao-56-hargreaves-samani-potential-evapotranspiration-pet)
-   - [UNEP Aridity Index](#unep-aridity-index)
-   - [Climatic Water Deficit / Surplus](#climatic-water-deficit--surplus)
-   - [Biologically Dry Months (Walter-Lieth)](#biologically-dry-months-walter-lieth)
-6. [Data Quality Control & Gap-Filling Mechanisms](#6-data-quality-control--gap-filling-mechanisms)
-   - [Sentinel Filtering (-999.0)](#sentinel-filtering--9990)
-   - [Temporal & Spatial Imputation Algorithms](#temporal--spatial-imputation-algorithms)
-   - [Point Spatial Tolerance Thinning](#point-spatial-tolerance-thinning)
-7. [Atmospheric & Satellite Reanalysis Sources](#7-atmospheric--satellite-reanalysis-sources)
-   - [NASA POWER: MERRA-2 & CERES SYN1deg](#nasa-power-merra-2--ceres-syn1deg)
-   - [Open-Meteo: ERA5-Land (~9 km Resolution)](#open-meteo-era5-land-9-km-resolution)
-8. [Formatted Excel (.xls) Workbooks & Arabic UTF-8 BOM Encoding](#8-formatted-excel-xls-workbooks--arabic-utf-8-bom-encoding)
-   - [UTF-8 BOM Implementation in CSV Files](#utf-8-bom-implementation-in-csv-files)
-   - [Master Multi-Sheet Excel Workbook](#master-multi-sheet-excel-workbook)
-   - [Right-to-Left (RTL) Arabic Worksheets](#right-to-left-rtl-arabic-worksheets)
-9. [Spatial Interpolation, Masking & Layer Styling](#9-spatial-interpolation-masking--layer-styling)
-   - [IDW Gentle Decay vs. Classical Quadratic Decay](#idw-gentle-decay-vs-classical-quadratic-decay)
-   - [Spline with Tension & Kriging Options](#spline-with-tension--kriging-options)
-   - [Focal Smoothing & Polygon Mask Clipping](#focal-smoothing--polygon-mask-clipping)
-   - [Isobars & Wind Vectors Integration](#isobars--wind-vectors-integration)
+2. [Dual Architecture: ArcGIS Pro & ArcMap 10.8](#2-dual-architecture-arcgis-pro--arcmap-108)
+3. [The Dual-Tool Workflow Architecture](#3-the-dual-tool-workflow-architecture)
+4. [The 17 Modular Climate Layers](#4-the-17-modular-climate-layers)
+5. [Dual Operation Modes & Smart Skip Execution](#5-dual-operation-modes--smart-skip-execution)
+   - [A. Online Pipeline (Download & Generate Atlas)](#a-online-pipeline-download--generate-atlas)
+   - [B. Offline Pipeline (Interpolate & Map Existing Data)](#b-offline-pipeline-interpolate--map-existing-data)
+6. [Spatial Masking Rules & Non-Destructive Principles](#6-spatial-masking-rules--non-destructive-principles)
+   - [Station Points Invariance Rule](#station-points-invariance-rule)
+   - [Products Strictly Subject to Mask Clipping](#products-strictly-subject-to-mask-clipping)
+7. [High-Efficiency Lossless LZW Block Tiling Compression](#7-high-efficiency-lossless-lzw-block-tiling-compression)
+8. [Wind Vector Fields & Directional Flow Dynamics](#8-wind-vector-fields--directional-flow-dynamics)
+9. [WMO 30-Year Climatological Normals Standards](#9-wmo-30-year-climatological-normals-standards)
+10. [Global Bioclimatic & Aridity Models](#10-global-bioclimatic--aridity-models)
+11. [Data Quality Control & Gap-Filling Protocols](#11-data-quality-control--gap-filling-protocols)
+12. [Data Interoperability & Schema Standards](#12-data-interoperability--schema-standards)
 
 ---
 
 ## 1. Overview & Engineering Goals
 
-The **NASA POWER & Open-Meteo Climate Atlas Generator** is an enterprise-grade ArcGIS 10.8 Python Toolbox (`.pyt`) engineered in pure Python 2.7 / ArcPy. It automates the extraction, quality control, mathematical calculation, spatial interpolation, cartographic symbology, and data export of **82 climatological, hydrological, and bioclimatic indicators**.
+The **NASA POWER & Open-Meteo Climate Atlas Generator** is an enterprise-grade geoprocessing platform engineered to automate the ingestion, quality assurance, climatological calculations, spatial interpolation, cartographic symbology, and multi-format dissemination of multi-decadal meteorological data.
 
-### Key Architectural Strengths:
-- **100% Standalone**: Runs in 32-bit ArcGIS 10.8 without external dependencies (uses native `arcpy`, `requests`, `urllib2`, `csv`, and `xlwt`).
-- **Dual Operating Modes**: Complete online download pipeline or 100% offline interpolation of pre-existing datasets.
-- **WMO Compliant**: Full adherence to World Meteorological Organization (WMO) climatological standards and meteorological seasons.
-- **Multimodal Output**: File Geodatabase feature classes, shapefiles, LZW-compressed GeoTIFF rasters (clipped to the study area and written directly inside each element folder), UTF-8 BOM CSV files, and professionally styled Excel workbooks (`.xls`).
-
----
-
-## 2. Dual Operation Modes
-
-A master parameter at the very top of the tool (`Operation_Mode`) dictates the operational pipeline:
-
-### A. Online Pipeline: Download & Generate Atlas (`Download & Generate Atlas (Full Pipeline) [Default]`)
-- **Use Case**: Starting from bare station coordinates or sample point features.
-- **Behavior**:
-  - `Input_Point_Features` is enabled; `Precalculated_Point_Layer` is disabled.
-  - All internet access parameters (`Climate_Data_Source`, `OpenMeteo_Model`), time configuration (`Time_Mode`, `Single_Year`, `Start_Year`, `End_Year`, calendar controls), temporal resolution, and gap filling are active.
-  - Sequentially queries NASA POWER or Open-Meteo ERA5 APIs, computes 82 indicators, writes to GDB/Shapefile, generates clipped rasters, contours, wind arrows, map layers, and Excel files.
-
-### B. Offline Mode: Interpolate & Map Existing Data (`Interpolate & Map Existing Data (Offline Mode - No Internet)`)
-- **Use Case**: Reprocessing, re-interpolating, re-masking, or changing cell size on point datasets generated during a previous run without requiring an internet connection.
-- **Behavior**:
-  - `Input_Point_Features` is disabled; `Precalculated_Point_Layer` is enabled.
-  - **All online and download parameters are disabled and locked**.
-  - **Automatic Field Discovery**: When a layer is chosen, the engine scans its fields, identifies which climate modules are present, and preselects them in `Climate_Modules` and `Variables Selection (Checklist)`.
-  - Directly executes spatial interpolation (IDW / Kriging / Spline), mask clipping, focal smoothing, and master Excel workbook creation directly from the local data, then adds the resulting rasters to the map.
+### Primary Objectives:
+1. Eliminate manual barriers to acquiring global historical reanalysis and projection datasets from **NASA POWER** (MERRA-2, CERES) and **Open-Meteo** (ERA5-Land ~9 km).
+2. Automate mathematically sound spatial interpolation and climatological normal calculations following **World Meteorological Organization (WMO)** standards.
+3. Deliver a robust, modular schema comprising **17 discrete thematic feature classes**.
+4. Optimize raster generation pipelines using high-performance, **lossless block-tiled LZW compression** without scientific precision degradation.
 
 ---
 
-## 3. WMO 30-Year Climatological Normals Standards
+## 2. Dual Architecture: ArcGIS Pro & ArcMap 10.8
 
-### Definition of 30-Year Climatological Normals
-Under the guidelines of the World Meteorological Organization (**WMO-No. 1203: WMO Guidelines on the Calculation of Climate Normals**), a **Climatological Normal** is defined as an average of climatological data computed for the following consecutive 30-year period:
-$$\text{Normal} = \frac{1}{30} \sum_{y=1}^{30} X_y$$
+The codebase features a cross-compatible hybrid engine providing seamless operation across both major Esri software generations:
 
-### Reference Periods: 1991–2020 vs. 1961–1990
-- **1991–2020 (Current Standard Climatological Normal)**: Adopted internationally by WMO in 2021 as the official reference baseline for weather and climate monitoring, agricultural planning, and infrastructure design.
-- **1961–1990 (Historical Reference Normal)**: Preserved as the fixed reference standard for assessing long-term global climate change and historical warming trends.
-
-### Statistical Filtering of Interannual Noise
-Climate variables naturally exhibit substantial interannual variance driven by large-scale oscillatory modes (e.g., ENSO, NAO, IOD). A short period (e.g., 5 or 10 years) can be severely distorted by an abnormal drought or high precipitation anomaly. A 30-year window provides statistical stability, minimizes sample variance, and establishes an authoritative baseline for computing climate anomalies ($\Delta X = X - X_{normal}$).
-
----
-
-## 4. The 10 Climate Modules & Meteorological Seasons
-
-### Standard WMO Meteorological Seasons (DJF, MAM, JJA, SON)
-The tool strictly adheres to standard 3-month meteorological seasons based on full calendar months:
-- **Winter (DJF)**: December, January, February
-- **Spring (MAM)**: March, April, May
-- **Summer (JJA)**: June, July, August
-- **Autumn (SON)**: September, October, November
-
-### Module Architecture & Indicator Coverage
-1. **Temperature (`01_Temperature`)**: 13 indicators including annual/seasonal means, annual range, warmest summer month, coldest winter month, extreme daily means, and perceived temperature indices (Annual & Summer Steadman-Rothfusz Heat Index, Winter Humidex IH).
-2. **Precipitation (`02_Precipitation`)**: 8 indicators including annual total, monthly average, seasonal totals, maximum 24h rainfall, and rain days ($\ge 0.1\text{ mm}$).
-3. **Drought & Aridity (`10_Drought_And_Aridity`)**: 5 indicators (De Martonne, Hargreaves PET, UNEP Aridity Index, Climatic Water Deficit, Biologically Dry Months).
-4. **Sea Level Pressure (`03_Sea_Level_Pressure`)**: 6 indicators covering annual and seasonal mean sea level pressure (MSLP).
-5. **Surface Pressure (`04_Surface_Pressure`)**: 6 indicators covering actual station-level surface barometric pressure.
-6. **Wind (`05_Wind`)**: 12 indicators covering 10m wind speeds and circular vector mean wind direction ($\text{atan2}$).
-7. **Relative Humidity (`06_Humidity`)**: 6 indicators covering 2m relative humidity.
-8. **Solar Radiation (`07_Solar_Radiation`)**: 7 indicators covering daily insolation rates and annual cumulative energy ($\text{kWh/m}^2/\text{year}$).
-9. **UV Index (`08_UV_Index`)**: 6 indicators covering solar noon ultraviolet radiation hazard classes.
-10. **Cloud Cover (`09_Cloud_Cover`)**: 6 indicators covering all-sky cloud fraction percentages.
+- **ArcGIS Pro (2.x / 3.x) with Python 3.x**:
+  - Full Python 3 unicode compliance, avoiding legacy `unicode()` or `str.decode()` exceptions.
+  - Safe evaluation of dictionary views (`list(dict.values())`) and modern iterables.
+  - Mitigation of intermediate scratch deletion routines (`arcpy.management.Delete`), guaranteeing user layers in the Contents pane / Table of Contents (TOC) remain permanently visible during and after execution.
+- **ArcMap 10.8 with Python 2.7**:
+  - Full 32-bit ArcObjects / COM backward compatibility.
+  - Built-in interactive Tkinter visual calendar modal (`calendar_dialog.py`).
+  - Professional Excel reporting (`.xls`) with explicit UTF-8 BOM encoding for uncorrupted Arabic script support.
 
 ---
 
-## 5. Drought & Aridity Indices with Auto-Dependency Resolution
+## 3. The Dual-Tool Workflow Architecture
 
-### Auto-Dependency Resolution
-To calculate drought and evapo-transpiration metrics, 4 climate parameters are required:
-`["PRECTOTCORR", "T2M", "T2M_MAX", "T2M_MIN"]`.
-When a user selects `Drought & Aridity` alone without enabling Temperature or Precipitation, the engine **automatically requests and retrieves these required underlying parameters in the background**, calculating the drought indices without forcing the creation of unwanted temperature or rainfall layers.
-
-### Formulations and Classifications:
-
-#### 1. De Martonne Aridity Index (`DM_Aridity_Annual`):
-$$I_{DM} = \frac{P}{T + 10}$$
-- $I_{DM} < 5$: Hyper-arid
-- $5 \le I_{DM} < 10$: Arid
-- $10 \le I_{DM} < 20$: Semi-arid
-- $20 \le I_{DM} < 30$: Sub-humid
-- $I_{DM} \ge 30$: Humid
-
-#### 2. FAO-56 Hargreaves-Samani PET (`PET_Hargreaves_Annual`):
-$$PET = 0.0023 \times R_a \times (T_{mean} + 17.8) \times \sqrt{T_{max} - T_{min}}$$
-Where $R_a$ is extraterrestrial solar radiation computed astronomically from station latitude and calendar month Julian days, converted to mm/day equivalent ($\times 0.408$).
-
-#### 3. UNEP Aridity Index (`UNEP_Aridity_Annual`):
-$$AI = \frac{P}{PET}$$
-- $AI < 0.05$: Hyper-arid (e.g., Western Desert of Egypt)
-- $0.05 \le AI < 0.20$: Arid
-- $0.20 \le AI < 0.50$: Semi-arid
-- $0.50 \le AI < 0.65$: Dry sub-humid
-- $AI \ge 0.65$: Humid
-
-#### 4. Climatic Water Deficit (`Water_Deficit_Annual`):
-$$WD = P - PET$$
-Negative values denote seasonal or annual water deficits and irrigation requirements.
-
-#### 5. Biologically Dry Months (`Dry_Months_Count`):
-Count of calendar months where precipitation is less than twice the mean monthly temperature ($P_{month} < 2 \times T_{month}$) following Walter-Lieth bioclimatological criteria.
+The platform operates via two complementary tools:
+1. **`POWER_Climate_Atlas_Generator_10_8.pyt` (Feature Atlas Generator)**:
+   - Primary user-facing Geoprocessing Toolbox.
+   - Handles API communications, rate-limiting, quality control, calendar GUI interactions, and 92 climatological indicators.
+   - Generates the authoritative `Climate_Database.gdb` with 17 structured feature classes.
+2. **`raster_atlas_generator.py` (Raster Surface Engine)**:
+   - Core backend spatial processing engine.
+   - Executes spatial surface interpolation (IDW with smooth power profiles, Ordinary Kriging, Spline with Tension, Natural Neighbor).
+   - Manages focal smoothing filters, polygon boundary clipping, isobar contouring, wind vector arrow grids, and lossless LZW compression.
 
 ---
 
-## 6. Data Quality Control & Gap-Filling Mechanisms
+## 4. The 17 Modular Climate Layers
 
-### Sentinel Filtering (-999.0)
-All NASA and reanalysis missing indicators (`-999.0`, `None`, `NaN`) are intercepted and converted to `None / NoData`. This prevents catastrophic interpolation artifacts.
+Legacy bundled outputs have been fully refactored into **17 discrete, standalone feature classes**:
 
-### Imputation Methods (`Gap_Fill_Method`)
-- **Climatological Month Mean (Recommended)**: Missing months in a given year are imputed using the long-term mean of that specific calendar month across valid years for that point.
-- **Linear + Boundary Interpolation**: Fills interior missing sequences linearly and holds endpoints.
-- **Spatial Nearest Neighbor Fallback**: Missing attributes at an isolated point are estimated via Inverse Distance Weighting from the nearest valid spatial neighbors.
-
----
-
-## 7. Atmospheric & Satellite Reanalysis Sources
-
-- **NASA POWER**: Integrates NASA's GMAO MERRA-2 assimilation model (~50 km horizontal resolution) and CERES satellite radiation products (~100 km).
-- **Open-Meteo ERA5-Land**: Provides European Centre for Medium-Range Weather Forecasts (ECMWF) atmospheric reanalysis at **9 km (0.1°)** spatial resolution, delivering unprecedented regional fidelity.
-
----
-
-## 8. Formatted Excel (.xls) Workbooks & Arabic UTF-8 BOM Encoding
-
-### UTF-8 BOM in CSV Files
-All CSV exports prepend the Byte Order Mark `\xef\xbb\xbf`, ensuring Microsoft Excel opens Arabic text cleanly without garbled characters.
-
-### Master Styled Workbook (`Climate_Atlas_Master_Workbook.xls`)
-Generated automatically using the native `xlwt` library in Python 2.7:
-- Dark blue header rows (`fore_colour dark_blue`) with bold white text.
-- Alternating zebra row striping.
-- Thin borders on all cells.
-- Automated column width fitting.
-- Single multi-sheet workbook containing individual tabs for each climate element.
-- Arabic metadata and field dictionaries formatted with native Right-to-Left (`rtl=True`) worksheet orientation.
+| # | Feature Class | Scientific Description | Units |
+|:---:|---|---|:---:|
+| **01** | `01_Temperature` | Annual/seasonal means (DJF, MAM, JJA, SON), thermal range, summer/winter extremes, and dew point temperatures (Td). | °C |
+| **02** | `02_Precipitation` | Annual total, monthly mean, seasonal accumulated totals, 1-day maximum, and annual rain day frequency. | mm, days |
+| **03** | `03_Sea_Level_Pressure` | Atmospheric pressure reduced to mean sea level (MSLP) annual/seasonal means and range. | hPa / mbar |
+| **04** | `04_Surface_Pressure` | True atmospheric pressure at actual station topographic elevation. | hPa / mbar |
+| **05** | `05_Wind` | 10-meter wind speed means, circular mean vector wind directions, and annual wind range. | m/s, degrees (°) |
+| **06** | `06_Relative_Humidity` | 2-meter relative humidity annual/seasonal means and annual psychrometric range. | % |
+| **07** | `07_Solar_Radiation` | All-sky shortwave downward solar irradiance daily means and accumulated annual totals. | kWh/m²/day, kWh/m²/year |
+| **08** | `08_UV_Index` | Solar noon all-sky UV radiation index adhering to World Health Organization (WHO) risk scales. | index (0–15+) |
+| **09** | `09_Cloud_Cover` | Annual and seasonal all-sky cloud fractions and sunshine duration dynamics. | % |
+| **10** | `10_De_Martonne_Aridity` | De Martonne aridity index ($I_{DM} = P / (T + 10)$) and bioclimatic aridity classifications. | dimensionless index |
+| **11** | `11_Hargreaves_PET` | FAO-56 Hargreaves-Samani potential evapotranspiration computed with astronomical solar radiation ($R_a$). | mm/year |
+| **12** | `12_UNEP_Aridity` | United Nations Environment Programme aridity ratio ($AI = P / PET$) for dryland classification. | ratio |
+| **13** | `13_Water_Deficit` | Annual net climatic water balance ($WD = P - PET$). | mm/year |
+| **14** | `14_Dry_Months` | Walter-Lieth biologically dry months count ($P < 2T$). | months (0–12) |
+| **15** | `15_Heat_Index` | Steadman-Rothfusz apparent temperature (Heat Index), winter Humidex, and summer shade WBGT heat stress. | °C |
+| **16** | `16_Wind_Chill` | Osczevski-Bluestein equivalent wind chill temperature index. | °C |
+| **17** | `17_Trends_And_Anomalies` | Decadal linear climate trends and annual/seasonal anomalies relative to the 1991–2020 WMO normal. | °C/decade, mm/decade, % |
 
 ---
 
-## 9. Spatial Interpolation, Masking & Output Layout
+## 5. Dual Operation Modes & Smart Skip Execution
 
-- **IDW Gentle Decay**: Uses power = 1.2 by default to eliminate artificial bullseye patterns around stations.
-- **Spline with Tension**: Produces smooth surfaces that strictly honor station values without extreme overshooting.
-- **ExtractByMask**: Clips all outputs cleanly to the polygon study area boundary with enforced LZW TIFF compression.
-- **Mask protection**: the reprojected mask (`_scratch/maskp.shp`) is excluded from all intermediate purges and is rebuilt automatically if lost; if clipping fails for any reason the raster is **skipped** (no unclipped surface is ever published as a final result).
-- **Flat output layout**: each element's rasters (`.tif`) are written directly inside its folder (e.g. `01_Temperature/`; wind goes to `05_Wind/Speed/` and `05_Wind/Direction/`) — no `Rasters`/`Layers` subfolders and no `.lyr` files.
+### A. Online Pipeline (`Download & Generate Atlas`)
+- Ingests raw station coordinates or point features.
+- Connects to NASA POWER or Open-Meteo ERA5-Land APIs.
+- Applies QA/QC, gap-fills missing dates, computes all 92 indicators, and creates `Climate_Database.gdb`.
 
-### Raster Reclassification Options
-Located directly beneath the **Interpolation Parameters** category:
-- **Default State (`Enable_Raster_Reclass = False`)**:
-  - Only clean, continuous floating-point surface GeoTIFFs (`.tif`) are generated, without creating additional discrete classified files.
-- **When Enabled (`Enable_Raster_Reclass = True`)**:
-  - **Number of Classes (`Reclass_Classes_Count`)**: User-selectable from 2 to 32 classes (default: 7).
-  - **Classification Method (`Reclass_Method`)**:
-    1. **Natural Breaks (Jenks)**: Minimizes squared deviations within classes while maximizing variance between classes.
-    2. **Equal Interval**: Partitions the span into intervals of equal range.
-    3. **Equal Area (Quantile)**: Equal number of grid cells per class.
-    4. **Geometric Interval**: Geometrically distributed ranges suited for skewed climate data.
-    5. **Standard Deviation**: Classifies cells relative to their mean and standard deviation.
-  - Automatically generates classified display rasters (`_cls.tif`), builds Raster Attribute Tables (VAT), embeds `.clr` colormaps mathematically interpolated to the requested class count, and documents precise true-data break boundaries in layer metadata.
+### B. Offline Pipeline (`Interpolate & Map Existing Data`)
+- 100% offline workflow without internet dependency.
+- **Smart Skip Logic**: If `Climate_Database.gdb` or previously downloaded outputs exist in the project directory, the tool automatically reuses them rather than rebuilding or overwriting from scratch.
+- **TOC Integrity**: Eliminates intermediate layer drops, guaranteeing that user layers remain visible in the Table of Contents / Contents pane.
+- **Auto-Field Discovery**: Automatically detects present variables and pre-activates corresponding module checklists upon selecting the precalculated layer.
+
+---
+
+## 6. Spatial Masking Rules & Non-Destructive Principles
+
+### Station Points Invariance Rule
+- **Point features are NEVER clipped by the study area polygon**.
+- Preserving the full input point set maintains geographical context, allows boundary spatial interpolation without edge distortion, and keeps the station database intact for reuse in broader or adjacent studies.
+
+### Products Strictly Subject to Mask Clipping
+Polygon mask clipping (`Study_Area_Mask`) is applied exclusively to derived spatial products:
+1. **Continuous raster surfaces (GeoTIFFs)**.
+2. **Atmospheric pressure isobars (Contours)**.
+3. **Directional wind vector arrow grids**.
+
+---
+
+## 7. High-Efficiency Lossless LZW Block Tiling Compression
+
+- Utilizes `arcpy.management.CopyRaster` configured with **LZW compression** and **`128x128` block tiling** (`tileSize="128 128"`).
+- Suppresses intermediate pyramid computation overhead (`arcpy.env.pyramid = "NONE"`).
+- **Verified Benchmark Results**:
+  - **34.8% reduction in raster file size** on disk.
+  - **100% Bit-for-Bit Lossless Precision**: Evaluated using numerical matrix differentiation via NumPy; absolute maximum cell divergence is identically zero (`max_diff = 0.000000000000000`). All floating-point decimal precision is completely conserved.
+
+---
+
+## 8. Wind Vector Fields & Directional Flow Dynamics
+
+- Produces continuous wind speed surfaces alongside circular vector mean wind direction surfaces (0–360° azimuth).
+- Generates a regularized point grid whose spatial density is controlled via `Wind_Factor_Cell_Size`.
+- Samples speed and azimuth values onto grid points, clips the grid to the study mask, and configures directional arrow symbology to depict airflow patterns.
+
+---
+
+## 9. WMO 30-Year Climatological Normals Standards
+
+- The tool aligns with **WMO-No. 1203** standards specifying 30-year consecutive averaging periods to eliminate decadal climate noise.
+- Current global baseline: **1991–2020**.
+- Meteorological seasons:
+  - **Winter (DJF)**: December, January, February
+  - **Spring (MAM)**: March, April, May
+  - **Summer (JJA)**: June, July, August
+  - **Autumn (SON)**: September, October, November
+
+---
+
+## 10. Global Bioclimatic & Aridity Models
+
+- **De Martonne Aridity Index**: $I_{DM} = P / (T + 10)$
+- **FAO-56 Hargreaves-Samani PET**: $PET = 0.0023 \cdot R_a \cdot (T_{mean} + 17.8) \cdot \sqrt{T_{max} - T_{min}}$
+- **UNEP Aridity Ratio**: $AI = P / PET$
+- **Climatic Water Deficit**: $WD = P - PET$
+- **Biologically Dry Months (Walter-Lieth)**: $P_{month} < 2 \cdot T_{month}$
+
+---
+
+## 11. Data Quality Control & Gap-Filling Protocols
+
+- Translates NASA `-999.0` missing values to `None / Null`.
+- Imputation methods: Climatological month mean, linear boundary interpolation, and spatial nearest neighbor fallback.
+
+---
+
+## 12. Data Interoperability & Schema Standards
+
+- **Geodatabase (`Climate_Database.gdb`)**: 17 clean feature classes with sequential, gap-free `OBJECTID` indexing and zero orphaned export fields.
+- **Shapefiles (`.shp`)**: Optional clean export with 10-character field truncation.
+- **Arabic Database (`Climate_Database_AR.gdb`)**: Features Arabic field aliases while preserving English physical names for offline pipeline reusability.
+- **Excel Master Workbook**: Professionally styled workbooks with UTF-8 BOM encoding.
+- **Authoritative Data Dictionary**: Referenced in `Fields_AR_EN_Units.xlsx`.
