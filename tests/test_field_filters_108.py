@@ -119,7 +119,7 @@ except ImportError:
     sys.exit(0 if not FAIL else 1)
 tool = mod.PowerClimateAtlasGenerator()
 ps = tool.getParameterInfo()
-check("Total parameters is 53", len(ps) == 53, len(ps))
+check("Total parameters is 59", len(ps) == 59, len(ps))
 
 pdict = dict((p.name, p) for p in ps)
 check("Field_Filter_Scope exists", "Field_Filter_Scope" in pdict)
@@ -129,17 +129,24 @@ check("Selected_Fields exists", "Selected_Fields" in pdict)
 check("Enable_Raster_Reclass exists", "Enable_Raster_Reclass" in pdict)
 check("Reclass_Classes_Count exists", "Reclass_Classes_Count" in pdict)
 check("Reclass_Method exists", "Reclass_Method" in pdict)
+check("Measurement_Units_System exists", "Measurement_Units_System" in pdict)
+check("Temperature_Unit exists", "Temperature_Unit" in pdict)
+check("Precipitation_Unit exists", "Precipitation_Unit" in pdict)
+check("Pressure_Unit exists", "Pressure_Unit" in pdict)
+check("Wind_Speed_Unit exists", "Wind_Speed_Unit" in pdict)
 check("Enable_Raster_Reclass default False", pdict["Enable_Raster_Reclass"].value == False)
 
 # Check positions and display names
 names = [p.name for p in ps]
-check("Climate_Modules is at index 21", names[21] == "Climate_Modules")
-check("Field_Filter_Scope is at index 23", names[23] == "Field_Filter_Scope")
-check("Included_Aggregations follows scope at index 24", names[24] == "Included_Aggregations")
-check("Included_Seasons follows at index 25", names[25] == "Included_Seasons")
-check("Selected_Fields checklist is at index 26", names[26] == "Selected_Fields")
+cm_idx = names.index("Climate_Modules")
+scope_idx = names.index("Field_Filter_Scope")
+check("Climate_Modules exists in parameters", cm_idx >= 0)
+check("Field_Filter_Scope exists and follows module selection", scope_idx > cm_idx)
+check("Included_Aggregations follows scope", names[scope_idx + 1] == "Included_Aggregations")
+check("Included_Seasons follows at index + 2", names[scope_idx + 2] == "Included_Seasons")
+check("Selected_Fields checklist is at index + 3", names[scope_idx + 3] == "Selected_Fields")
 check("Selected_Fields displayName contains Variables",
-      "Variables" in ps[26].displayName)
+      "Variables" in pdict["Selected_Fields"].displayName)
 check("Field_Filter_Scope category is Variable & Field Selection",
       pdict["Field_Filter_Scope"].category == "Variable & Field Selection")
 

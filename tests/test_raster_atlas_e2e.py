@@ -75,7 +75,7 @@ def run_test():
         os.path.basename(tif_annual), desc_ras.format, desc_ras.pixelType))
 
     # Check Shp & Tables
-    vec_dir = os.path.join(out_test_dir, "00_Vector_Data")
+    vec_dir = os.path.join(out_test_dir, "00_Tables_And_Reports")
     shp_file = os.path.join(vec_dir, "01_Temperature_Grid_Points.shp")
     assert os.path.isfile(shp_file), "Shapefile missing: %s" % shp_file
     print("[PASS] Shapefile exists: %s" % os.path.basename(shp_file))

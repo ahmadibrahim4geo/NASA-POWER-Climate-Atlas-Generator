@@ -201,7 +201,7 @@ rows = mod.metadata_rows_for_modules(["Temperature", "Dew Point", "Wind", "Heat 
 check("metadata rows T+DP+W+HI=34", len(rows) == 10 + 6 + 13 + 5, len(rows))
 cols = ["Field_Name", "Full_Name_EN", "Name_AR", "NASA_Code", "Module", "Period", "Statistic", "Unit", "Description_AR", "Description_EN", "Calculation", "Source", "Notes"]
 check("metadata cols", all(all(c in r for c in cols) for r in rows))
-check("REQUIRED 115", len(mod.REQUIRED_COLUMNS) == 115, len(mod.REQUIRED_COLUMNS))
+check("REQUIRED 116", len(mod.REQUIRED_COLUMNS) == 116, len(mod.REQUIRED_COLUMNS))
 check("R extremes absent from REQUIRED_COLUMNS", "R_Max_Daily_Month" not in mod.REQUIRED_COLUMNS and "R_Annual_Rain_Days_Total" not in mod.REQUIRED_COLUMNS)
 check("all fielddefs in REQUIRED", all(r[0] in mod.REQUIRED_COLUMNS for r in mod.FIELD_DEFS))
 
@@ -221,9 +221,9 @@ check("ET winter + spring + summer + autumn ~= annual total",
 allf = [r[0] for r in mod.FIELD_DEFS] + [a[0] for a in mod.ADMIN_FIELDS]
 bad = [f for f in allf if len(f) > 10]
 check("long names all mapped", all(b in mod.SHP_FIELD_MAP for b in bad), bad[:3])
-check("shp map 104 unique<=10", len(mod.SHP_FIELD_MAP) == 104
+check("shp map 105 unique<=10", len(mod.SHP_FIELD_MAP) == 105
       and all(len(v) <= 10 for v in mod.SHP_FIELD_MAP.values())
-      and len(set(mod.SHP_FIELD_MAP.values())) == 104)
+      and len(set(mod.SHP_FIELD_MAP.values())) == 105)
 check("shp map covers climate", all(f in mod.SHP_FIELD_MAP for r in mod.FIELD_DEFS for f in [r[0]]))
 check("ramps 7", all(len(mod.COLOR_RAMPS[k]) == 7 for k in ["Temperature", "Precipitation", "Sea Level Pressure", "Relative Humidity", "Dew Point", "Solar Radiation", "Cloud Cover"]))
 check("UV 5 classes", len(mod.COLOR_RAMPS["UV Index"]) == 5)

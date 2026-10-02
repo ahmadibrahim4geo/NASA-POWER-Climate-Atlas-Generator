@@ -118,8 +118,8 @@ try:
     t_raw = [f for f in t_rasters if f.endswith(".tif") and not f.endswith("_cls.tif")]
     p_raw = [f for f in p_rasters if f.endswith(".tif") and not f.endswith("_cls.tif")]
     assert len(t_raw) == 3, "Expected 3 summer temperature rasters, got: %s" % t_raw
-    # Verify Excel workbooks generated in 00_Vector_Data
-    vec_dir = os.path.join(OUT, "00_Vector_Data")
+    # Verify Excel workbooks generated in 00_Tables_And_Reports
+    vec_dir = os.path.join(OUT, "00_Tables_And_Reports")
     master_xls = os.path.join(vec_dir, "Climate_Atlas_Master_Workbook.xls")
     assert os.path.isfile(master_xls), "Master workbook missing: %s" % master_xls
     log("Master workbook verified: %s" % master_xls)

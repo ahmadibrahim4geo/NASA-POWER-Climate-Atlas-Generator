@@ -18,15 +18,9 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
 
-try:  # Python 3 (imp was removed in 3.12; .pyt needs SourceFileLoader)
-    import importlib.machinery as _ilm
-
-    def _load_source(_name, _path):
-        return _ilm.SourceFileLoader(_name, _path).load_module()
-except ImportError:  # Python 2.7 fallback
-    import imp as _imp
-    _load_source = _imp.load_source
-pyt_mod = _load_source("pyt_tool", os.path.join(ROOT, "POWER_Climate_Atlas_Generator_10_8.pyt"))
+mod = type(sys)("pyt_tool")
+exec(compile(open(os.path.join(ROOT, "POWER_Climate_Atlas_Generator_10_8.pyt"), "rb").read(), "pyt_tool", "exec"), mod.__dict__)
+pyt_mod = mod
 
 
 class TestExcelAndArabicExport(unittest.TestCase):

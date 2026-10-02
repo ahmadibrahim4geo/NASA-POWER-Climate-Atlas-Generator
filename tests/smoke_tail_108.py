@@ -24,7 +24,7 @@ def _log(t):
 gdb = os.path.join(OUT, "Climate_Database.gdb")
 mask = os.path.join(BASE, "Egypt Climate Data", "Egpyt_Climate.gdb", "Egypt")
 out_sr = arcpy.SpatialReference(4326)
-paths = {"gdb": gdb, "vec": os.path.join(OUT, "00_Vector_Data")}
+paths = {"gdb": gdb, "vec": os.path.join(OUT, "00_Tables_And_Reports")}
 
 reg = []
 for m in modules:

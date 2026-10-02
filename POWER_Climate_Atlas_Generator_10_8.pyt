@@ -406,6 +406,21 @@ def now_str():
     return _dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
+def format_duration(seconds):
+    if seconds is None:
+        return "0s"
+    s = int(round(seconds))
+    hrs = s // 3600
+    mins = (s % 3600) // 60
+    secs = s % 60
+    if hrs > 0:
+        return "%dh %02dm %02ds" % (hrs, mins, secs)
+    elif mins > 0:
+        return "%dm %02ds" % (mins, secs)
+    else:
+        return "%.1fs" % seconds
+
+
 def makedirs_ok(path):
     if not os.path.isdir(path):
         try:
@@ -1624,6 +1639,7 @@ SHP_FIELD_MAP = {
     "HI_Summer_Mean": "HI_SumMean",
     "HI_Winter_Mean": "HI_WinMean",
     "Interp_Meth": "Intrp_Meth",
+    "Measurement_Unit": "Meas_Unit",
     "PSL_Annual_Mean": "PSL_AnMean",
     "PSL_Annual_Range": "PSL_AnRng",
     "PSL_Autumn_Mean": "PSL_AuMean",
@@ -2134,6 +2150,7 @@ ADMIN_FIELDS = [
     ("Interp_Meth", "TEXT", "Spatial interpolation algorithm"),
     ("Cell_Size", "DOUBLE", "Base raster cell size in meters"),
     ("Wind_Cell", "DOUBLE", "Wind grid cell size in meters"),
+    ("Measurement_Unit", "TEXT", "Measurement_Unit"),
     ("Status", "TEXT", "Point processing status (OK / Error)"),
     ("Error_Msg", "TEXT", "Error message if any"),
 ]
@@ -2150,13 +2167,76 @@ ADMIN_AR = {
     "Interp_Meth": u"خوارزمية الاستيفاء",
     "Cell_Size": u"حجم خلية الراستر",
     "Wind_Cell": u"حجم خلية الرياح",
+    "Measurement_Unit": u"وحدة القياس",
+    "Unit": u"وحدة القياس",
     "Status": u"حالة المعالجة",
     "Error_Msg": u"رسالة الخطأ",
 }
 
+def get_units_mapping(unit_sys=None, unit_temp=None, unit_precip=None, unit_press=None, unit_wind=None):
+    t_unit = u"°F" if (unit_temp and "Fahrenheit" in unit_temp) else u"°C"
+    p_unit = "in" if (unit_precip and "Inches" in unit_precip) else "mm"
+    if unit_press and "mbar" in unit_press:
+        pr_unit = "mbar"
+    elif unit_press and "inHg" in unit_press:
+        pr_unit = "inHg"
+    else:
+        pr_unit = "hPa"
+    if unit_wind and "km/h" in unit_wind:
+        w_unit = "km/h"
+    elif unit_wind and "kt" in unit_wind:
+        w_unit = "kt"
+    elif unit_wind and "mph" in unit_wind:
+        w_unit = "mph"
+    else:
+        w_unit = "m/s"
+
+    return {
+        "Temperature": t_unit,
+        "Heat Index": t_unit,
+        "Heat_Index": t_unit,
+        "Wind Chill": t_unit,
+        "Wind_Chill": t_unit,
+        "Dew Point": t_unit,
+        "Dew_Point": t_unit,
+        "Precipitation": p_unit,
+        "Water Deficit": p_unit,
+        "Water_Deficit": p_unit,
+        "Evapotranspiration": p_unit,
+        "Sea Level Pressure": pr_unit,
+        "Sea_Level_Pressure": pr_unit,
+        "Surface Pressure": pr_unit,
+        "Surface_Pressure": pr_unit,
+        "Isobars": pr_unit,
+        "Wind": w_unit,
+        "Wind Speed": w_unit,
+        "Wind_Speed": w_unit,
+        "Wind Vector": w_unit,
+        "Wind_Vector": w_unit,
+        "Relative Humidity": "%",
+        "Relative_Humidity": "%",
+        "Cloud Cover": "%",
+        "Cloud_Cover": "%",
+        "Solar Radiation": "MJ/m²/day",
+        "Solar_Radiation": "MJ/m²/day",
+        "UV Index": "Index",
+        "UV_Index": "Index",
+        "De Martonne Aridity": "Index",
+        "De_Martonne_Aridity": "Index",
+        "UNEP Aridity": "Ratio",
+        "UNEP_Aridity": "Ratio",
+        "Dry Months": "Months",
+        "Dry_Months": "Months",
+        "Trends & Anomalies": u"%s/dec" % t_unit,
+        "Trends_And_Anomalies": u"%s/dec" % t_unit,
+        "Climate_Models": "Composite",
+        "Drought & Aridity": "Composite",
+    }
+
+
 REQUIRED_COLUMNS = [
     "OBJECTID", "Source_ID", "Point_Lat", "Point_Lon", "Data_Start", "Data_End",
-    "Temporal", "Interp_Meth", "Cell_Size", "Wind_Cell", "Status", "Error_Msg",
+    "Temporal", "Interp_Meth", "Cell_Size", "Wind_Cell", "Measurement_Unit", "Status", "Error_Msg",
     "T_Annual_Mean", "T_Winter_Mean", "T_Spring_Mean", "T_Summer_Mean", "T_Autumn_Mean",
     "T_Annual_Range", "T_Max_Summer_Month_Mean", "T_Min_Winter_Month_Mean",
     "T_Annual_Max_Mean", "T_Annual_Min_Mean", "HI_Annual_Mean", "HI_Summer_Mean", "HI_Winter_Mean", "HI_Annual_Range", "WBGT_Summer_Mean",
@@ -2602,7 +2682,7 @@ class PowerClimateAtlasGenerator(object):
     or 'Open-Meteo Historical API (ERA5 Reanalysis)' (ERA5, ~0.25 deg native;
     daily + hourly aggregates auto-mapped to the same fields and standards).
 
-    OUTPUT LAYOUT (fixed, per-module folders 01..10 plus 00_Vector_Data,
+    OUTPUT LAYOUT (fixed, per-module folders 01..18 plus 00_Tables_And_Reports,
     Export_SHP and Project_Data.gdb): see the Processing_Log.txt written
     next to every run for the exact file list, warnings and QA results.
 
@@ -2708,6 +2788,17 @@ class PowerClimateAtlasGenerator(object):
         p1.description = ("OPTIONAL but recommended. Polygon used to set processing extent/mask, "
                           "clip final rasters, and generate wind vectors/isobars.")
 
+        p_study_name = arcpy.Parameter(
+            displayName="Study Area Name (Optional) / اسم منطقة الدراسة",
+            name="Study_Area_Name",
+            datatype="GPString",
+            parameterType="Optional",
+            direction="Input")
+        p_study_name.value = "Egypt"
+        p_study_name.description = ("OPTIONAL. Name of the study area (e.g. 'Egypt', 'Sinai', 'Aswan', 'Nile Basin'). "
+                                    "Used to title the atlas, name the boundary layer archived in GDB, and generate the Classification Workbook.")
+
+
         p12 = arcpy.Parameter(
             displayName="Output Folder Workspace",
             name="Output_Workspace",
@@ -2727,6 +2818,89 @@ class PowerClimateAtlasGenerator(object):
             direction="Input")
         p2.description = ("OPTIONAL. Target coordinate system for all outputs. "
                           "DEFAULT: same as input points.")
+
+        # ═══ Measurement Units & Standards ═══
+        p_unit_sys = arcpy.Parameter(
+            displayName="Measurement Units System",
+            name="Measurement_Units_System",
+            datatype="GPString",
+            parameterType="Optional",
+            direction="Input")
+        p_unit_sys.filter.type = "ValueList"
+        p_unit_sys.filter.list = [
+            "Metric (Celsius °C, mm, hPa, m/s) [Default]",
+            "Imperial (Fahrenheit °F, Inches in, inHg, mph)",
+            "Custom Units"
+        ]
+        p_unit_sys.value = "Metric (Celsius °C, mm, hPa, m/s) [Default]"
+        p_unit_sys.category = "Measurement Units & Standards"
+        p_unit_sys.description = (
+            "Select the measurement units system for atlas outputs.\n"
+            "• Metric (Default): Celsius (°C), Millimeters (mm), Hectopascals (hPa), Meters/second (m/s) conforming to WMO and Egyptian standards.\n"
+            "• Imperial: Fahrenheit (°F), Inches (in), Inches of Mercury (inHg), Miles/hour (mph).\n"
+            "• Custom Units: Manually customize units for each climate variable below.\n\n"
+            "نظام وحدات القياس المعتمد في المخرجات: المتري (الافتراضي والمعتمد لمصر والمنظمة العالمية للأرصاد WMO) أو الإمبراطوري أو تخصيص الوحدات يدوياً."
+        )
+
+        p_unit_temp = arcpy.Parameter(
+            displayName="Temperature Unit",
+            name="Temperature_Unit",
+            datatype="GPString",
+            parameterType="Optional",
+            direction="Input")
+        p_unit_temp.filter.type = "ValueList"
+        p_unit_temp.filter.list = ["Celsius (°C) [Default]", "Fahrenheit (°F)"]
+        p_unit_temp.value = "Celsius (°C) [Default]"
+        p_unit_temp.category = "Measurement Units & Standards"
+        p_unit_temp.description = (
+            "Measurement unit for temperature variables (°C or °F).\n"
+            "وحدة قياس درجات الحرارة: مئوية (°C) كمعيار افتراضي أو فهرنهايت (°F)."
+        )
+
+        p_unit_precip = arcpy.Parameter(
+            displayName="Precipitation Unit",
+            name="Precipitation_Unit",
+            datatype="GPString",
+            parameterType="Optional",
+            direction="Input")
+        p_unit_precip.filter.type = "ValueList"
+        p_unit_precip.filter.list = ["Millimeters (mm) [Default]", "Inches (in)"]
+        p_unit_precip.value = "Millimeters (mm) [Default]"
+        p_unit_precip.category = "Measurement Units & Standards"
+        p_unit_precip.description = (
+            "Measurement unit for precipitation and rainfall (mm or inches).\n"
+            "وحدة قياس الأمطار والتساقط: مليمتر (mm) كمعيار افتراضي أو بالبوصة (in)."
+        )
+
+        p_unit_press = arcpy.Parameter(
+            displayName="Pressure Unit",
+            name="Pressure_Unit",
+            datatype="GPString",
+            parameterType="Optional",
+            direction="Input")
+        p_unit_press.filter.type = "ValueList"
+        p_unit_press.filter.list = ["Hectopascals (hPa) [Default]", "Millibars (mbar)", "Inches of Mercury (inHg)"]
+        p_unit_press.value = "Hectopascals (hPa) [Default]"
+        p_unit_press.category = "Measurement Units & Standards"
+        p_unit_press.description = (
+            "Measurement unit for atmospheric and sea level pressure (hPa, mbar, or inHg).\n"
+            "وحدة قياس الضغط الجوي وضغط مستوى سطح البحر: هكتوباسكال (hPa) أو مليبار أو بوصة زئبقية."
+        )
+
+        p_unit_wind = arcpy.Parameter(
+            displayName="Wind Speed Unit",
+            name="Wind_Speed_Unit",
+            datatype="GPString",
+            parameterType="Optional",
+            direction="Input")
+        p_unit_wind.filter.type = "ValueList"
+        p_unit_wind.filter.list = ["Meters per second (m/s) [Default]", "Kilometers per hour (km/h)", "Knots (kt)", "Miles per hour (mph)"]
+        p_unit_wind.value = "Meters per second (m/s) [Default]"
+        p_unit_wind.category = "Measurement Units & Standards"
+        p_unit_wind.description = (
+            "Measurement unit for surface wind speed (m/s, km/h, kt, or mph).\n"
+            "وحدة قياس سرعة الرياح السطحية: متر/ثانية (m/s) كمعيار افتراضي، كم/ساعة، عقدة، أو ميل/ساعة."
+        )
 
         p_exp_shp = arcpy.Parameter(
             displayName="Export Shapefiles (Optional)",
@@ -3322,9 +3496,9 @@ class PowerClimateAtlasGenerator(object):
             datatype="GPBoolean",
             parameterType="Optional",
             direction="Input")
-        p23.value = True
+        p23.value = False
         p23.category = "Map Options"
-        p23.description = "OPTIONAL (default ON). Adds final layers to the current ArcMap data frame."
+        p23.description = "OPTIONAL (default OFF). Safely adds final layers to the current map sequentially."
 
         p28 = arcpy.Parameter(
             displayName="Map Add Modules (elements to add)",
@@ -3350,7 +3524,9 @@ class PowerClimateAtlasGenerator(object):
         p22.category = "Maintenance & Cache"
         p22.description = ("OPTIONAL (default ON). Deletes intermediate products after use.")
 
-        return [p_op_mode, p_wf_mode, p_dl, p0, p_precalc, p1, p12, p2, p_exp_shp, p_ar_db, p14, p_om_model,
+        return [p_op_mode, p_wf_mode, p_dl, p0, p_precalc, p1, p_study_name, p12, p2,
+                p_unit_sys, p_unit_temp, p_unit_precip, p_unit_press, p_unit_wind,
+                p_exp_shp, p_ar_db, p14, p_om_model,
                 p3, p4, p5, p6, p_start_date, p_end_date, p7, p_gf,
                 p24,
                 p8, p_temporal_scope, p_filter_scope, p_inc_aggs, p_inc_seasons, p_sel_fields,
@@ -3370,6 +3546,34 @@ class PowerClimateAtlasGenerator(object):
         p_op = pdict.get("Operation_Mode")
         op_text = p_op.valueAsText if p_op else "Download & Generate Atlas (Full Pipeline) [Default]"
         is_offline = bool(op_text and ("Offline" in op_text or "Existing" in op_text or op_text.startswith("Interpolate & Map Existing Data")))
+
+        # --- Measurement Units synchronization ---
+        p_usys = pdict.get("Measurement_Units_System")
+        usys_val = p_usys.valueAsText if p_usys else "Metric"
+        is_custom_units = bool(usys_val and "Custom" in usys_val)
+        is_imperial = bool(usys_val and "Imperial" in usys_val)
+
+        p_ut = pdict.get("Temperature_Unit")
+        p_up = pdict.get("Precipitation_Unit")
+        p_upr = pdict.get("Pressure_Unit")
+        p_uw = pdict.get("Wind_Speed_Unit")
+
+        if p_ut:
+            p_ut.enabled = is_custom_units
+            if not is_custom_units:
+                p_ut.value = "Fahrenheit (°F)" if is_imperial else "Celsius (°C) [Default]"
+        if p_up:
+            p_up.enabled = is_custom_units
+            if not is_custom_units:
+                p_up.value = "Inches (in)" if is_imperial else "Millimeters (mm) [Default]"
+        if p_upr:
+            p_upr.enabled = is_custom_units
+            if not is_custom_units:
+                p_upr.value = "Inches of Mercury (inHg)" if is_imperial else "Hectopascals (hPa) [Default]"
+        if p_uw:
+            p_uw.enabled = is_custom_units
+            if not is_custom_units:
+                p_uw.value = "Miles per hour (mph)" if is_imperial else "Meters per second (m/s) [Default]"
 
         p_in = pdict.get("Input_Point_Features") or pdict.get("Input_Points")
         p_pre = pdict.get("Precalculated_Point_Layers") or pdict.get("Precalculated_Point_Layer")
@@ -3897,7 +4101,9 @@ class PowerClimateAtlasGenerator(object):
             else:
                 p_std_in = pdict.get("Input_Point_Features") or pdict.get("Input_Points")
                 in_points = p_std_in.valueAsText if p_std_in else None
-            mask = (pdict.get("Study_Area_Mask") or parameters[4]).valueAsText
+            mask = pdict["Study_Area_Mask"].valueAsText if (pdict.get("Study_Area_Mask") and pdict["Study_Area_Mask"].valueAsText) else None
+            p_sname = pdict.get("Study_Area_Name")
+            study_area_name = p_sname.valueAsText if (p_sname and p_sname.valueAsText) else ""
             out_sr_p = pdict.get("Output_Spatial_Reference") or pdict.get("Output_Coordinate_System")
             out_sr_text = out_sr_p.valueAsText if out_sr_p else None
             time_mode = (pdict.get("Time_Mode") or pdict.get("Time_Range_Mode")).valueAsText or "Single Year"
@@ -3911,8 +4117,10 @@ class PowerClimateAtlasGenerator(object):
             p_ed = pdict.get("End_Date")
             d_start = parse_gp_date(p_sd.value if p_sd else None)
             d_end = parse_gp_date(p_ed.value if p_ed else None)
-            temporal = (pdict.get("Temporal_Resolution") or parameters[17]).valueAsText or "Monthly"
-            mods_text = (pdict.get("Climate_Modules") or parameters[20]).valueAsText or ""
+            p_temp = pdict.get("Temporal_Resolution")
+            temporal = p_temp.valueAsText if (p_temp and p_temp.valueAsText) else "Monthly"
+            p_cmods = pdict.get("Climate_Modules")
+            mods_text = p_cmods.valueAsText if (p_cmods and p_cmods.valueAsText) else ""
             raw_items = [m.strip().strip("'\"") for m in mods_text.split(";") if m.strip().strip("'\"")]
             modules = []
             active_submodels = []
@@ -3942,7 +4150,8 @@ class PowerClimateAtlasGenerator(object):
             if wind_cell <= 0:
                 wind_cell = 25000.0
             interp = pdict.get("Interpolation_Method").valueAsText if pdict.get("Interpolation_Method") else "IDW"
-            out_ws = (pdict.get("Output_Workspace") or parameters[5]).valueAsText
+            p_ows = pdict.get("Output_Workspace")
+            out_ws = p_ows.valueAsText if (p_ows and p_ows.valueAsText) else ""
             p_iso = pdict.get("Create_Isobars")
             create_isobars = bool(p_iso.value) if (p_iso and p_iso.value is not None) else False
             p_pv = pdict.get("Purge_Cache")
@@ -3953,6 +4162,20 @@ class PowerClimateAtlasGenerator(object):
             export_shp = bool(p_exp.value) if (p_exp and p_exp.value is not None) else False
             p_ardb = pdict.get("Create_Arabic_Database")
             arabic_db = bool(p_ardb.value) if (p_ardb and p_ardb.value is not None) else False
+
+            # --- Measurement Units extraction ---
+            p_usys = pdict.get("Measurement_Units_System")
+            unit_sys_text = p_usys.valueAsText if (p_usys and p_usys.valueAsText) else "Metric"
+            p_utemp = pdict.get("Temperature_Unit")
+            unit_temp_text = p_utemp.valueAsText if (p_utemp and p_utemp.valueAsText) else "Celsius (°C)"
+            p_uprecip = pdict.get("Precipitation_Unit")
+            unit_precip_text = p_uprecip.valueAsText if (p_uprecip and p_uprecip.valueAsText) else "Millimeters (mm)"
+            p_upress = pdict.get("Pressure_Unit")
+            unit_press_text = p_upress.valueAsText if (p_upress and p_upress.valueAsText) else "Hectopascals (hPa)"
+            p_uwind = pdict.get("Wind_Speed_Unit")
+            unit_wind_text = p_uwind.valueAsText if (p_uwind and p_uwind.valueAsText) else "Meters per second (m/s)"
+            units_by_module = get_units_mapping(unit_sys_text, unit_temp_text, unit_precip_text, unit_press_text, unit_wind_text)
+
             p_tol = pdict.get("Point_Tolerance")
             tol_m = tolerance_meters(p_tol.valueAsText if (p_tol and p_tol.value) else None)
             p_foc = pdict.get("Focal_Smoothing")
@@ -4169,8 +4392,8 @@ class PowerClimateAtlasGenerator(object):
                     out_sr.loadFromString(out_sr_text)
                 except Exception:
                     try:
-                        p_sr = pdict.get("Output_Spatial_Reference", parameters[6])
-                        out_sr = arcpy.Describe(p_sr.value).spatialReference
+                        p_sr = pdict.get("Output_Spatial_Reference")
+                        out_sr = arcpy.Describe(p_sr.value).spatialReference if p_sr else in_desc.spatialReference
                     except Exception:
                         out_sr = in_desc.spatialReference
             else:
@@ -4189,6 +4412,59 @@ class PowerClimateAtlasGenerator(object):
                 gdb_name = "Climate_Database_%s.gdb" % time_tag
             gdb_path, paths = self._build_layout(out_ws, active_export_modules, gdb_name=gdb_name, export_shp=export_shp)
             msg("Workspace: %s (GDB: %s)" % (out_ws, gdb_name))
+
+            # -------------------------------------------------------------
+            # Archive Study Area Mask Boundary & Grid Points into Project GDB
+            # -------------------------------------------------------------
+            s_name = (study_area_name or "").strip()
+            if not s_name and mask:
+                try:
+                    s_name = os.path.splitext(os.path.basename(mask))[0]
+                except Exception:
+                    s_name = "Study_Area"
+            if not s_name:
+                s_name = "Study_Area"
+
+            import re
+            clean_sname = re.sub(r'[^a-zA-Z0-9_]', '_', s_name).strip('_')
+            if not clean_sname:
+                clean_sname = "Study_Area"
+
+            # 1. Archive Mask Boundary Layer inside GDB
+            if mask and arcpy.Exists(mask):
+                bnd_fc_name = arcpy.ValidateTableName("%s_Boundary" % clean_sname, gdb_path)
+                bnd_out_path = os.path.join(gdb_path, bnd_fc_name)
+                try:
+                    m_abs = os.path.abspath(str(mask)).lower()
+                    b_abs = os.path.abspath(str(bnd_out_path)).lower()
+                    if m_abs != b_abs:
+                        if not arcpy.Exists(bnd_out_path):
+                            arcpy.management.CopyFeatures(mask, bnd_out_path)
+                            msg("Archived Study Area Mask boundary into GDB: %s" % bnd_fc_name)
+                        else:
+                            msg("Study Area Mask boundary already exists in GDB: %s" % bnd_fc_name)
+                    else:
+                        msg("Study Area Mask boundary already resides in GDB: %s" % bnd_fc_name)
+                except Exception as ex_bnd:
+                    warn("Could not archive Study Area Mask boundary into GDB: %s" % ex_bnd)
+
+            # 2. Archive Primary Input Sampling Grid Points inside GDB
+            if primary_in_point and arcpy.Exists(primary_in_point):
+                pts_fc_name = arcpy.ValidateTableName("%s_Grid_Points" % clean_sname, gdb_path)
+                pts_out_path = os.path.join(gdb_path, pts_fc_name)
+                try:
+                    p_abs = os.path.abspath(str(primary_in_point)).lower()
+                    pt_abs = os.path.abspath(str(pts_out_path)).lower()
+                    if p_abs != pt_abs:
+                        if not arcpy.Exists(pts_out_path):
+                            arcpy.management.CopyFeatures(primary_in_point, pts_out_path)
+                            msg("Archived Input Sampling Grid Points into GDB: %s" % pts_fc_name)
+                        else:
+                            msg("Input Sampling Grid Points already exist in GDB: %s" % pts_fc_name)
+                    else:
+                        msg("Input Sampling Grid Points already reside in GDB: %s" % pts_fc_name)
+                except Exception as ex_pts:
+                    warn("Could not archive Input Sampling Grid Points into GDB: %s" % ex_pts)
 
             wgs = arcpy.SpatialReference(4326)
             scratch_dir = os.path.join(out_ws, "_scratch")
@@ -4281,7 +4557,7 @@ class PowerClimateAtlasGenerator(object):
                 arcpy.env.compression = "LZW"
                 arcpy.env.tileSize = "128 128"
                 arcpy.env.pyramid = "NONE"
-                arcpy.env.rasterStatistics = "NONE"
+                arcpy.env.rasterStatistics = "STATISTICS 1 1"
             except Exception:
                 pass
             try:
@@ -4317,7 +4593,11 @@ class PowerClimateAtlasGenerator(object):
             admin_meta = {
                 "y0": y0, "y1": y1, "temporal": temporal, "interp": interp_label,
                 "base_cell": base_cell, "wind_cell": wind_cell,
-                "data_start": col_data_start, "data_end": col_data_end
+                "data_start": col_data_start, "data_end": col_data_end,
+                "units_by_module": units_by_module,
+                "unit_sys": unit_sys_text, "unit_temp": unit_temp_text,
+                "unit_precip": unit_precip_text, "unit_press": unit_press_text,
+                "unit_wind": unit_wind_text
             }
             element_fcs = {}
             raster_registry = []
@@ -4346,7 +4626,7 @@ class PowerClimateAtlasGenerator(object):
                     short = MODULE_SHORT.get(m, m)
                     if export_shp:
                         self._export_shapefile(fc, os.path.join(paths["shp"], short + ".shp"), msg, warn)
-                    self._export_csv(fc, os.path.join(paths["vec"], short + ".csv"), msg, warn)
+                    self._export_excel(fc, os.path.join(paths["vec"], short + ".xls"), msg, warn)
                     if not download_only and sa_avail:
                         if mask_required:
                             mask = ensure_mask_fc(mask, mask_orig, maskp, out_sr, msg, warn)
@@ -4427,10 +4707,17 @@ class PowerClimateAtlasGenerator(object):
                     if _om_note:
                         warn(_om_note)
 
+                module_timings = {}
+                raster_timings = {}
+                overall_start_dt = now_str()
+
                 try:
                     for mi, m in enumerate(ordered_modules):
+                        t_mod_start = time.time()
+                        mod_start_clock = now_str().split(" ")[1]
                         msg("\n" + "=" * 65)
                         msg(">>> ELEMENT [%d/%d]: %s <<<" % (mi + 1, len(ordered_modules), m))
+                        msg("  -> Module Processing Started: %s" % mod_start_clock)
                         msg("=" * 65)
 
                         # Determine raw parameters needed for this element
@@ -4442,6 +4729,8 @@ class PowerClimateAtlasGenerator(object):
                                         needed_m.append(p)
                         else:
                             needed_m = list(MODULE_PARAMS.get(m, []))
+
+                        t_dl_start = time.time()
 
                         # Check if any station needs querying
                         if use_om:
@@ -4479,6 +4768,33 @@ class PowerClimateAtlasGenerator(object):
                                         results[idx]["status"] = "FAILED"
                                     arcpy.SetProgressorPosition(step_i + 1)
                                 arcpy.ResetProgressor()
+
+                                # --- Automatic Rescue Pass for Open-Meteo ---
+                                failed_om = [idx for (idx, p) in pts_to_fetch if results[idx].get("status") == "FAILED"]
+                                if failed_om:
+                                    msg("  [RESCUE PASS] Retrying %d transiently failed station(s) for %s with extended timeout..."
+                                        % (len(failed_om), m))
+                                    time.sleep(3.0)
+                                    for r_i, idx in enumerate(failed_om):
+                                        p = pts[idx]
+                                        try:
+                                            monthly, daily_raw, _drop = fetch_openmeteo_point(
+                                                p["lat"], p["lon"], y0, y1, [m],
+                                                daily_vars=m_d_vars, hourly_vars=m_h_vars,
+                                                model=om_slug, timeout=90, retries=4,
+                                                start_date=start_date_str, end_date=end_date_str)
+                                            results[idx].setdefault("monthly", {}).update(monthly)
+                                            if temporal == "Daily":
+                                                results[idx].setdefault("daily_raw", {}).update(daily_raw)
+                                            results[idx]["status"] = "OK"
+                                            results[idx]["error"] = ""
+                                            msg("    -> [RESCUED %d/%d] Station OID %s recovered successfully!"
+                                                % (r_i + 1, len(failed_om), p.get("oid", idx + 1)))
+                                        except Exception as ex_r:
+                                            results[idx]["error"] = str(ex_r)[:500]
+                                            results[idx]["status"] = "FAILED"
+                                            warn("    -> [STILL FAILED] Station OID %s: %s"
+                                                 % (p.get("oid", idx + 1), str(ex_r)[:150]))
                             else:
                                 msg("Element [%d/%d] %s: All required variables already cached in memory. Reusing with 0 queries."
                                     % (mi + 1, len(ordered_modules), m))
@@ -4518,9 +4834,47 @@ class PowerClimateAtlasGenerator(object):
                                             results[idx]["status"] = "FAILED"
                                     arcpy.SetProgressorPosition(step_i + 1)
                                 arcpy.ResetProgressor()
+
+                                # --- Automatic Rescue Pass for NASA POWER ---
+                                failed_nasa = []
+                                for (idx, p, missing_p) in pts_to_fetch:
+                                    curr_par = results[idx].get("parameter", {})
+                                    unresolved = [pname for pname in missing_p if pname not in curr_par]
+                                    if unresolved or results[idx].get("status") == "FAILED":
+                                        failed_nasa.append((idx, p, unresolved if unresolved else missing_p))
+
+                                if failed_nasa:
+                                    msg("  [RESCUE PASS] Retrying %d transiently failed station(s) for %s with extended timeout..."
+                                        % (len(failed_nasa), m))
+                                    time.sleep(3.0)
+                                    for r_i, (idx, p, missing_p) in enumerate(failed_nasa):
+                                        try:
+                                            par = fetch_nasa_point(
+                                                p["lat"], p["lon"], y0, y1, missing_p,
+                                                temporal=temporal, session=sess,
+                                                timeout=90, retries=4,
+                                                start_date=start_date_str, end_date=end_date_str)
+                                            key = (round(p["lat"], 4), round(p["lon"], 4), y0, y1, temporal, start_date_str, end_date_str, tuple(sorted(missing_p)))
+                                            nasa_cache[key] = par
+                                            results[idx].setdefault("parameter", {}).update(par)
+                                            results[idx]["status"] = "OK"
+                                            results[idx]["error"] = ""
+                                            msg("    -> [RESCUED %d/%d] Station OID %s recovered successfully!"
+                                                % (r_i + 1, len(failed_nasa), p.get("oid", idx + 1)))
+                                        except Exception as ex_r:
+                                            results[idx]["error"] = str(ex_r)[:500]
+                                            results[idx]["status"] = "FAILED"
+                                            warn("    -> [STILL FAILED] Station OID %s: %s"
+                                                 % (p.get("oid", idx + 1), str(ex_r)[:150]))
                             else:
                                 msg("Element [%d/%d] %s: All required variables (%s) already cached in memory. Reusing with 0 queries."
                                     % (mi + 1, len(ordered_modules), m, ", ".join(needed_m)))
+
+                        t_dl_dur = time.time() - t_dl_start
+                        n_q = len(pts_to_fetch)
+                        avg_dl_s = (t_dl_dur / max(1, n_q)) if n_q else 0.0
+                        msg("  [TIMING] Element [%d/%d] %s: Data retrieved in %s (Avg: %.2fs/station, %d queried, %d cached)."
+                            % (mi + 1, len(ordered_modules), m, format_duration(t_dl_dur), avg_dl_s, n_q, len(pts) - n_q))
 
                         # Compute indicators for this element
                         msg("Element [%d/%d] %s: Computing indicators ..." % (mi + 1, len(ordered_modules), m))
@@ -4572,12 +4926,14 @@ class PowerClimateAtlasGenerator(object):
                         if fc and arcpy.Exists(fc):
                             element_fcs[m] = fc
 
-                        # Immediate Export of Shapefile, CSV, Excel
+                        # Immediate Export of Shapefile, Excel
                         short = MODULE_SHORT.get(m, m)
                         if export_shp:
                             self._export_shapefile(fc, os.path.join(paths["shp"], short + ".shp"), msg, warn)
-                        self._export_csv(fc, os.path.join(paths["vec"], short + ".csv"), msg, warn)
+                        self._export_excel(fc, os.path.join(paths["vec"], short + ".xls"), msg, warn)
 
+                        elem_rasters = []
+                        t_mod_interp_elapsed = 0.0
                         if is_sequential:
                             # Immediate Raster Interpolation (Sequential Mode)
                             if not download_only and sa_avail:
@@ -4589,12 +4945,15 @@ class PowerClimateAtlasGenerator(object):
                                         msg(">>> Element [%d/%d] %s completed: Point layer, Shapefile, CSV, Excel (rasters skipped). <<<\n"
                                             % (mi + 1, len(ordered_modules), m))
                                         continue
+                                t_interp_start = time.time()
                                 elem_rasters = self._interpolate_all(
                                     None, [m], paths, eff_base, interp, mask, msg, warn,
                                     iopts, kopts, is_geo, purge, scratch_dir, focal,
                                     {m: fc}, wanted_fields_by_module=wanted_fields_by_module,
                                     reclass_opts=reclass_opts,
-                                    raster_mask=raster_mask)
+                                    raster_mask=raster_mask,
+                                    raster_timings=raster_timings)
+                                t_mod_interp_elapsed = time.time() - t_interp_start
                                 raster_registry.extend(elem_rasters)
                                 if purge and os.path.exists(scratch_dir):
                                     for sf in os.listdir(scratch_dir):
@@ -4608,11 +4967,38 @@ class PowerClimateAtlasGenerator(object):
                                             pass
                                 gc.collect()
 
-                            msg(">>> Element [%d/%d] %s completed: Point layer, Shapefile, CSV, Excel & Rasters generated. <<<\n"
-                                % (mi + 1, len(ordered_modules), m))
+                            t_mod_dur = time.time() - t_mod_start
+                            mod_end_clock = now_str().split(" ")[1]
+                            module_timings[m] = {
+                                "start_time": mod_start_clock,
+                                "end_time": mod_end_clock,
+                                "dl_dur": t_dl_dur,
+                                "interp_dur": t_mod_interp_elapsed,
+                                "n_pts": len(pts),
+                                "n_queried": n_q,
+                                "n_rasters": len(elem_rasters),
+                                "total_dur": t_mod_dur,
+                                "status": "OK" if any(r.get("status") == "OK" for r in results) else "FAILED"
+                            }
+                            msg(">>> Element [%d/%d] %s completed in %s (Download: %s | Rasters [%d]: %s). <<<\n"
+                                % (mi + 1, len(ordered_modules), m, format_duration(t_mod_dur),
+                                   format_duration(t_dl_dur), len(elem_rasters), format_duration(t_mod_interp_elapsed)))
                         else:
-                            msg(">>> [BATCH DATA COMMITTED] Element [%d/%d] %s: Point layer & vector exports committed to GDB. <<<\n"
-                                % (mi + 1, len(ordered_modules), m))
+                            t_mod_dur = time.time() - t_mod_start
+                            mod_end_clock = now_str().split(" ")[1]
+                            module_timings[m] = {
+                                "start_time": mod_start_clock,
+                                "end_time": mod_end_clock,
+                                "dl_dur": t_dl_dur,
+                                "interp_dur": 0.0,
+                                "n_pts": len(pts),
+                                "n_queried": n_q,
+                                "n_rasters": 0,
+                                "total_dur": t_mod_dur,
+                                "status": "OK" if any(r.get("status") == "OK" for r in results) else "FAILED"
+                            }
+                            msg(">>> [BATCH DATA COMMITTED] Element [%d/%d] %s: Point layer & vector exports committed to GDB (%s). <<<\n"
+                                % (mi + 1, len(ordered_modules), m, format_duration(t_mod_dur)))
 
                     # Batch Mode Phase 2: Spatial Interpolation for all committed layers
                     if is_batch and not download_only and sa_avail:
@@ -4628,13 +5014,20 @@ class PowerClimateAtlasGenerator(object):
                                 if not mask:
                                     warn("Element '%s': mask unavailable, rasters skipped." % m)
                                     continue
+                            t_b_start = time.time()
                             elem_rasters = self._interpolate_all(
                                 None, [m], paths, eff_base, interp, mask, msg, warn,
                                 iopts, kopts, is_geo, purge, scratch_dir, focal,
                                 {m: fc}, wanted_fields_by_module=wanted_fields_by_module,
                                 reclass_opts=reclass_opts,
-                                raster_mask=raster_mask)
+                                raster_mask=raster_mask,
+                                raster_timings=raster_timings)
+                            t_b_dur = time.time() - t_b_start
                             raster_registry.extend(elem_rasters)
+                            if m in module_timings:
+                                module_timings[m]["interp_dur"] = t_b_dur
+                                module_timings[m]["n_rasters"] = len(elem_rasters)
+                                module_timings[m]["total_dur"] += t_b_dur
                             if purge and os.path.exists(scratch_dir):
                                 for sf in os.listdir(scratch_dir):
                                     sfp = os.path.join(scratch_dir, sf)
@@ -4644,7 +5037,8 @@ class PowerClimateAtlasGenerator(object):
                                     except Exception:
                                         pass
                             gc.collect()
-                            msg(">>> Element [%d/%d] %s: Rasters interpolated & clipped to mask. <<<\n" % (mi + 1, len(ordered_modules), m))
+                            msg(">>> Element [%d/%d] %s: Rasters interpolated & clipped in %s (Generated %d rasters). <<<\n"
+                                % (mi + 1, len(ordered_modules), m, format_duration(t_b_dur), len(elem_rasters)))
 
                 finally:
                     if tmp_base_is_temp:
@@ -4766,6 +5160,7 @@ class PowerClimateAtlasGenerator(object):
                 _n_ok = ok_count
                 _fail = fail
 
+            t_total_elapsed = time.time() - t_start
             self._write_log(paths["vec"], {
                 "tool_version": TOOL_VERSION, "modules": active_export_modules,
                 "submodels": active_submodels, "years": (y0, y1, len(years)),
@@ -4775,7 +5170,11 @@ class PowerClimateAtlasGenerator(object):
                 "wind_cell": wind_cell, "n_points": _n_pts, "n_ok": _n_ok,
                 "n_fail": len(_fail), "failed": _fail[:50], "rasters": raster_registry,
                 "wind": wind_fcs, "warnings": warnings, "qa": qa,
-                "elapsed": time.time() - t_start,
+                "elapsed": t_total_elapsed,
+                "start_time": overall_start_dt,
+                "end_time": now_str(),
+                "module_timings": module_timings,
+                "raster_timings": raster_timings,
                 "purge": purge, "add_to_map": add_to_map,
                 "tol_m": tol_m, "focal": focal, "dl_only": download_only,
                 "element_layers": element_fcs,
@@ -4794,15 +5193,108 @@ class PowerClimateAtlasGenerator(object):
                     self._add_to_map(raster_registry, wind_fcs, map_modules,
                                      msg, warn)
             self._cleanup(msg, scratch_dir, purge)
+            # Generate Master Climate Atlas Classification & Specification Guide
             try:
-                arcpy.CheckInExtension("Spatial")
-            except Exception:
-                pass
-            msg("Done in %.1fs. Outputs in %s" % (time.time() - t_start, out_ws))
+                tool_dir = os.path.dirname(os.path.abspath(__file__))
+                if tool_dir not in sys.path:
+                    sys.path.insert(0, tool_dir)
+                import generate_master_atlas_excel
+                guide_path = os.path.join(paths["vec"], "Climate_Atlas_Classification_Guide.xlsx")
+                sp_info = {
+                    "name": clean_sname,
+                    "display_name": study_area_name or clean_sname
+                }
+                if mask and arcpy.Exists(mask):
+                    try:
+                        tot_sqkm = 0.0
+                        tot_perim = 0.0
+                        with arcpy.da.SearchCursor(mask, ["SHAPE@"]) as s_cur:
+                            for s_row in s_cur:
+                                geom = s_row[0]
+                                if geom:
+                                    try:
+                                        tot_sqkm += geom.getArea("GEODESIC", "SQUAREKILOMETERS")
+                                        tot_perim += geom.getLength("GEODESIC", "KILOMETERS")
+                                    except Exception:
+                                        tot_sqkm += (geom.area / 1e6)
+                                        tot_perim += (geom.length / 1e3)
+                        if tot_sqkm > 0:
+                            sp_info["total_sqkm"] = tot_sqkm
+                            sp_info["area"] = "{:,.2f} كم² ({:,.2f} مليون هكتار)".format(tot_sqkm, tot_sqkm / 10000.0) if tot_sqkm >= 10000 else "{:,.2f} كم² ({:,.2f} هكتار)".format(tot_sqkm, tot_sqkm * 100)
+                        if tot_perim > 0:
+                            sp_info["perimeter"] = "{:,.2f} كم".format(tot_perim)
+                        
+                        desc_m = arcpy.Describe(mask)
+                        ext_m = desc_m.extent
+                        sr_m = desc_m.spatialReference
+                        if sr_m and sr_m.factoryCode == 4326:
+                            sp_info["extent"] = "{:.4f}°N إلى {:.4f}°N | {:.4f}°E إلى {:.4f}°E".format(
+                                ext_m.YMin, ext_m.YMax, ext_m.XMin, ext_m.XMax
+                            )
+                        else:
+                            sr_wgs = arcpy.SpatialReference(4326)
+                            p_min = arcpy.PointGeometry(arcpy.Point(ext_m.XMin, ext_m.YMin), sr_m).projectAs(sr_wgs)
+                            p_max = arcpy.PointGeometry(arcpy.Point(ext_m.XMax, ext_m.YMax), sr_m).projectAs(sr_wgs)
+                            sp_info["extent"] = "{:.4f}°N إلى {:.4f}°N | {:.4f}°E إلى {:.4f}°E".format(
+                                p_min.firstPoint.Y, p_max.firstPoint.Y, p_min.firstPoint.X, p_max.firstPoint.X
+                            )
+                    except Exception as ex_sp:
+                        warn("Could not calculate spatial geometry metrics: %s" % ex_sp)
+
+                pts_for_count = primary_in_point if (primary_in_point and arcpy.Exists(primary_in_point)) else None
+                if not pts_for_count:
+                    pts_fc_check = os.path.join(gdb_path, "%s_Grid_Points" % clean_sname)
+                    if arcpy.Exists(pts_fc_check):
+                        pts_for_count = pts_fc_check
+                if pts_for_count:
+                    try:
+                        cnt = int(arcpy.management.GetCount(pts_for_count)[0])
+                        sp_info["points"] = "{:,} محطة رصد مناخية".format(cnt)
+                    except Exception:
+                        pass
+
+                generate_master_atlas_excel.build_master_classification_workbook(
+                    base_dir=out_ws,
+                    study_area_name=clean_sname,
+                    target_excel=guide_path,
+                    spatial_info=sp_info,
+                    tech_info={
+                        "cell_size": "%.1f متر (%.1f Meters)" % (eff_base if is_geo else base_cell, base_cell),
+                        "wind_cell": "%.1f متر (%.1f Meters)" % (eff_wind if is_geo else wind_cell, wind_cell),
+                        "isobar_step": "4.0 mbar (Global Standard)",
+                        "interp": interp,
+                        "period": period_label,
+                        "source": provider
+                    }
+                )
+                msg("Generated Master Climate Atlas Classification Guide: %s" % guide_path)
+                root_guide_path = os.path.join(out_ws, "Climate_Atlas_Classification_Guide.xlsx")
+                try:
+                    import shutil
+                    shutil.copy2(guide_path, root_guide_path)
+                    msg("Saved root workspace copy of Classification Guide: %s" % root_guide_path)
+                except Exception as ex_copy:
+                    warn("Could not copy Classification Guide to root: %s" % ex_copy)
+            except Exception as ex_guide:
+                warn("Could not generate Climate Atlas Classification Guide: %s" % ex_guide)
+
+            msg("\n" + "=" * 70)
+            msg("  [DONE] NASA POWER Climate Atlas Generated Successfully!")
+            msg("  Execution Started : %s" % overall_start_dt)
+            msg("  Execution Finished: %s" % now_str())
+            msg("  Total Duration    : %s (%.1f seconds)" % (format_duration(t_total_elapsed), t_total_elapsed))
+            msg("  Project Directory : %s" % out_ws)
+            msg("  Tables & Reports  : %s" % paths["vec"])
+            msg("=" * 70 + "\n")
         except Exception as ex:
             tb = traceback.format_exc()
             messages.addErrorMessage("FAILED: %s\n%s" % (ex, tb))
             raise
+        finally:
+            try:
+                arcpy.CheckInExtension("Spatial")
+            except Exception:
+                pass
 
     def _add_to_map(self, registry, wind_fcs, map_modules, msg, warn):
         """Add chosen elements to the CURRENT ArcMap data frame, one group layer
@@ -4860,22 +5352,45 @@ class PowerClimateAtlasGenerator(object):
                 by_module = {}
                 for (_f, _r, _lp, _m, _c, _n) in registry:
                     by_module.setdefault(_m, []).append(_r)
-                added = 0
+                
+                # Gather all valid layers to add sequentially
+                items_to_add = []
                 for module in map_modules:
                     lps = by_module.get(module, [])
                     extras = []
                     if module == "Wind":
                         extras = [w for w in (wind_fcs or []) if arcpy.Exists(w)]
-                    if not lps and not extras:
-                        continue
                     for lp in lps + extras:
+                        if lp and arcpy.Exists(lp):
+                            items_to_add.append((module, lp))
+
+                total_items = len(items_to_add)
+                if total_items == 0:
+                    warn("Add to map: no valid layers found to add.")
+                    return
+
+                msg("\n>>> Safely adding %d layer(s) to current ArcGIS Pro map sequentially... <<<" % total_items)
+                added = 0
+                for idx, (module, lp) in enumerate(items_to_add, 1):
+                    try:
+                        bname = os.path.basename(lp)
+                        msg("  -> [%d/%d] Adding to map: %s (%s)..." % (idx, total_items, bname, module))
+                        new_layer = m.addDataFromPath(lp)
+                        # Safeguard: Keep the first layer visible for immediate preview,
+                        # hide subsequent layers to prevent GPU/DirectX rendering storm and memory crash
                         try:
-                            if lp and arcpy.Exists(lp):
-                                m.addDataFromPath(lp)
-                                added += 1
-                        except Exception as ex:
-                            warn("Could not add %s to Pro map: %s" % (lp, ex))
-                msg("Added %d layers to current ArcGIS Pro map." % added)
+                            if new_layer:
+                                lyrs = new_layer if isinstance(new_layer, (list, tuple)) else [new_layer]
+                                for lyr in lyrs:
+                                    if added > 0:
+                                        lyr.visible = False
+                        except Exception:
+                            pass
+                        added += 1
+                        time.sleep(0.05)  # Yield for ArcGIS Pro UI event loop
+                    except Exception as ex:
+                        warn("Could not add %s to Pro map: %s" % (lp, ex))
+                msg("Successfully added %d layer(s) to ArcGIS Pro map (background layers initially hidden to protect performance)." % added)
                 return
             except Exception as ex:
                 warn("Add to ArcGIS Pro map skipped: %s" % ex)
@@ -4895,38 +5410,52 @@ class PowerClimateAtlasGenerator(object):
             by_module = {}
             for (_f, _r, _lp, _m, _c, _n) in registry:
                 by_module.setdefault(_m, []).append(_r)
-            added = 0
+            
+            # Gather all valid layers for ArcMap
+            items_to_add = []
             for module in map_modules:
                 lps = by_module.get(module, [])
                 extras = []
                 if module == "Wind":
                     extras = [w for w in (wind_fcs or []) if arcpy.Exists(w)]
-                if not lps and not extras:
-                    warn("Add to map: element '%s' has no outputs; skipped." % module)
-                    continue
-                gname = MODULE_FOLDER.get(module, module)
-                grp = _create_group(mxd, df, gname)
                 for lp in lps + extras:
-                    try:
-                        if not lp or not arcpy.Exists(lp):
-                            continue
-                        layer = arcpy.mapping.Layer(lp)
-                        if grp is not None:
-                            arcpy.mapping.AddLayerToGroup(df, grp, layer, "BOTTOM")
-                        else:
-                            arcpy.mapping.AddLayer(df, layer, "BOTTOM")
-                        added += 1
-                    except Exception as ex:
-                        warn("Could not add %s to map: %s" % (lp, ex))
-                msg("Element '%s' added (%d layers%s)." % (
-                    module, len(lps) + len(extras),
-                    " in group '%s'" % gname if grp is not None else ", flat"))
+                    if lp and arcpy.Exists(lp):
+                        items_to_add.append((module, lp))
+
+            total_items = len(items_to_add)
+            if total_items == 0:
+                warn("Add to map: no valid layers found to add.")
+                return
+
+            msg("\n>>> Safely adding %d layer(s) to current ArcMap data frame sequentially... <<<" % total_items)
+            added = 0
+            groups = {}
+            for idx, (module, lp) in enumerate(items_to_add, 1):
+                try:
+                    bname = os.path.basename(lp)
+                    msg("  -> [%d/%d] Adding to ArcMap: %s (%s)..." % (idx, total_items, bname, module))
+                    gname = MODULE_FOLDER.get(module, module)
+                    if gname not in groups:
+                        groups[gname] = _create_group(mxd, df, gname)
+                    grp = groups.get(gname)
+
+                    layer = arcpy.mapping.Layer(lp)
+                    if added > 0:
+                        layer.visible = False
+                    if grp is not None:
+                        arcpy.mapping.AddLayerToGroup(df, grp, layer, "BOTTOM")
+                    else:
+                        arcpy.mapping.AddLayer(df, layer, "BOTTOM")
+                    added += 1
+                    time.sleep(0.02)
+                except Exception as ex:
+                    warn("Could not add %s to map: %s" % (lp, ex))
             try:
                 arcpy.RefreshActiveView()
                 arcpy.RefreshTOC()
             except Exception:
                 pass
-            msg("Added %d layers to the current map." % added)
+            msg("Successfully added %d layer(s) to ArcMap (background layers initially hidden)." % added)
         except Exception as ex:
             warn("Add to map failed: %s" % ex)
 
@@ -4940,7 +5469,7 @@ class PowerClimateAtlasGenerator(object):
         gdb_path = os.path.join(out_ws, gdb_name)
         if not arcpy.Exists(gdb_path):
             arcpy.management.CreateFileGDB(out_ws, gdb_name)
-        paths = {"gdb": gdb_path, "vec": os.path.join(out_ws, "00_Vector_Data"),
+        paths = {"gdb": gdb_path, "vec": os.path.join(out_ws, "00_Tables_And_Reports"),
                  "shp": os.path.join(out_ws, "Export_SHP")}
         makedirs_ok(paths["vec"])
         if export_shp:
@@ -5144,7 +5673,7 @@ class PowerClimateAtlasGenerator(object):
             except Exception:
                 pass
 
-    def _export_csv(self, fc, csv_path, msg, warn):
+    def _export_excel(self, fc, xls_path, msg, warn):
         try:
             fields = [f.name for f in arcpy.ListFields(fc)
                       if f.type not in ("Geometry", "Raster", "Blob")]
@@ -5152,13 +5681,14 @@ class PowerClimateAtlasGenerator(object):
             with arcpy.da.SearchCursor(fc, fields) as cur:
                 for r in cur:
                     rows.append(list(r))
-            write_csv(csv_path, fields, rows)
-            msg("CSV: %s" % csv_path)
-            xls_path = os.path.splitext(csv_path)[0] + ".xls"
             write_excel_file(xls_path, fields, rows, sheet_name="Data", rtl=False)
             msg("Excel: %s" % xls_path)
         except Exception as ex:
-            warn("CSV/Excel export failed: %s" % ex)
+            warn("Excel export failed: %s" % ex)
+
+    def _export_csv(self, fc, csv_path, msg, warn):
+        xls_path = os.path.splitext(csv_path)[0] + ".xls"
+        return self._export_excel(fc, xls_path, msg, warn)
 
     def _interp_surface(self, in_points, field, cell, method, iopts=None, kopts=None):
         iopts = iopts or {"power": 1.2, "search": "Variable", "npoints": 12, "maxdist": None,
@@ -5718,6 +6248,7 @@ class PowerClimateAtlasGenerator(object):
                         rec_f = point_records[p_idx]["fields"] if (p_idx is not None and p_idx < len(point_records)) else {}
                         d_start_v = rec_f.get("Data_Start") or (admin_meta.get("data_start") if admin_meta else 0)
                         d_end_v = rec_f.get("Data_End") or (admin_meta.get("data_end") if admin_meta else 0)
+                        unit_val = rec_f.get("Measurement_Unit") or rec_f.get("Unit") or (admin_meta.get("units_by_module", {}).get(m, "") if admin_meta else "")
                         admin_vals = [
                             rec_f.get("Source_ID", row[0]),
                             lat_v,
@@ -5728,6 +6259,7 @@ class PowerClimateAtlasGenerator(object):
                             rec_f.get("Interp_Meth", "Offline"),
                             rec_f.get("Cell_Size", (admin_meta.get("base_cell", 0.0) if admin_meta else 0.0)),
                             rec_f.get("Wind_Cell", (admin_meta.get("wind_cell", 0.0) if admin_meta else 0.0)),
+                            unit_val,
                             rec_f.get("Status", "OK"),
                             (rec_f.get("Error_Msg", "") or "")[:255]
                         ]
@@ -5827,8 +6359,9 @@ class PowerClimateAtlasGenerator(object):
                     vals = r.get("fields", {})
                     ds_val = str(admin_meta.get("data_start", str(y0)))
                     de_val = str(admin_meta.get("data_end", str(y1)))
+                    unit_val = admin_meta.get("units_by_module", {}).get(m, "") if admin_meta else ""
                     admin = [r.get("oid", row[0]), r.get("lat"), r.get("lon"), ds_val, de_val, temporal,
-                             interp, base_cell, wind_cell, r.get("status", "FAILED"),
+                             interp, base_cell, wind_cell, unit_val, r.get("status", "FAILED"),
                              (r.get("error", "") or "")[:255]]
                     for i in range(len(admin)):
                         row[2 + i] = admin[i]
@@ -5872,7 +6405,7 @@ class PowerClimateAtlasGenerator(object):
                          iopts=None, kopts=None, is_geo=False,
                          purge=True, scratch=None, focal=None, source_by_module=None,
                          wanted_fields_by_module=None, reclass_opts=None,
-                         raster_mask=None):
+                         raster_mask=None, raster_timings=None):
         from arcpy.sa import ExtractByMask
         out_ws = os.path.dirname(paths["vec"])
         if scratch is None:
@@ -6055,6 +6588,8 @@ class PowerClimateAtlasGenerator(object):
 
                 t_fld_dur = time.time() - t_fld_start
                 msg("     [OK] Successfully saved: %s (in %.1f seconds)" % (os.path.basename(rp), t_fld_dur))
+                if raster_timings is not None:
+                    raster_timings[field] = (module, os.path.basename(rp), t_fld_dur)
 
                 # Immediately release raster memory and dataset locks before next iteration
                 try:
@@ -6456,19 +6991,11 @@ class PowerClimateAtlasGenerator(object):
         cols = ["Field_Name", "Full_Name_EN", "Name_AR", "NASA_Code", "Module", "Period",
                 "Statistic", "Unit", "Description_AR", "Description_EN", "Calculation",
                 "Source", "Notes"]
-        p1 = os.path.join(vec_dir, "Metadata_Dictionary.csv")
-        write_csv(p1, cols, [[r[c] for c in cols] for r in rows])
-        msg("Dictionary: %s (%d fields)" % (p1, len(rows)))
         p1_xls = os.path.join(vec_dir, "Metadata_Dictionary.xls")
         write_excel_file(p1_xls, cols, [[r[c] for c in cols] for r in rows], sheet_name="Metadata", rtl=False)
-        msg("Dictionary Excel: %s" % p1_xls)
+        msg("Dictionary Excel: %s (%d fields)" % (p1_xls, len(rows)))
 
-        p2 = os.path.join(vec_dir, "Field_Dictionary_Arabic.csv")
         ar_cols = ["Field_Name", "Name_AR", "Unit", "Description_AR", "Module", "Period"]
-        write_csv(p2, ar_cols,
-                  [[r["Field_Name"], r["Name_AR"], r["Unit"],
-                    r["Description_AR"], r["Module"], r["Period"]] for r in rows])
-        msg("Dictionary: %s" % p2)
         p2_xls = os.path.join(vec_dir, "Field_Dictionary_Arabic.xls")
         write_excel_file(p2_xls, ar_cols,
                          [[r["Field_Name"], r["Name_AR"], r["Unit"],
@@ -6556,10 +7083,10 @@ class PowerClimateAtlasGenerator(object):
             _add("no -999 sentinel values", bad == 0, "(bad=%d)" % bad)
         except Exception as ex:
             _add("no -999 sentinel values", False, str(ex))
-        _add("Metadata_Dictionary.csv",
-             os.path.isfile(os.path.join(paths["vec"], "Metadata_Dictionary.csv")))
-        _add("Field_Dictionary_Arabic.csv",
-             os.path.isfile(os.path.join(paths["vec"], "Field_Dictionary_Arabic.csv")))
+        _add("Metadata_Dictionary.xls",
+             os.path.isfile(os.path.join(paths["vec"], "Metadata_Dictionary.xls")))
+        _add("Field_Dictionary_Arabic.xls",
+             os.path.isfile(os.path.join(paths["vec"], "Field_Dictionary_Arabic.xls")))
         missing = [item[0] for item in registry if not os.path.isfile(item[1])]
         _add("tif per raster", len(missing) == 0,
              "(%d/%d, missing=%s)" % (len(registry) - len(missing), len(registry), missing[:5]))
@@ -6665,7 +7192,48 @@ class PowerClimateAtlasGenerator(object):
             fh.write(u"\nQA:\n")
             for name, ok, detail in info["qa"]:
                 fh.write(u"  [%s] %s %s\n" % ("PASS" if ok else "FAIL", name, detail))
-            fh.write(u"\nElapsed: %.1fs\n" % info["elapsed"])
+
+            # --- EXECUTION TIMELINE & PERFORMANCE BENCHMARKS ---
+            fh.write(u"\n" + u"=" * 78 + u"\n")
+            fh.write(u"EXECUTION TIMELINE & PERFORMANCE BENCHMARKS\n")
+            fh.write(u"=" * 78 + u"\n")
+            fh.write(u"Overall Started  : %s\n" % info.get("start_time", "-"))
+            fh.write(u"Overall Completed: %s\n" % info.get("end_time", "-"))
+            fh.write(u"Total Duration   : %s (%.1f seconds)\n" % (
+                format_duration(info.get("elapsed", 0)), info.get("elapsed", 0)))
+
+            mod_timings = info.get("module_timings") or {}
+            if mod_timings:
+                fh.write(u"\n--- Element Performance Breakdown ---\n")
+                fh.write(u"%-22s | %-8s | %-8s | %-12s | %-7s | %-12s | %-6s\n" %
+                         ("Element", "Start", "End", "Download Dur", "Rasters", "Interp Dur", "Status"))
+                fh.write(u"%s\n" % ("-" * 86))
+                for m, mdata in mod_timings.items():
+                    fh.write(u"%-22s | %-8s | %-8s | %-12s | %-7d | %-12s | %-6s\n" % (
+                        m[:22],
+                        mdata.get("start_time", "-"),
+                        mdata.get("end_time", "-"),
+                        format_duration(mdata.get("dl_dur", 0)),
+                        mdata.get("n_rasters", 0),
+                        format_duration(mdata.get("interp_dur", 0)),
+                        mdata.get("status", "-")
+                    ))
+
+            r_timings = info.get("raster_timings") or {}
+            if r_timings:
+                fh.write(u"\n--- Detailed Raster Generation Durations ---\n")
+                fh.write(u"%-22s | %-36s | %-12s\n" % ("Element", "Raster File", "Duration"))
+                fh.write(u"%s\n" % ("-" * 76))
+                for fld, rinfo in sorted(r_timings.items(), key=lambda x: (x[1][0] if len(x[1]) > 0 else "", x[0])):
+                    _mod = rinfo[0] if len(rinfo) > 0 else "-"
+                    _fname = rinfo[1] if len(rinfo) > 1 else fld
+                    _dur = rinfo[2] if len(rinfo) > 2 else 0.0
+                    fh.write(u"%-22s | %-36s | %-12s\n" % (
+                        _mod[:22],
+                        _fname[:36],
+                        format_duration(_dur)
+                    ))
+            fh.write(u"=" * 78 + u"\n")
 
     def _cleanup(self, msg, scratch=None, purge=True):
         for o in ["in_memory/input_proj", "in_memory/raw_ras",

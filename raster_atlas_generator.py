@@ -469,6 +469,7 @@ SHP_FIELD_MAP = {
     "HI_Summer_Mean": "HI_SumMean",
     "HI_Winter_Mean": "HI_WinMean",
     "Interp_Meth": "Intrp_Meth",
+    "Measurement_Unit": "Meas_Unit",
     "PSL_Annual_Mean": "PSL_AnMean",
     "PSL_Annual_Range": "PSL_AnRng",
     "PSL_Autumn_Mean": "PSL_AuMean",
@@ -722,6 +723,66 @@ MODULE_INDICATOR_FIELDS["Trends & Baseline Anomalies"] = MODULE_INDICATOR_FIELDS
 MODULE_INDICATOR_FIELDS["Climate_Models"] = [
     item for mod_key in DERIVED_MODULES_ALL for item in MODULE_INDICATOR_FIELDS.get(mod_key, [])
 ]
+
+def get_units_mapping(unit_sys=None, unit_temp=None, unit_precip=None, unit_press=None, unit_wind=None):
+    t_unit = u"°F" if (unit_temp and "Fahrenheit" in unit_temp) else u"°C"
+    p_unit = "in" if (unit_precip and "Inches" in unit_precip) else "mm"
+    if unit_press and "mbar" in unit_press:
+        pr_unit = "mbar"
+    elif unit_press and "inHg" in unit_press:
+        pr_unit = "inHg"
+    else:
+        pr_unit = "hPa"
+    if unit_wind and "km/h" in unit_wind:
+        w_unit = "km/h"
+    elif unit_wind and "kt" in unit_wind:
+        w_unit = "kt"
+    elif unit_wind and "mph" in unit_wind:
+        w_unit = "mph"
+    else:
+        w_unit = "m/s"
+
+    return {
+        "Temperature": t_unit,
+        "Heat Index": t_unit,
+        "Heat_Index": t_unit,
+        "Wind Chill": t_unit,
+        "Wind_Chill": t_unit,
+        "Dew Point": t_unit,
+        "Dew_Point": t_unit,
+        "Precipitation": p_unit,
+        "Water Deficit": p_unit,
+        "Water_Deficit": p_unit,
+        "Evapotranspiration": p_unit,
+        "Sea Level Pressure": pr_unit,
+        "Sea_Level_Pressure": pr_unit,
+        "Surface Pressure": pr_unit,
+        "Surface_Pressure": pr_unit,
+        "Isobars": pr_unit,
+        "Wind": w_unit,
+        "Wind Speed": w_unit,
+        "Wind_Speed": w_unit,
+        "Wind Vector": w_unit,
+        "Wind_Vector": w_unit,
+        "Relative Humidity": "%",
+        "Relative_Humidity": "%",
+        "Cloud Cover": "%",
+        "Cloud_Cover": "%",
+        "Solar Radiation": "MJ/m²/day",
+        "Solar_Radiation": "MJ/m²/day",
+        "UV Index": "Index",
+        "UV_Index": "Index",
+        "De Martonne Aridity": "Index",
+        "De_Martonne_Aridity": "Index",
+        "UNEP Aridity": "Ratio",
+        "UNEP_Aridity": "Ratio",
+        "Dry Months": "Months",
+        "Dry_Months": "Months",
+        "Trends & Anomalies": u"%s/dec" % t_unit,
+        "Trends_And_Anomalies": u"%s/dec" % t_unit,
+        "Climate_Models": "Composite",
+        "Drought & Aridity": "Composite",
+    }
 
 _this_dir = os.path.dirname(os.path.abspath(__file__)) if '__file__' in globals() else os.getcwd()
 if _this_dir not in sys.path:
@@ -997,13 +1058,18 @@ def write_csv(path, header, rows):
                 w.writerow(["" if c is None else c for c in r])
 
 
-def write_excel_file(path, header, rows, sheet_name="Data"):
+def write_excel_file(path, header, rows, sheet_name="Data", rtl=False):
     try:
         import xlwt
     except ImportError:
         return False
     wb = xlwt.Workbook(encoding="utf-8")
     ws = wb.add_sheet((sheet_name or "Data")[:31])
+    if rtl:
+        try:
+            ws.cols_right_to_left = True
+        except Exception:
+            pass
     header_style = xlwt.easyxf(
         "font: bold on, color white, height 220; "
         "pattern: pattern solid, fore_colour dark_blue; "
@@ -1135,6 +1201,19 @@ class RasterDataClimateAtlasGenerator(object):
         )
         p1.description = (
             "REQUIRED. Polygon layer used to clip and mask the final interpolated rasters (e.g. Egypt boundary)."
+        )
+
+        p_study_name = arcpy.Parameter(
+            displayName="Study Area Name (Optional) / اسم منطقة الدراسة",
+            name="Study_Area_Name",
+            datatype="GPString",
+            parameterType="Optional",
+            direction="Input"
+        )
+        p_study_name.value = ""
+        p_study_name.description = (
+            "OPTIONAL. Name of the study area (e.g. 'Egypt', 'Sinai', 'Nile Basin'). "
+            "Used to title the atlas, name the boundary layer archived in GDB, and generate the Classification Workbook."
         )
 
         # ═══ Data Provider & Authentication ═══
@@ -1385,13 +1464,97 @@ class RasterDataClimateAtlasGenerator(object):
         )
         p_sr.category = "Output Options"
 
+        # ═══ Measurement Units & Standards ═══
+        p_unit_sys = arcpy.Parameter(
+            displayName="Measurement Units System",
+            name="Measurement_Units_System",
+            datatype="GPString",
+            parameterType="Optional",
+            direction="Input")
+        p_unit_sys.filter.type = "ValueList"
+        p_unit_sys.filter.list = [
+            "Metric (Celsius °C, mm, hPa, m/s) [Default]",
+            "Imperial (Fahrenheit °F, Inches in, inHg, mph)",
+            "Custom Units"
+        ]
+        p_unit_sys.value = "Metric (Celsius °C, mm, hPa, m/s) [Default]"
+        p_unit_sys.category = "Measurement Units & Standards"
+        p_unit_sys.description = (
+            "Select the measurement units system for atlas outputs.\n"
+            "• Metric (Default): Celsius (°C), Millimeters (mm), Hectopascals (hPa), Meters/second (m/s) conforming to WMO and Egyptian standards.\n"
+            "• Imperial: Fahrenheit (°F), Inches (in), Inches of Mercury (inHg), Miles/hour (mph).\n"
+            "• Custom Units: Manually customize units for each climate variable below.\n\n"
+            "نظام وحدات القياس المعتمد في المخرجات: المتري (الافتراضي والمعتمد لمصر والمنظمة العالمية للأرصاد WMO) أو الإمبراطوري أو تخصيص الوحدات يدوياً."
+        )
+
+        p_unit_temp = arcpy.Parameter(
+            displayName="Temperature Unit",
+            name="Temperature_Unit",
+            datatype="GPString",
+            parameterType="Optional",
+            direction="Input")
+        p_unit_temp.filter.type = "ValueList"
+        p_unit_temp.filter.list = ["Celsius (°C) [Default]", "Fahrenheit (°F)"]
+        p_unit_temp.value = "Celsius (°C) [Default]"
+        p_unit_temp.category = "Measurement Units & Standards"
+        p_unit_temp.description = (
+            "Measurement unit for temperature variables (°C or °F).\n"
+            "وحدة قياس درجات الحرارة: مئوية (°C) كمعيار افتراضي أو فهرنهايت (°F)."
+        )
+
+        p_unit_precip = arcpy.Parameter(
+            displayName="Precipitation Unit",
+            name="Precipitation_Unit",
+            datatype="GPString",
+            parameterType="Optional",
+            direction="Input")
+        p_unit_precip.filter.type = "ValueList"
+        p_unit_precip.filter.list = ["Millimeters (mm) [Default]", "Inches (in)"]
+        p_unit_precip.value = "Millimeters (mm) [Default]"
+        p_unit_precip.category = "Measurement Units & Standards"
+        p_unit_precip.description = (
+            "Measurement unit for precipitation and rainfall (mm or inches).\n"
+            "وحدة قياس الأمطار والتساقط: مليمتر (mm) كمعيار افتراضي أو بالبوصة (in)."
+        )
+
+        p_unit_press = arcpy.Parameter(
+            displayName="Pressure Unit",
+            name="Pressure_Unit",
+            datatype="GPString",
+            parameterType="Optional",
+            direction="Input")
+        p_unit_press.filter.type = "ValueList"
+        p_unit_press.filter.list = ["Hectopascals (hPa) [Default]", "Millibars (mbar)", "Inches of Mercury (inHg)"]
+        p_unit_press.value = "Hectopascals (hPa) [Default]"
+        p_unit_press.category = "Measurement Units & Standards"
+        p_unit_press.description = (
+            "Measurement unit for atmospheric and sea level pressure (hPa, mbar, or inHg).\n"
+            "وحدة قياس الضغط الجوي وضغط مستوى سطح البحر: هكتوباسكال (hPa) أو مليبار أو بوصة زئبقية."
+        )
+
+        p_unit_wind = arcpy.Parameter(
+            displayName="Wind Speed Unit",
+            name="Wind_Speed_Unit",
+            datatype="GPString",
+            parameterType="Optional",
+            direction="Input")
+        p_unit_wind.filter.type = "ValueList"
+        p_unit_wind.filter.list = ["Meters per second (m/s) [Default]", "Kilometers per hour (km/h)", "Knots (kt)", "Miles per hour (mph)"]
+        p_unit_wind.value = "Meters per second (m/s) [Default]"
+        p_unit_wind.category = "Measurement Units & Standards"
+        p_unit_wind.description = (
+            "Measurement unit for surface wind speed (m/s, km/h, kt, or mph).\n"
+            "وحدة قياس سرعة الرياح السطحية: متر/ثانية (m/s) كمعيار افتراضي، كم/ساعة، عقدة، أو ميل/ساعة."
+        )
+
         return [
-            p_mode, p_wf_mode, p_precalc, p0, p1,
+            p_mode, p_wf_mode, p_precalc, p0, p1, p_study_name,
             p2, p3, p4,
             p_tmode, p_syr, p_s_yr, p_e_yr, p_sd, p_ed, p_tscope, p_aggs,
             p_mods,
             p_interp, p_cell, p_wind_cell,
-            p_exp_indiv, p_ws, p_sr
+            p_exp_indiv, p_ws, p_sr,
+            p_unit_sys, p_unit_temp, p_unit_precip, p_unit_press, p_unit_wind
         ]
 
     def updateParameters(self, parameters):
@@ -1402,6 +1565,34 @@ class RasterDataClimateAtlasGenerator(object):
         p_op = pdict.get("Operation_Mode")
         op_text = p_op.valueAsText if p_op else "Download Gridded Data & Generate Atlas (Full Pipeline) [Default]"
         is_offline = bool(op_text and "Offline" in op_text)
+
+        # --- Measurement Units synchronization ---
+        p_usys = pdict.get("Measurement_Units_System")
+        usys_val = p_usys.valueAsText if p_usys else "Metric"
+        is_custom_units = bool(usys_val and "Custom" in usys_val)
+        is_imperial = bool(usys_val and "Imperial" in usys_val)
+
+        p_ut = pdict.get("Temperature_Unit")
+        p_up = pdict.get("Precipitation_Unit")
+        p_upr = pdict.get("Pressure_Unit")
+        p_uw = pdict.get("Wind_Speed_Unit")
+
+        if p_ut:
+            p_ut.enabled = is_custom_units
+            if not is_custom_units:
+                p_ut.value = "Fahrenheit (°F)" if is_imperial else "Celsius (°C) [Default]"
+        if p_up:
+            p_up.enabled = is_custom_units
+            if not is_custom_units:
+                p_up.value = "Inches (in)" if is_imperial else "Millimeters (mm) [Default]"
+        if p_upr:
+            p_upr.enabled = is_custom_units
+            if not is_custom_units:
+                p_upr.value = "Inches of Mercury (inHg)" if is_imperial else "Hectopascals (hPa) [Default]"
+        if p_uw:
+            p_uw.enabled = is_custom_units
+            if not is_custom_units:
+                p_uw.value = "Miles per hour (mph)" if is_imperial else "Meters per second (m/s) [Default]"
 
         p_wf = pdict.get("Execution_Workflow_Mode")
         if p_wf:
@@ -1568,6 +1759,7 @@ class RasterDataClimateAtlasGenerator(object):
 
         in_extent_layer = _get_text("Download_Extent_Layer")
         in_clip_layer = _get_text("Final_Clip_Layer")
+        study_area_name = _get_text("Study_Area_Name", "").strip()
         source = _get_text("Climate_Data_Source", "NASA POWER Regional Grid")
         edl_user = _get_text("Earthdata_Username")
         edl_pass = _get_text("Earthdata_Password")
@@ -1587,6 +1779,14 @@ class RasterDataClimateAtlasGenerator(object):
 
         if not modules and not active_submodels:
             modules = ["Temperature"]
+
+        # --- Measurement Units extraction ---
+        unit_sys_text = _get_text("Measurement_Units_System", "Metric")
+        unit_temp_text = _get_text("Temperature_Unit", "Celsius (°C)")
+        unit_precip_text = _get_text("Precipitation_Unit", "Millimeters (mm)")
+        unit_press_text = _get_text("Pressure_Unit", "Hectopascals (hPa)")
+        unit_wind_text = _get_text("Wind_Speed_Unit", "Meters per second (m/s)")
+        units_by_module = get_units_mapping(unit_sys_text, unit_temp_text, unit_precip_text, unit_press_text, unit_wind_text)
 
         # Parse Time Window
         time_mode = _get_text("Time_Mode", "Single Year")
@@ -1727,7 +1927,7 @@ class RasterDataClimateAtlasGenerator(object):
 
         # 3. Establish output folders & GDB
         makedirs_ok(out_root)
-        vec_dir = os.path.join(out_root, "00_Vector_Data")
+        vec_dir = os.path.join(out_root, "00_Tables_And_Reports")
         makedirs_ok(vec_dir)
         gdb_path = os.path.join(out_root, "Project_Data.gdb")
         if not arcpy.Exists(gdb_path):
@@ -1735,6 +1935,64 @@ class RasterDataClimateAtlasGenerator(object):
             arcpy.CreateFileGDB_management(out_root, "Project_Data.gdb")
         scratch_dir = os.path.join(out_root, "scratch_cache")
         makedirs_ok(scratch_dir)
+
+        # -------------------------------------------------------------
+        # Archive Study Area Mask Boundary & Grid Points into Project GDB
+        # -------------------------------------------------------------
+        s_name = (study_area_name or "").strip()
+        if not s_name and in_clip_layer:
+            try:
+                s_name = os.path.splitext(os.path.basename(in_clip_layer))[0]
+            except Exception:
+                s_name = "Study_Area"
+        if not s_name:
+            s_name = "Study_Area"
+
+        clean_sname = re.sub(r'[^a-zA-Z0-9_]', '_', s_name).strip('_')
+        if not clean_sname:
+            clean_sname = "Study_Area"
+
+        # 1. Archive Mask Boundary Layer inside GDB
+        if in_clip_layer and arcpy.Exists(in_clip_layer):
+            bnd_fc_name = arcpy.ValidateTableName("%s_Boundary" % clean_sname, gdb_path)
+            bnd_out_path = os.path.join(gdb_path, bnd_fc_name)
+            try:
+                m_abs = os.path.abspath(str(in_clip_layer)).lower()
+                b_abs = os.path.abspath(str(bnd_out_path)).lower()
+                if m_abs != b_abs:
+                    if not arcpy.Exists(bnd_out_path):
+                        arcpy.management.CopyFeatures(in_clip_layer, bnd_out_path)
+                        msg("Archived Study Area Mask boundary into GDB: %s" % bnd_fc_name)
+                    else:
+                        msg("Study Area Mask boundary already exists in GDB: %s" % bnd_fc_name)
+                else:
+                    msg("Study Area Mask boundary already resides in GDB: %s" % bnd_fc_name)
+            except Exception as ex_bnd:
+                warn("Could not archive Study Area Mask boundary into GDB: %s" % ex_bnd)
+
+        # 2. Archive Sampling Grid Points inside GDB
+        pts_src = None
+        if is_offline and 'layer_paths' in locals() and layer_paths:
+            pts_src = layer_paths[0]
+        elif in_extent_layer and arcpy.Exists(in_extent_layer):
+            pts_src = in_extent_layer
+
+        if pts_src and arcpy.Exists(pts_src):
+            pts_fc_name = arcpy.ValidateTableName("%s_Grid_Points" % clean_sname, gdb_path)
+            pts_out_path = os.path.join(gdb_path, pts_fc_name)
+            try:
+                p_abs = os.path.abspath(str(pts_src)).lower()
+                pt_abs = os.path.abspath(str(pts_out_path)).lower()
+                if p_abs != pt_abs:
+                    if not arcpy.Exists(pts_out_path):
+                        arcpy.management.CopyFeatures(pts_src, pts_out_path)
+                        msg("Archived Input Sampling Grid Points into GDB: %s" % pts_fc_name)
+                    else:
+                        msg("Input Sampling Grid Points already exist in GDB: %s" % pts_fc_name)
+                else:
+                    msg("Input Sampling Grid Points already reside in GDB: %s" % pts_fc_name)
+            except Exception as ex_pts:
+                warn("Could not archive Input Sampling Grid Points into GDB: %s" % ex_pts)
 
         # Coordinate System Handling & Effective Cell Size
         target_sr = out_sr
@@ -1759,7 +2017,7 @@ class RasterDataClimateAtlasGenerator(object):
             arcpy.env.compression = "LZW"
             arcpy.env.tileSize = "128 128"
             arcpy.env.pyramid = "NONE"
-            arcpy.env.rasterStatistics = "NONE"
+            arcpy.env.rasterStatistics = "STATISTICS 1 1"
         except Exception:
             pass
 
@@ -1802,7 +2060,8 @@ class RasterDataClimateAtlasGenerator(object):
             msg("\n--- Assembling Offline Multi-Layer Point Features ---")
             element_layers, indicator_fields_by_module = self._merge_offline_layers(
                 layer_paths, gdb_path, target_sr, ordered_modules, active_submodels,
-                msg, warn, col_data_start=col_data_start, col_data_end=col_data_end
+                msg, warn, col_data_start=col_data_start, col_data_end=col_data_end,
+                units_by_module=units_by_module
             )
         else:
             # ═══ ONLINE DOWNLOAD PROCESSING ═══
@@ -1841,13 +2100,15 @@ class RasterDataClimateAtlasGenerator(object):
                         source, mod, tiles, start_yr, end_yr,
                         gdb_path, scratch_dir, edl_user, edl_pass,
                         element_layers, intermediate_points, msg, warn,
-                        col_data_start=col_data_start, col_data_end=col_data_end
+                        col_data_start=col_data_start, col_data_end=col_data_end,
+                        units_by_module=units_by_module
                     )
                 else:
                     pts_fc, ind_fields = self._process_tiles_to_master_points(
                         source, mod, tiles, start_yr, end_yr, gdb_path, aggs,
                         scratch_dir, edl_user, edl_pass, msg, warn,
-                        col_data_start=col_data_start, col_data_end=col_data_end
+                        col_data_start=col_data_start, col_data_end=col_data_end,
+                        units_by_module=units_by_module
                     )
 
                 if pts_fc and arcpy.Exists(pts_fc):
@@ -1933,10 +2194,106 @@ class RasterDataClimateAtlasGenerator(object):
         except Exception:
             pass
 
+        # Generate Master Climate Atlas Classification & Specification Guide
+        try:
+            tool_dir = os.path.dirname(os.path.abspath(__file__))
+            if tool_dir not in sys.path:
+                sys.path.insert(0, tool_dir)
+            import generate_master_atlas_excel
+            guide_path = os.path.join(vec_dir, "Climate_Atlas_Classification_Guide.xlsx")
+            sp_info = {
+                "name": clean_sname,
+                "display_name": study_area_name or clean_sname
+            }
+            mask_src = in_clip_layer if (in_clip_layer and arcpy.Exists(in_clip_layer)) else None
+            if not mask_src:
+                bnd_chk = os.path.join(gdb_path, "%s_Boundary" % clean_sname)
+                if arcpy.Exists(bnd_chk):
+                    mask_src = bnd_chk
+            if mask_src and arcpy.Exists(mask_src):
+                try:
+                    tot_sqkm = 0.0
+                    tot_perim = 0.0
+                    with arcpy.da.SearchCursor(mask_src, ["SHAPE@"]) as s_cur:
+                        for s_row in s_cur:
+                            geom = s_row[0]
+                            if geom:
+                                try:
+                                    tot_sqkm += geom.getArea("GEODESIC", "SQUAREKILOMETERS")
+                                    tot_perim += geom.getLength("GEODESIC", "KILOMETERS")
+                                except Exception:
+                                    tot_sqkm += (geom.area / 1e6)
+                                    tot_perim += (geom.length / 1e3)
+                    if tot_sqkm > 0:
+                        sp_info["total_sqkm"] = tot_sqkm
+                        sp_info["area"] = "{:,.2f} كم² ({:,.2f} مليون هكتار)".format(tot_sqkm, tot_sqkm / 10000.0) if tot_sqkm >= 10000 else "{:,.2f} كم² ({:,.2f} هكتار)".format(tot_sqkm, tot_sqkm * 100)
+                    if tot_perim > 0:
+                        sp_info["perimeter"] = "{:,.2f} كم".format(tot_perim)
+                    
+                    desc_m = arcpy.Describe(mask_src)
+                    ext_m = desc_m.extent
+                    sr_m = desc_m.spatialReference
+                    if sr_m and sr_m.factoryCode == 4326:
+                        sp_info["extent"] = "{:.4f}°N إلى {:.4f}°N | {:.4f}°E إلى {:.4f}°E".format(
+                            ext_m.YMin, ext_m.YMax, ext_m.XMin, ext_m.XMax
+                        )
+                    else:
+                        sr_wgs = arcpy.SpatialReference(4326)
+                        p_min = arcpy.PointGeometry(arcpy.Point(ext_m.XMin, ext_m.YMin), sr_m).projectAs(sr_wgs)
+                        p_max = arcpy.PointGeometry(arcpy.Point(ext_m.XMax, ext_m.YMax), sr_m).projectAs(sr_wgs)
+                        sp_info["extent"] = "{:.4f}°N إلى {:.4f}°N | {:.4f}°E إلى {:.4f}°E".format(
+                            p_min.firstPoint.Y, p_max.firstPoint.Y, p_min.firstPoint.X, p_max.firstPoint.X
+                        )
+                except Exception as ex_sp:
+                    warn("Could not calculate spatial geometry metrics: %s" % ex_sp)
+
+            pts_for_count = pts_src if ('pts_src' in locals() and pts_src and arcpy.Exists(pts_src)) else None
+            if not pts_for_count and in_extent_layer and arcpy.Exists(in_extent_layer):
+                pts_for_count = in_extent_layer
+            if not pts_for_count:
+                pts_chk = os.path.join(gdb_path, "%s_Grid_Points" % clean_sname)
+                if arcpy.Exists(pts_chk):
+                    pts_for_count = pts_chk
+            if pts_for_count:
+                try:
+                    cnt = int(arcpy.management.GetCount(pts_for_count)[0])
+                    sp_info["points"] = "{:,} محطة رصد مناخية".format(cnt)
+                except Exception:
+                    pass
+
+            generate_master_atlas_excel.build_master_classification_workbook(
+                base_dir=out_root,
+                study_area_name=clean_sname,
+                target_excel=guide_path,
+                spatial_info=sp_info,
+                tech_info={
+                    "cell_size": "%.1f متر (%.1f Meters)" % (eff_cell_size if is_geo else cell_size, cell_size),
+                    "wind_cell": "%.1f متر (%.1f Meters)" % (eff_wind_size if is_geo else wind_cell_size, wind_cell_size),
+                    "isobar_step": "4.0 mbar (Global Standard)",
+                    "interp": interp_method,
+                    "period": period_label,
+                    "source": source
+                }
+            )
+            msg("Generated Master Climate Atlas Classification Guide: %s" % guide_path)
+            root_guide_path = os.path.join(out_root, "Climate_Atlas_Classification_Guide.xlsx")
+            try:
+                import shutil
+                shutil.copy2(guide_path, root_guide_path)
+                msg("Saved root workspace copy of Classification Guide: %s" % root_guide_path)
+            except Exception as ex_copy:
+                warn("Could not copy Classification Guide to root: %s" % ex_copy)
+        except Exception as ex_guide:
+            warn("Could not generate Climate Atlas Classification Guide: %s" % ex_guide)
+
         msg("\n" + "=" * 70)
         msg("POWER Raster Climate Atlas Generation Complete in %.1f seconds." % elapsed)
         msg("Output workspace: %s" % out_root)
         msg("=" * 70)
+        try:
+            arcpy.CheckInExtension("Spatial")
+        except Exception:
+            pass
 
     # -----------------------------------------------------------------------
     # Helper: Generate Spatial Tiles for Regional Queries
@@ -1978,7 +2335,7 @@ class RasterDataClimateAtlasGenerator(object):
     # -----------------------------------------------------------------------
     def _process_tiles_to_master_points(self, source, module, tiles, start_yr, end_yr,
                                         gdb_path, aggs, scratch_dir, edl_user, edl_pass, msg, warn,
-                                        col_data_start="", col_data_end=""):
+                                        col_data_start="", col_data_end="", units_by_module=None):
         primary_param = POWER_PRIMARY_PARAM.get(module, "T2M")
         pts_fc = os.path.join(gdb_path, module.replace(" ", "_"))
         if arcpy.Exists(pts_fc):
@@ -2140,10 +2497,24 @@ class RasterDataClimateAtlasGenerator(object):
 
         arcpy.AddField_management(pts_fc, "Data_Start", "TEXT", field_length=30, field_alias="Data_Start")
         arcpy.AddField_management(pts_fc, "Data_End", "TEXT", field_length=30, field_alias="Data_End")
+        arcpy.AddField_management(pts_fc, "Measurement_Unit", "TEXT", field_length=25, field_alias="Measurement_Unit")
         if col_data_start:
             arcpy.CalculateField_management(pts_fc, "Data_Start", "'%s'" % str(col_data_start).replace("'", ""), CALC_EXPR_TYPE)
         if col_data_end:
             arcpy.CalculateField_management(pts_fc, "Data_End", "'%s'" % str(col_data_end).replace("'", ""), CALC_EXPR_TYPE)
+        unit_str = (units_by_module.get(module, "") if units_by_module else "")
+        if unit_str:
+            clean_u = _enc(unit_str).replace("'", "")
+            try:
+                arcpy.CalculateField_management(pts_fc, "Measurement_Unit", "'%s'" % clean_u, CALC_EXPR_TYPE)
+            except Exception:
+                try:
+                    with arcpy.da.UpdateCursor(pts_fc, ["Measurement_Unit"]) as _ucur:
+                        for _urow in _ucur:
+                            _urow[0] = unit_str
+                            _ucur.updateRow(_urow)
+                except Exception:
+                    pass
 
         # Set English aliases on all fields
         for fld, lbl in indicator_fields:
@@ -2161,7 +2532,7 @@ class RasterDataClimateAtlasGenerator(object):
     def _process_single_derived_to_master_points(self, source, mod, tiles, start_yr, end_yr,
                                                  gdb_path, scratch_dir, edl_user, edl_pass,
                                                  element_layers, intermediate_points, msg, warn,
-                                                 col_data_start="", col_data_end=""):
+                                                 col_data_start="", col_data_end="", units_by_module=None):
         req_map = {
             "Heat Index": ["Temperature", "Relative Humidity"],
             "Wind Chill": ["Temperature", "Wind"],
@@ -2233,6 +2604,21 @@ class RasterDataClimateAtlasGenerator(object):
             arcpy.AddField_management(pts_fc, "Data_End", "TEXT", field_length=30, field_alias="Data_End")
         if col_data_end:
             arcpy.CalculateField_management(pts_fc, "Data_End", "'%s'" % str(col_data_end).replace("'", ""), CALC_EXPR_TYPE)
+        if "Measurement_Unit" not in existing_flds:
+            arcpy.AddField_management(pts_fc, "Measurement_Unit", "TEXT", field_length=25, field_alias="Measurement_Unit")
+        unit_str = (units_by_module.get(mod, "") if units_by_module else "")
+        if unit_str:
+            clean_u = _enc(unit_str).replace("'", "")
+            try:
+                arcpy.CalculateField_management(pts_fc, "Measurement_Unit", "'%s'" % clean_u, CALC_EXPR_TYPE)
+            except Exception:
+                try:
+                    with arcpy.da.UpdateCursor(pts_fc, ["Measurement_Unit"]) as _ucur:
+                        for _urow in _ucur:
+                            _urow[0] = unit_str
+                            _ucur.updateRow(_urow)
+                except Exception:
+                    pass
 
         t_map = {}
         temp_fc = element_layers.get("Temperature") or intermediate_points.get("Temperature")
@@ -2359,7 +2745,7 @@ class RasterDataClimateAtlasGenerator(object):
     # -----------------------------------------------------------------------
     def _merge_offline_layers(self, layer_paths, gdb_path, out_sr, modules,
                               active_submodels, msg, warn,
-                              col_data_start="", col_data_end=""):
+                              col_data_start="", col_data_end="", units_by_module=None):
         element_fcs = {}
         indicator_fields_by_module = {}
         wgs_sr = arcpy.SpatialReference(4326)
@@ -2582,9 +2968,9 @@ class RasterDataClimateAtlasGenerator(object):
 
                 # Check if fields exist or need to be added
                 existing_f = set(f.name for f in arcpy.ListFields(pts_fc))
-                for req_admin in ["Point_ID", "POINT_X", "POINT_Y", "Data_Start", "Data_End"]:
+                for req_admin in ["Point_ID", "POINT_X", "POINT_Y", "Data_Start", "Data_End", "Measurement_Unit"]:
                     if req_admin not in existing_f:
-                        f_typ = "LONG" if req_admin == "Point_ID" else ("TEXT" if req_admin.startswith("Data_") else "DOUBLE")
+                        f_typ = "LONG" if req_admin == "Point_ID" else ("TEXT" if (req_admin.startswith("Data_") or req_admin == "Measurement_Unit") else "DOUBLE")
                         arcpy.AddField_management(pts_fc, req_admin, f_typ, field_alias=req_admin)
 
                 fld_names = [item[0] for item in ind_fields]
@@ -2595,7 +2981,7 @@ class RasterDataClimateAtlasGenerator(object):
 
                 # Populate attributes
                 oid_n = arcpy.Describe(pts_fc).OIDFieldName
-                with arcpy.da.UpdateCursor(pts_fc, [oid_n, "Point_ID", "POINT_X", "POINT_Y", "Data_Start", "Data_End"] + fld_names) as ucur:
+                with arcpy.da.UpdateCursor(pts_fc, [oid_n, "Point_ID", "POINT_X", "POINT_Y", "Data_Start", "Data_End", "Measurement_Unit"] + fld_names) as ucur:
                     for row in ucur:
                         p_oid = row[0]
                         p_idx = oid_to_idx.get(p_oid)
@@ -2606,6 +2992,7 @@ class RasterDataClimateAtlasGenerator(object):
                         row[3] = rec_entry.get("lat")
                         row[4] = col_data_start
                         row[5] = col_data_end
+                        row[6] = rec_fields.get("Measurement_Unit") or rec_fields.get("Unit") or (units_by_module.get(m, "") if units_by_module else "")
 
                         for fi, fld in enumerate(fld_names):
                             val = rec_fields.get(fld)
@@ -2613,11 +3000,11 @@ class RasterDataClimateAtlasGenerator(object):
                                 val = rec_fields.get(SHP_FIELD_MAP[fld])
                             if val is None and fld in REV_SHP_MAP:
                                 val = rec_fields.get(REV_SHP_MAP[fld])
-                            row[6 + fi] = val
+                            row[7 + fi] = val
                         ucur.updateRow(row)
 
                 # Clean any unwanted/extraneous fields (e.g. Feat_ID, Feat_Name, old base fields)
-                keep_fields = set(["OBJECTID", "Shape", "SHAPE", oid_n, "Point_ID", "POINT_X", "POINT_Y", "Data_Start", "Data_End"] + fld_names)
+                keep_fields = set(["OBJECTID", "Shape", "SHAPE", oid_n, "Point_ID", "POINT_X", "POINT_Y", "Data_Start", "Data_End", "Measurement_Unit"] + fld_names)
                 to_delete = [f.name for f in arcpy.ListFields(pts_fc) if f.name not in keep_fields and f.type not in ("OID", "Geometry")]
                 if to_delete:
                     try:
@@ -3060,7 +3447,6 @@ class RasterDataClimateAtlasGenerator(object):
                     except Exception: pass
                 arcpy.CopyFeatures_management(pts_fc, sub_shp)
 
-        csv_path = os.path.join(vec_dir, "%s_Table.csv" % mod_prefix)
         xls_path = os.path.join(vec_dir, "%s_Table.xls" % mod_prefix)
         existing_f = [f.name for f in arcpy.ListFields(pts_fc)]
         fields = ["Point_ID", "POINT_X", "POINT_Y"]
@@ -3068,6 +3454,10 @@ class RasterDataClimateAtlasGenerator(object):
             fields.append("Data_Start")
         if "Data_End" in existing_f:
             fields.append("Data_End")
+        if "Measurement_Unit" in existing_f:
+            fields.append("Measurement_Unit")
+        elif "Unit" in existing_f:
+            fields.append("Unit")
         fld_names = [f[0] for f in indicator_fields if f[0] in existing_f]
         fields.extend(fld_names)
 
@@ -3081,11 +3471,14 @@ class RasterDataClimateAtlasGenerator(object):
             header.append("Data_Start")
         if "Data_End" in existing_f:
             header.append("Data_End")
+        if "Measurement_Unit" in existing_f:
+            header.append("Measurement_Unit")
+        elif "Unit" in existing_f:
+            header.append("Unit")
         header.extend(fld_names)
 
-        write_csv(csv_path, header, rows)
         write_excel_file(xls_path, header, rows, sheet_name=module[:31])
-        msg("  -> Exported tables: CSV + XLS")
+        msg("  -> Exported table: %s" % os.path.basename(xls_path))
 
     # -----------------------------------------------------------------------
     # Helper: Generate .lyr file with embedded color ramp
@@ -3120,8 +3513,8 @@ class RasterDataClimateAtlasGenerator(object):
     # Helper: Write Bilingual Dictionaries & Log
     # -----------------------------------------------------------------------
     def _write_dictionaries(self, vec_dir, modules, msg):
-        dict_en = os.path.join(vec_dir, "Metadata_Dictionary.csv")
-        dict_ar = os.path.join(vec_dir, "Field_Dictionary_Arabic.csv")
+        dict_en_xls = os.path.join(vec_dir, "Metadata_Dictionary.xls")
+        dict_ar_xls = os.path.join(vec_dir, "Field_Dictionary_Arabic.xls")
 
         header_en = ["Module", "Field_Name", "Description", "Unit", "Source"]
         rows_en = [
@@ -3241,7 +3634,8 @@ class RasterDataClimateAtlasGenerator(object):
         for d_mod, d_rows in derived_meta_en.items():
             if d_mod in modules or "Climate_Models" in modules:
                 rows_en.extend(d_rows)
-        write_csv(dict_en, header_en, rows_en)
+        write_excel_file(dict_en_xls, header_en, rows_en, sheet_name="Metadata")
+        msg("  -> Exported dictionary: %s" % os.path.basename(dict_en_xls))
 
         header_ar = ["العنصر", "اسم_الحقل", "الوصف", "الوحدة", "المصدر"]
         rows_ar = [
@@ -3317,7 +3711,8 @@ class RasterDataClimateAtlasGenerator(object):
         for d_mod, d_rows in derived_meta_ar.items():
             if d_mod in modules or "Climate_Models" in modules:
                 rows_ar.extend(d_rows)
-        write_csv(dict_ar, header_ar, rows_ar)
+        write_excel_file(dict_ar_xls, header_ar, rows_ar, sheet_name="Arabic_Dictionary", rtl=True)
+        msg("  -> Exported dictionary (RTL): %s" % os.path.basename(dict_ar_xls))
 
     def _write_log(self, out_root, info):
         log_path = os.path.join(out_root, "Processing_Log.txt")
