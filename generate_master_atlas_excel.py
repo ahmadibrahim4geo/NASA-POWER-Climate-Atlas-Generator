@@ -84,12 +84,14 @@ MODULE_FOLDER_MAP = {
     "18_Trends_And_Anomalies": "18_Trends_And_Anomalies",
 }
 
-nice_numbers = [
-    0.01, 0.02, 0.025, 0.04, 0.05, 0.1, 0.125, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5,
-    0.6, 0.75, 0.8, 1.0, 1.25, 1.5, 2.0, 2.2, 2.5, 3.0, 3.5, 4.0, 5.0,
-    6.0, 7.0, 7.5, 8.0, 9.0, 10.0, 11.0, 12.0, 12.5, 15.0, 16.0, 20.0, 25.0, 30.0, 35.0,
-    40.0, 45.0, 50.0, 60.0, 70.0, 72.0, 75.0, 80.0, 100.0, 125.0, 150.0, 175.0,
-    200.0, 250.0, 300.0, 350.0, 400.0, 500.0, 1000.0
+NICE_INTEGERS = [
+    1, 2, 3, 4, 5, 6, 8, 10, 12, 14, 15, 16, 18, 20, 25, 30, 35, 40, 45, 50,
+    60, 70, 72, 75, 80, 90, 100, 120, 125, 150, 200, 250, 300, 350, 400, 500, 600, 700, 750, 800, 900, 1000, 1500, 2000
+]
+
+NICE_DECIMALS_1 = [
+    0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,
+    1.2, 1.4, 1.5, 1.6, 1.8, 2.2, 2.5, 2.8, 3.2, 3.5, 4.5
 ]
 
 def get_clean_unit_symbol(unit, fld):
@@ -122,42 +124,80 @@ def get_clean_unit_symbol(unit, fld):
         return u
     return u if u and u != "-" else ""
 
+def fmt_val(v, step=None):
+    """Format values strictly adhering to: whole integers if possible, at most 1 decimal place."""
+    if v is None:
+        return ""
+    if abs(v - round(v)) < 1e-4:
+        return str(int(round(v)))
+    if step is not None and step < 0.09:
+        return "{:.2f}".format(v)
+    return "{:.1f}".format(v)
+
 def get_equal_classes(fld, vmin, vmax, n_classes):
+    """Computes Equal Interval classes from largest to smallest (من الكبير إلى الصغير).
+    Prioritizes whole integers when feasible; otherwise strictly 1 decimal place.
+    Ensures complete coverage including the empirical Maximum.
+    """
     # Special exact physical cases: Wind direction is 0-360 azimuth everywhere
     if fld.startswith("W_Dir"):
-        step = 360.0 / float(n_classes)
-        breaks = [round(i * step, 2) for i in range(n_classes + 1)]
-        return step, breaks
+        if n_classes == 3: return 120, [0, 120, 240, 360]
+        if n_classes == 5: return 72, [0, 72, 144, 216, 288, 360]
+        if n_classes == 9: return 40, [0, 40, 80, 120, 160, 200, 240, 280, 320, 360]
+        step = round(360.0 / float(n_classes), 1)
+        if abs(step - round(step)) < 1e-4: step = int(round(step))
+        return step, [round(i * step, 1) for i in range(n_classes + 1)]
 
-    span = vmax - vmin
+    # Dry months: discrete 0-12 integer count
+    if "Dry_Months" in fld:
+        step = max(1, int(math.ceil((vmax - vmin) / float(n_classes))))
+        start = int(math.floor(vmin / float(step))) * step
+        return step, [start + i * step for i in range(n_classes + 1)]
+
+    span = float(vmax - vmin)
     if span <= 0: span = 1.0
+
+    # 1. Try Integer steps first (Prioritizing whole integers without fractions)
+    if span >= n_classes * 0.65:
+        for ns in NICE_INTEGERS:
+            if ns * n_classes >= span:
+                start = math.floor(vmin / float(ns)) * ns
+                end = start + n_classes * ns
+                if end >= vmax:
+                    excess = (end - vmax) + (vmin - start)
+                    if (excess / span <= 0.30) or (span < 4.0):
+                        breaks = [int(start + i * ns) for i in range(n_classes + 1)]
+                        return ns, breaks
+
+    # 2. Try 1-decimal steps if integer step is not suitable
+    all_nice = sorted(NICE_DECIMALS_1 + [float(x) for x in NICE_INTEGERS])
     cand = []
-    for ns in nice_numbers:
+    for ns in all_nice:
         if ns * n_classes >= span * 0.999:
-            start = math.floor(vmin / ns) * ns
-            if start + n_classes * ns >= vmax - 1e-4:
-                excess = (start + n_classes * ns - vmax) + (vmin - start)
+            start = math.floor(round(vmin / ns, 4)) * ns
+            start = round(start, 1)
+            end = round(start + n_classes * ns, 1)
+            if end >= vmax - 1e-4:
+                excess = (end - vmax) + (vmin - start)
                 cand.append((excess, ns, start))
     if cand:
         cand.sort(key=lambda x: (x[0], x[1]))
         _, step, start = cand[0]
-    else:
-        step = math.ceil(span / float(n_classes))
-        start = math.floor(vmin / step) * step
-    breaks = [round(start + i * step, 4) for i in range(n_classes + 1)]
+        breaks = [round(start + i * step, 1) for i in range(n_classes + 1)]
+        return step, breaks
+
+    # 3. Fallback: 1-decimal equal step
+    step = round(span / float(n_classes), 1)
+    if step == 0: step = 0.1
+    start = round(vmin, 1)
+    breaks = [round(start + i * step, 1) for i in range(n_classes + 1)]
     return step, breaks
 
-def fmt_val(v, step):
-    if step >= 1 and abs(v - round(v)) < 1e-4:
-        return str(int(round(v)))
-    elif step >= 0.1 and abs(v * 10 - round(v * 10)) < 1e-4:
-        return "{:.1f}".format(v)
-    elif step >= 0.01:
-        return "{:.2f}".format(v)
-    else:
-        return "{:.3f}".format(v)
-
 def generate_gis_labels(fld, breaks, step, unit):
+    """Generates clean GIS cartographic interval labels ordered from Large to Small (من الكبير إلى الصغير).
+    Class 1 (Highest) includes the true upper Maximum (no open-ended '>').
+    Class N (Lowest) includes the true lower Minimum.
+    """
     n = len(breaks) - 1
     labels = []
     u_sym = get_clean_unit_symbol(unit, fld)
@@ -165,15 +205,11 @@ def generate_gis_labels(fld, breaks, step, unit):
     if u_sym == "°":
         u_str = "°"
 
+    # From largest to smallest (من الكبير للصغير)
     for i in range(n, 0, -1):
         upper = fmt_val(breaks[i], step)
         lower = fmt_val(breaks[i-1], step)
-        if i == n:
-            lbl = "> {}{}".format(lower, u_str)
-        elif i == 1:
-            lbl = "< {}{}".format(upper, u_str)
-        else:
-            lbl = "{} - {}{}".format(lower, upper, u_str)
+        lbl = "{} - {}{}".format(lower, upper, u_str)
         labels.append(lbl)
     return labels
 
@@ -222,7 +258,7 @@ def load_authoritative_fields():
 
     return fields_list
 
-def build_master_classification_workbook(base_dir=None, study_area_name="Egypt", target_excel=None, spatial_info=None, tech_info=None):
+def build_master_classification_workbook(base_dir=None, study_area_name="Egypt", target_excel=None, spatial_info=None, tech_info=None, raster_stats=None):
     r"""
     Builds the complete 7-sheet Master Climate Atlas Classification & Specification Workbook.
     Automatically saves copies to:
@@ -245,7 +281,8 @@ def build_master_classification_workbook(base_dir=None, study_area_name="Egypt",
                 "study_area_name": study_area_name,
                 "target_excel": target_excel,
                 "spatial_info": spatial_info or {},
-                "tech_info": tech_info or {}
+                "tech_info": tech_info or {},
+                "raster_stats": raster_stats or {}
             }
             json_file = os.path.join(tempfile.gettempdir(), "atlas_guide_args.json")
             with open(json_file, "w") as jf:
@@ -268,8 +305,12 @@ def build_master_classification_workbook(base_dir=None, study_area_name="Egypt",
             pass
         return target_excel
 
-    # 1. Parse all raster aux.xml files for exact empirical Min, Max, Mean and folder location
-    raster_stats = {}
+    # 1. Parse all raster aux.xml files or query ArcPy for exact empirical Min, Max, Mean and folder location
+    if raster_stats is None:
+        raster_stats = {}
+    else:
+        raster_stats = dict(raster_stats)
+
     if os.path.exists(base_dir):
         for root, dirs, files in os.walk(base_dir):
             for f in sorted(files):
@@ -277,6 +318,8 @@ def build_master_classification_workbook(base_dir=None, study_area_name="Egypt",
                     rel_folder = os.path.relpath(root, base_dir)
                     tif_name = f
                     fld_name = f[:-4]
+                    if fld_name in raster_stats and raster_stats[fld_name].get('min') is not None:
+                        continue
                     xml_path = os.path.join(root, f + '.aux.xml')
                     s_min, s_max, s_mean = None, None, None
                     if os.path.exists(xml_path):
@@ -296,13 +339,24 @@ def build_master_classification_workbook(base_dir=None, study_area_name="Egypt",
                                 if hmax is not None and hmax.text: s_max = float(hmax.text)
                         except Exception:
                             pass
-                    raster_stats[fld_name] = {
-                        'folder': rel_folder,
-                        'tif': tif_name,
-                        'min': s_min if s_min is not None else 0.0,
-                        'max': s_max if s_max is not None else 1.0,
-                        'mean': s_mean if s_mean is not None else (0.5 if s_min is None else (s_min + s_max) / 2.0)
-                    }
+                    # ArcPy direct query fallback if statistics not found in aux.xml
+                    if s_min is None or s_max is None:
+                        try:
+                            import arcpy
+                            tif_fpath = os.path.join(root, f)
+                            s_min = float(arcpy.GetRasterProperties_management(tif_fpath, "MINIMUM")[0])
+                            s_max = float(arcpy.GetRasterProperties_management(tif_fpath, "MAXIMUM")[0])
+                            s_mean = float(arcpy.GetRasterProperties_management(tif_fpath, "MEAN")[0])
+                        except Exception:
+                            pass
+                    if s_min is not None and s_max is not None:
+                        raster_stats[fld_name] = {
+                            'folder': rel_folder,
+                            'tif': tif_name,
+                            'min': s_min,
+                            'max': s_max,
+                            'mean': s_mean if s_mean is not None else (s_min + s_max) / 2.0
+                        }
 
     # Load authoritative climate fields (103 elements)
     climate_fields = load_authoritative_fields()
@@ -941,9 +995,9 @@ def build_master_classification_workbook(base_dir=None, study_area_name="Egypt",
                 (8, u_sym or unit, Alignment(horizontal="center", vertical="center"), DATA_FONT_BOLD),
                 (9, "Equal Interval", Alignment(horizontal="center", vertical="center"), DATA_FONT),
                 (10, "{}{}".format(fmt_val(step, step), u_suf), Alignment(horizontal="center", vertical="center"), CODE_FONT_BOLD),
-                (11, "{:.2f}{}".format(vmin, u_suf), Alignment(horizontal="center", vertical="center"), CODE_FONT),
-                (12, "{:.2f}{}".format(vmax, u_suf), Alignment(horizontal="center", vertical="center"), CODE_FONT),
-                (13, "{:.2f}{}".format(vmean, u_suf), Alignment(horizontal="center", vertical="center"), CODE_FONT),
+                (11, "{}{}".format(fmt_val(vmin, step), u_suf), Alignment(horizontal="center", vertical="center"), CODE_FONT),
+                (12, "{}{}".format(fmt_val(vmax, step), u_suf), Alignment(horizontal="center", vertical="center"), CODE_FONT_BOLD),
+                (13, "{}{}".format(fmt_val(vmean, step), u_suf), Alignment(horizontal="center", vertical="center"), CODE_FONT),
             ]
 
             for ci, lbl in enumerate(labels, 1):
@@ -1001,7 +1055,8 @@ if __name__ == "__main__":
             study_area_name=data.get("study_area_name", "Egypt"),
             target_excel=data.get("target_excel"),
             spatial_info=data.get("spatial_info"),
-            tech_info=data.get("tech_info")
+            tech_info=data.get("tech_info"),
+            raster_stats=data.get("raster_stats")
         )
     else:
         build_master_classification_workbook(base_dir=args.base_dir, study_area_name=args.study_area, target_excel=args.target_excel)

@@ -6586,6 +6586,11 @@ class PowerClimateAtlasGenerator(object):
                     except Exception:
                         src_raster.save(rp)
 
+                try:
+                    arcpy.management.CalculateStatistics(rp)
+                except Exception:
+                    pass
+
                 t_fld_dur = time.time() - t_fld_start
                 msg("     [OK] Successfully saved: %s (in %.1f seconds)" % (os.path.basename(rp), t_fld_dur))
                 if raster_timings is not None:

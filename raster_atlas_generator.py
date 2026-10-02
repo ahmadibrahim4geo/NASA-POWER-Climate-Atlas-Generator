@@ -3255,7 +3255,7 @@ class RasterDataClimateAtlasGenerator(object):
                 arcpy.env.compression = "LZW"
                 arcpy.env.tileSize = "128 128"
                 arcpy.env.pyramid = "NONE"
-                arcpy.env.rasterStatistics = "NONE"
+                arcpy.env.rasterStatistics = "STATISTICS 1 1"
                 arcpy.env.parallelProcessingFactor = "0"
             except Exception:
                 pass
@@ -3281,11 +3281,18 @@ class RasterDataClimateAtlasGenerator(object):
                         arcpy.env.compression = "LZW"
                         arcpy.env.tileSize = "128 128"
                         arcpy.env.pyramid = "NONE"
+                        arcpy.env.rasterStatistics = "STATISTICS 1 1"
                     except Exception:
                         pass
                     arcpy.ProjectRaster_management(out_tif, tmp_proj, out_sr)
                     arcpy.management.Delete(out_tif)
                     arcpy.Rename_management(tmp_proj, out_tif)
+
+            # Build and calculate statistics so .aux.xml and dataset headers have exact empirical values
+            try:
+                arcpy.management.CalculateStatistics(out_tif)
+            except Exception:
+                pass
 
             return True
         except Exception as ex:
