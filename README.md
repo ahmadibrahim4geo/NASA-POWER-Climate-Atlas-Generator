@@ -167,14 +167,29 @@
 
 ---
 
-### ٧. المنظومة الكارتوجرافية والستايلات المعتمدة
-* تتضمن مكتبة الستايلات المعتمدة في مجلد `style/`:
+### ٧. المنظومة الكارتوجرافية والستايلات ودليل التصنيف المعتمد
+* **أ. مكتبة الستايلات العلمية المعتمدة (مجلد `style/`)**:
   - **125 ستايلاً كارتوجرافياً علمياً** يغطي كافة المجالات المناخية، مسنداً للمراجع الدولية (WMO, IPCC AR6, NOAA NCEI, ECMWF ERA5, WHO).
   - **2,250 تدرجاً لونياً (Color Ramps)** تدعم التصنيف من 3 إلى 11 فئة، بنمطين رئيسيين:
     - نمط **`[Stepped]`**: فئات لونية مصمتة ومنفصلة لخرائط الراستر المصنفة (`Classified`).
     - نمط **`[Smooth]`**: تدرجات لونية انسيابية متصلة لخرائط الراستر الممتدة (`Stretched`).
   - مصنف الإكسيل الماستر المرئي الملون (`NASA_POWER_Climate_Atlas_Master_Styles.xlsx`).
   - قاموس الحقول والوحدات المعتمد باللغتين العربية والإنجليزية (`Fields_AR_EN_Units.xlsx`).
+
+* **ب. دليل التصنيف الكارتوجرافي الشامل للأطلس (`Climate_Atlas_Classification_Guide.xlsx`)**:
+  تنتج الأداة تلقائياً دليلاً معيارياً فائق الدقة في مجلد `00_Tables_And_Reports` والمسار الجذري، يتضمن:
+  1. **مستويات الفئات الأربعة القياسية**: أوراق عمل مخصصة لـ (3 فئات - تنفيذي)، (5 فئات - المعيار الذهبي)، (7 فئات - أكاديمي تفصيلي)، (9 فئات - مدى واسع مكثف).
+  2. **خوارزمية إنقاذ الفئات المنهارة (Degenerate Class Recovery Engine)**:
+     - عند تشغيل تصنيف الفئات المتساوية (Equal Interval) بأرقام صحيحة في ArcMap للراسترات ذات المدى الضيق، يُسفر التقريب الميكانيكي أحياناً عن فئات شاذة أو منهارة مثل (`27 - 27°` أو `6 - 6`).
+     - تقوم المنظومة تلقائياً بكشف هذه الفئات وإعادة موازنة السلسلة بالكامل من الأسفل إلى الأعلى بخطوة صحيحة منتظمة متساوية (درجتين أو أكثر: `20 - 21°`، `22 - 23°`، `24 - 25°`، `26 - 27°`، `28 - 29°`).
+  3. **التوثيق المزدوج فائق الشفافية في نفس الخلية**:
+     - لمنع تشتت الباحث، يُعرض في خلية الأرقام الصحيحة: **الحل الكارتوجرافي المتوازن الموصى به** يليه مباشرة بين قوسين **أصل أرك ماب الميكانيكي**، مثل:
+       `26 - 27° (أصل أرك ماب: 27 - 27°)`
+     - عندما تكون الفئة سليمة ومتطابقة أصلاً مع أرك ماب (مثل `22 - 25°`) تُعرض مباشرة دون أقواس إضافية.
+  4. **عمود الكسور العشرية الدقيق (1 Decimal)**:
+     - يوفر فواصل أرك ماب الحرفية بدقة `0.1` بجوار كل فئة، لتمكين الباحثين من المقارنة الرقمية أو استخدام الفئات الكسرية.
+  5. **توحيد الرموز والوحدات الفيزيائية المعيارية**:
+     - رمز الدرجة المئوية يظهر كرمز منفرد `°` في نهاية فئات الحرارة فقط دون تكرار ودون إلحاق حرف `C`، مع ضبط باقي الوحدات (`mm`، `%`، `hPa`، `m/s`، `°/dec`).
 
 ---
 
@@ -292,12 +307,18 @@ The platform enforces a strict **1:1 unified naming convention** connecting UI p
 
 ---
 
-## 🎨 Cartographic Mega System
+## 🎨 Cartographic Mega System & Classification Guide
 
 - **125 Scientific Styles** conforming to WMO, IPCC AR6, NOAA NCEI, and ECMWF standards.
 - **2,250 Color Ramps** across 9 class tiers (3 to 11 classes) with `[Stepped]` and `[Smooth]` modes.
 - Master Excel visual palette catalog: `NASA_POWER_Climate_Atlas_Master_Styles.xlsx`.
 - Complete bilingual field dictionary and units reference: `Fields_AR_EN_Units.xlsx`.
+- **Automated Cartographic Classification Guide (`Climate_Atlas_Classification_Guide.xlsx`)**:
+  - Generates comprehensive classification guide sheets across 3, 5, 7, and 9 classes.
+  - **Intelligent Degenerate Class Recovery Engine**: Automatically detects and rescues collapsed mechanical classes (e.g., `27 - 27°` or `6 - 6`) into balanced, non-overlapping uniform ranges (e.g., `26 - 27°`, `28 - 29°`) with bottom-to-top chain consistency.
+  - **Transparent Dual In-Cell Annotation**: Cells present the recommended clean cartographic range followed by ArcMap's raw mechanical output in parentheses (e.g., `26 - 27° (أصل أرك ماب: 27 - 27°)`), preventing user confusion.
+  - **Dual Representation Columns**: Integer discrete intervals alongside high-precision 1-decimal intervals for exact numerical reference.
+  - **Strict International Unit & Symbol Standardization**: Clean degree symbol `°` without duplicate `C` notation, plus `mm`, `%`, `hPa`, `m/s`, and `°/dec`.
 
 ---
 

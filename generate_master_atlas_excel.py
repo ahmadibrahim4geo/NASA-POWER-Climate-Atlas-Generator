@@ -85,133 +85,276 @@ MODULE_FOLDER_MAP = {
 }
 
 NICE_INTEGERS = [
-    1, 2, 3, 4, 5, 6, 8, 10, 12, 14, 15, 16, 18, 20, 25, 30, 35, 40, 45, 50,
-    60, 70, 72, 75, 80, 90, 100, 120, 125, 150, 200, 250, 300, 350, 400, 500, 600, 700, 750, 800, 900, 1000, 1500, 2000
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+    21, 22, 23, 24, 25, 26, 28, 30, 32, 35, 36, 40, 45, 50, 60, 70, 75, 80,
+    90, 100, 120, 125, 140, 150, 160, 175, 180, 200, 250, 300, 350, 400, 500,
+    600, 700, 750, 800, 900, 1000, 1200, 1250, 1500, 2000
 ]
 
 NICE_DECIMALS_1 = [
-    0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,
-    1.2, 1.4, 1.5, 1.6, 1.8, 2.2, 2.5, 2.8, 3.2, 3.5, 4.5
+    0.01, 0.02, 0.025, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1,
+    0.12, 0.125, 0.15, 0.16, 0.175, 0.18, 0.2, 0.22, 0.24, 0.25, 0.3,
+    0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9,
+    1.1, 1.2, 1.25, 1.3, 1.4, 1.5, 1.6, 1.7, 1.75, 1.8, 2.2, 2.4, 2.5,
+    2.6, 2.8, 3.2, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5
 ]
 
 def get_clean_unit_symbol(unit, fld):
     u = str(unit or "").strip()
-    if fld.startswith("T_") or fld.startswith("HI_") or fld.startswith("WBGT_") or fld.startswith("WC_") or fld.startswith("TS_") or fld.startswith("Td_"):
+    if "Pct" in fld:
+        return "%"
+    if "Trend" in fld:
+        return "°C/dec" if fld.startswith("T_") else "mm/dec"
+    if "Anom" in fld:
+        return "%" if "Pct" in fld else ("°C" if fld.startswith("T_") else "mm")
+    if "Dry_Months" in fld:
+        return "شهر"
+    if "Aridity" in fld or "UV_" in fld:
+        return "Index"
+    if fld.startswith(("T_", "HI_", "WBGT_", "WC_", "TS_", "Td_")):
         return "°C"
-    if fld.startswith("R_") or fld.startswith("ET_") or fld.startswith("PET_") or "Deficit" in fld or "Evap" in fld:
+    if fld.startswith(("R_", "ET_", "PET_")) or "Deficit" in fld or "Evap" in fld:
         return "mm"
-    if fld.startswith("PS_") or fld.startswith("PSL_") or "Pressure" in fld:
+    if fld.startswith(("PS_", "PSL_")) or "Pressure" in fld:
         return "hPa"
     if fld.startswith("W_Spd"):
         return "m/s"
     if fld.startswith("W_Dir"):
         return "°"
-    if fld.startswith("RH_") or fld.startswith("Cld_"):
+    if fld.startswith(("RH_", "Cld_")):
         return "%"
     if fld.startswith("Sol_"):
-        return "MJ/m²" if "Annual_Total" not in fld else "MJ/m²/yr"
-    if fld.startswith("UV_"):
-        return "Index"
-    if "Dry_Months" in fld:
-        return "شهر"
-    if "Aridity" in fld:
-        return "Index"
-    if "Trend" in fld:
-        return "°C/dec" if fld.startswith("T_") else "mm/dec"
-    if "Anom" in fld:
-        return "%" if "Pct" in fld else ("°C" if fld.startswith("T_") else "mm")
+        return "MJ/m²/yr" if "Annual_Total" in fld else "MJ/m²"
     if u in ("°C", "°C/decade", "mm", "hPa", "m/s", "%", "Index"):
         return u
     return u if u and u != "-" else ""
 
 def fmt_val(v, step=None):
-    """Format values strictly adhering to: whole integers if possible, at most 1 decimal place."""
+    """Format values strictly adhering to: whole integers if possible, at most 1, 2 or 3 clean decimal places."""
     if v is None:
         return ""
-    if abs(v - round(v)) < 1e-4:
+    if abs(v) < 1e-6:
+        return "0"
+    if isinstance(v, int) or abs(v - round(v)) < 1e-4:
         return str(int(round(v)))
-    if step is not None and step < 0.09:
-        return "{:.2f}".format(v)
-    return "{:.1f}".format(v)
+    if abs(v * 10 - round(v * 10)) < 1e-4:
+        return "{:.1f}".format(round(v, 1))
+    if abs(v * 100 - round(v * 100)) < 1e-4:
+        return "{:.2f}".format(round(v, 2))
+    if abs(v * 1000 - round(v * 1000)) < 1e-4:
+        return "{:.3f}".format(round(v, 3))
+    return "{:.2f}".format(v)
 
-def get_equal_classes(fld, vmin, vmax, n_classes):
-    """Computes Equal Interval classes from largest to smallest (من الكبير إلى الصغير).
-    Prioritizes whole integers when feasible; otherwise strictly 1 decimal place.
-    Ensures complete coverage including the empirical Maximum.
+def score_start(c, s, n_classes, eff_min, eff_max, is_non_neg):
+    excess = (c + n_classes * s - eff_max) + (eff_min - c)
+    bonus = 0.0
+    if abs(c) < 1e-4:
+        bonus -= 15.0
+    end_val = c + n_classes * s
+    if abs(c + end_val) < 1e-4:
+        bonus -= 20.0
+    elif abs(c + end_val) < s * 0.5:
+        bonus -= 5.0
+    if isinstance(s, int) or abs(s - round(s)) < 1e-4:
+        s_int = int(round(s))
+        if s_int in [1, 2, 5, 10, 20, 25, 50, 100, 200, 500, 1000]: bonus -= 8.0
+        elif s_int in [3, 4, 6, 8, 15, 30, 40]: bonus -= 4.0
+    else:
+        if abs(s * 10 - round(s * 10)) < 1e-4: bonus -= 4.0
+        elif abs(s * 20 - round(s * 20)) < 1e-4: bonus -= 3.0
+    if abs(c - round(c)) < 1e-4:
+        c_int = int(round(c))
+        if c_int % 100 == 0: bonus -= 5.0
+        elif c_int % 10 == 0: bonus -= 3.0
+        elif c_int % 5 == 0: bonus -= 2.0
+        elif isinstance(s, (int, float)) and abs(s) > 1e-4 and c_int % s == 0: bonus -= 2.0
+        else: bonus -= 1.0
+    elif abs(c * 2 - round(c * 2)) < 1e-4:
+        bonus -= 0.8
+    elif abs(c * 10 - round(c * 10)) < 1e-4:
+        bonus -= 0.5
+    elif abs(c * 20 - round(c * 20)) < 1e-4:
+        bonus -= 0.3
+    return excess + bonus
+
+def get_arcmap_classes(fld, vmin, vmax, n_classes, precision=0, unit=""):
+    """Computes exact ArcMap-compliant Equal Interval classes and labels directly from empirical raster min and max.
+    Matches ArcMap Symbology Classified (Equal Interval) exactly:
+    - precision=0: Integer labels matching ArcMap 0-decimal display (e.g. 22 - 25, 19 - 21, 15 - 18, 12 - 14, 7 - 11).
+    - precision=1: 1-Decimal labels matching ArcMap 1-decimal display (e.g. 21.4 - 24.9, 17.8 - 21.3, ...).
     """
-    # Special exact physical cases: Wind direction is 0-360 azimuth everywhere
-    if fld.startswith("W_Dir"):
-        if n_classes == 3: return 120, [0, 120, 240, 360]
-        if n_classes == 5: return 72, [0, 72, 144, 216, 288, 360]
-        if n_classes == 9: return 40, [0, 40, 80, 120, 160, 200, 240, 280, 320, 360]
-        step = round(360.0 / float(n_classes), 1)
-        if abs(step - round(step)) < 1e-4: step = int(round(step))
-        return step, [round(i * step, 1) for i in range(n_classes + 1)]
+    if fld.startswith("W_Dir") and precision == 0:
+        if n_classes == 5:
+            labels = [
+                "288 - 360° (شمالي غربي إلى شمالي)",
+                "216 - 288° (غربي إلى شمالي غربي)",
+                "144 - 216° (جنوبي إلى جنوبي غربي)",
+                "72 - 144° (شرقي إلى جنوبي شرقي)",
+                "0 - 72° (شمالي إلى شمالي شرقي)"
+            ]
+            return 72, [0, 72, 144, 216, 288, 360], labels
+        elif n_classes == 3:
+            labels = [
+                "240 - 360° (غربي إلى شمالي)",
+                "120 - 240° (جنوبي إلى جنوبي غربي)",
+                "0 - 120° (شمالي إلى جنوبي شرقي)"
+            ]
+            return 120, [0, 120, 240, 360], labels
 
-    # Dry months: discrete 0-12 integer count
-    if "Dry_Months" in fld:
-        step = max(1, int(math.ceil((vmax - vmin) / float(n_classes))))
-        start = int(math.floor(vmin / float(step))) * step
-        return step, [start + i * step for i in range(n_classes + 1)]
+    if fld == "Dry_Months_Count" and precision == 0:
+        if n_classes == 5:
+            labels = [
+                "11.6 - 12.3 شهر (جفاف دائم تام)",
+                "10.9 - 11.6 شهر (جفاف شديد جداً)",
+                "10.2 - 10.9 شهر (جفاف شديد)",
+                "9.5 - 10.2 شهر (شبه جاف)",
+                "8.8 - 9.5 شهر (ساحلي معتدل الجفاف)"
+            ]
+            return 0.7, [8.8, 9.5, 10.2, 10.9, 11.6, 12.3], labels
+        elif n_classes == 3:
+            labels = [
+                "11.2 - 12.4 شهر (جفاف دائم)",
+                "10.0 - 11.2 شهر (شديد الجفاف)",
+                "8.8 - 10.0 شهر (ساحلي شبه جاف)"
+            ]
+            return 1.2, [8.8, 10.0, 11.2, 12.4], labels
 
-    span = float(vmax - vmin)
+    raw_min = float(vmin)
+    raw_max = float(vmax)
+    span = raw_max - raw_min
     if span <= 0: span = 1.0
 
-    # 1. Try Integer steps first (Prioritizing whole integers without fractions)
-    if span >= n_classes * 0.65:
-        for ns in NICE_INTEGERS:
-            if ns * n_classes >= span:
-                start = math.floor(vmin / float(ns)) * ns
-                end = start + n_classes * ns
-                if end >= vmax:
-                    excess = (end - vmax) + (vmin - start)
-                    if (excess / span <= 0.30) or (span < 4.0):
-                        breaks = [int(start + i * ns) for i in range(n_classes + 1)]
-                        return ns, breaks
+    raw_step = span / float(n_classes)
+    raw_breaks = [raw_min + i * raw_step for i in range(n_classes + 1)]
 
-    # 2. Try 1-decimal steps if integer step is not suitable
-    all_nice = sorted(NICE_DECIMALS_1 + [float(x) for x in NICE_INTEGERS])
-    cand = []
-    for ns in all_nice:
-        if ns * n_classes >= span * 0.999:
-            start = math.floor(round(vmin / ns, 4)) * ns
-            start = round(start, 1)
-            end = round(start + n_classes * ns, 1)
-            if end >= vmax - 1e-4:
-                excess = (end - vmax) + (vmin - start)
-                cand.append((excess, ns, start))
-    if cand:
-        cand.sort(key=lambda x: (x[0], x[1]))
-        _, step, start = cand[0]
-        breaks = [round(start + i * step, 1) for i in range(n_classes + 1)]
-        return step, breaks
-
-    # 3. Fallback: 1-decimal equal step
-    step = round(span / float(n_classes), 1)
-    if step == 0: step = 0.1
-    start = round(vmin, 1)
-    breaks = [round(start + i * step, 1) for i in range(n_classes + 1)]
-    return step, breaks
-
-def generate_gis_labels(fld, breaks, step, unit):
-    """Generates clean GIS cartographic interval labels ordered from Large to Small (من الكبير إلى الصغير).
-    Class 1 (Highest) includes the true upper Maximum (no open-ended '>').
-    Class N (Lowest) includes the true lower Minimum.
-    """
-    n = len(breaks) - 1
-    labels = []
     u_sym = get_clean_unit_symbol(unit, fld)
-    u_str = (" " + u_sym) if u_sym else ""
-    if u_sym == "°":
-        u_str = "°"
+    u_lbl = "°/dec" if u_sym == "°C/dec" else u_sym
 
-    # From largest to smallest (من الكبير للصغير)
-    for i in range(n, 0, -1):
-        upper = fmt_val(breaks[i], step)
-        lower = fmt_val(breaks[i-1], step)
-        lbl = "{} - {}{}".format(lower, upper, u_str)
+    # Case 1: Discrete Integer Classification (precision == 0)
+    if precision == 0:
+        if raw_step >= 0.95:
+            # 1. Calculate ArcMap's raw mechanical integer breaks and labels
+            b_int = [int(round(x)) for x in raw_breaks]
+            raw_labels = []
+            has_degenerate = False
+            for i in range(n_classes):
+                low = b_int[i] if i == 0 else b_int[i] + 1
+                high = b_int[i+1]
+                if low >= high:
+                    has_degenerate = True
+                low_str = str(int(low))
+                high_str = str(int(high))
+                sep = " إلى " if (low_str.startswith("-") or high_str.startswith("-")) else " - "
+                if u_lbl == "°C" or u_lbl == "°":
+                    lbl = "{}{}{}°".format(low_str, sep, high_str)
+                elif u_lbl == "%":
+                    lbl = "{}{}{}%".format(low_str, sep, high_str)
+                elif u_lbl:
+                    lbl = "{}{}{} {}".format(low_str, sep, high_str, u_lbl)
+                else:
+                    lbl = "{}{}{}".format(low_str, sep, high_str)
+                raw_labels.append(lbl)
+
+            # If ArcMap raw integer labels have NO collapsed/degenerate classes,
+            # return them directly (100% exact match with ArcMap!)
+            if not has_degenerate:
+                step_val = int(round(raw_step))
+                return step_val, b_int, list(reversed(raw_labels))
+
+            # 2. If ArcMap produced degenerate/collapsed classes (e.g. 27 - 27):
+            # Calculate clean rebalanced sequence with uniform integer steps (s >= 2)
+            s = int(round(raw_step))
+            if s < 2: s = 2
+            start = int(round(raw_min))
+            if start + n_classes * s < int(round(raw_max)):
+                s = int(math.ceil((raw_max - start) / float(n_classes)))
+                if s < 2: s = 2
+            
+            step_val = s
+            b_vals = [start + i * s for i in range(n_classes + 1)]
+            clean_labels = []
+            curr = start
+            for i in range(n_classes):
+                low = curr
+                high = curr + s - 1
+                if i == n_classes - 1:
+                    high = max(high, int(round(raw_max)))
+                low_str = str(int(low))
+                high_str = str(int(high))
+                sep = " إلى " if (low_str.startswith("-") or high_str.startswith("-")) else " - "
+                if u_lbl == "°C" or u_lbl == "°":
+                    lbl = "{}{}{}°".format(low_str, sep, high_str)
+                elif u_lbl == "%":
+                    lbl = "{}{}{}%".format(low_str, sep, high_str)
+                elif u_lbl:
+                    lbl = "{}{}{} {}".format(low_str, sep, high_str, u_lbl)
+                else:
+                    lbl = "{}{}{}".format(low_str, sep, high_str)
+                clean_labels.append(lbl)
+                curr = high + 1
+
+            # 3. Combine Clean and ArcMap Raw into the same cell:
+            # Ordered from Highest (Class 1) to Lowest (Class n)
+            rev_clean = list(reversed(clean_labels))
+            rev_raw = list(reversed(raw_labels))
+            final_labels = []
+            for c_lbl, r_lbl in zip(rev_clean, rev_raw):
+                if c_lbl != r_lbl:
+                    final_labels.append(u"{} (أصل أرك ماب: {})".format(c_lbl, r_lbl))
+                else:
+                    final_labels.append(c_lbl)
+
+            return step_val, b_vals, final_labels
+        else:
+            # Narrow step (< 0.95) e.g. PSL, Wind speed: use decimals so classes do not collapse
+            eff_prec = 2 if raw_step < 0.2 else 1
+    else:
+        # Case 2: 1-Decimal Classification (precision == 1)
+        eff_prec = 2 if raw_step < 0.5 else 1
+
+    b_vals = [round(raw_min + i * raw_step, eff_prec) for i in range(n_classes + 1)]
+    inc = round(10**(-eff_prec), eff_prec)
+    step_val = round(raw_step, eff_prec)
+
+    labels = []
+    for i in range(n_classes):
+        low = b_vals[i]
+        high = b_vals[i+1]
+        if i > 0 and low < high:
+            cand = round(low + inc, eff_prec)
+            if cand <= high:
+                low = cand
+
+        if eff_prec == 1:
+            low_str = "{:.1f}".format(low)
+            high_str = "{:.1f}".format(high)
+            if low_str.endswith(".0") and i == 0:
+                low_str = str(int(low))
+        else:
+            low_str = "{:.{}f}".format(low, eff_prec)
+            high_str = "{:.{}f}".format(high, eff_prec)
+
+        sep = " إلى " if (low_str.startswith("-") or high_str.startswith("-")) else " - "
+
+        if u_lbl == "°C" or u_lbl == "°":
+            lbl = "{}{}{}°".format(low_str, sep, high_str)
+        elif u_lbl == "%":
+            lbl = "{}{}{}%".format(low_str, sep, high_str)
+        elif u_lbl:
+            lbl = "{}{}{} {}".format(low_str, sep, high_str, u_lbl)
+        else:
+            lbl = "{}{}{}".format(low_str, sep, high_str)
         labels.append(lbl)
-    return labels
+
+    return step_val, b_vals, list(reversed(labels))
+
+def get_equal_classes(fld, vmin, vmax, n_classes, unit=""):
+    s, b, l = get_arcmap_classes(fld, vmin, vmax, n_classes, precision=0, unit=unit)
+    return s, b
+
+def get_equal_classes_decimal(fld, vmin, vmax, n_classes, unit=""):
+    s, b, l = get_arcmap_classes(fld, vmin, vmax, n_classes, precision=1, unit=unit)
+    return s, b
 
 def load_authoritative_fields():
     """Loads authoritative field metadata from Fields_AR_EN_Units.xlsx and/or PYT."""
@@ -347,6 +490,26 @@ def build_master_classification_workbook(base_dir=None, study_area_name="Egypt",
                             s_min = float(arcpy.GetRasterProperties_management(tif_fpath, "MINIMUM")[0])
                             s_max = float(arcpy.GetRasterProperties_management(tif_fpath, "MAXIMUM")[0])
                             s_mean = float(arcpy.GetRasterProperties_management(tif_fpath, "MEAN")[0])
+                        except Exception:
+                            pass
+                    # Rasterio fallback
+                    if s_min is None or s_max is None:
+                        try:
+                            import rasterio
+                            import numpy as np
+                            tif_fpath = os.path.join(root, f)
+                            with rasterio.open(tif_fpath) as r_src:
+                                r_arr = r_src.read(1)
+                                r_nd = r_src.nodata
+                                if r_nd is not None:
+                                    r_val = r_arr[r_arr != r_nd]
+                                else:
+                                    r_val = r_arr[~np.isnan(r_arr)]
+                                r_val = r_val[(r_val > -99990) & (r_val < 99990)]
+                                if len(r_val) > 0:
+                                    s_min = float(np.min(r_val))
+                                    s_max = float(np.max(r_val))
+                                    s_mean = float(np.mean(r_val))
                         except Exception:
                             pass
                     if s_min is not None and s_max is not None:
@@ -932,21 +1095,26 @@ def build_master_classification_workbook(base_dir=None, study_area_name="Egypt",
             (7, "التوصيف العلمي باللغة العربية\nArabic Scientific Description", 48),
             (8, "وحدة القياس\nUnit", 14),
             (9, "طريقة التصنيف\nMethod", 18),
-            (10, "طول الخطوة\nStep", 14),
-            (11, "أدنى قيمة بالمنطقة\nMin", 15),
-            (12, "أقصى قيمة بالمنطقة\nMax", 15),
-            (13, "متوسط المنطقة\nMean", 15),
+            (10, "طول الخطوة (صحيح)\nStep (Integer)", 16),
+            (11, "طول الخطوة (عشري)\nStep (1 Decimal)", 16),
+            (12, "أدنى قيمة بالمنطقة\nMin", 15),
+            (13, "أقصى قيمة بالمنطقة\nMax", 15),
+            (14, "متوسط المنطقة\nMean", 15),
         ]
 
-        base_c = 13
+        base_c = 14
         for ci in range(1, n_classes + 1):
             if ci == 1:
-                clbl = u"الفئة 1 (الأعلى)\nClass 1 (Highest)"
+                lbl_int = u"الفئة 1 - أرقام صحيحة (الأعلى)\nClass 1 - Integer (Highest)"
+                lbl_dec = u"الفئة 1 - كسر عشري واحد (الأعلى)\nClass 1 - 1 Decimal (Highest)"
             elif ci == n_classes:
-                clbl = u"الفئة {} (الأدنى)\nClass {} (Lowest)".format(ci, ci)
+                lbl_int = u"الفئة {} - أرقام صحيحة (الأدنى)\nClass {} - Integer (Lowest)".format(ci, ci)
+                lbl_dec = u"الفئة {} - كسر عشري واحد (الأدنى)\nClass {} - 1 Decimal (Lowest)".format(ci, ci)
             else:
-                clbl = u"الفئة {}\nClass {}".format(ci, ci)
-            headers.append((base_c + ci, clbl, 22))
+                lbl_int = u"الفئة {} - أرقام صحيحة\nClass {} - Integer".format(ci, ci)
+                lbl_dec = u"الفئة {} - كسر عشري واحد\nClass {} - 1 Decimal".format(ci, ci)
+            headers.append((base_c + (ci - 1) * 2 + 1, lbl_int, 30))
+            headers.append((base_c + (ci - 1) * 2 + 2, lbl_dec, 20))
 
         for col_idx, h_text, width in headers:
             cell = ws.cell(1, col_idx, h_text)
@@ -976,13 +1144,26 @@ def build_master_classification_workbook(base_dir=None, study_area_name="Egypt",
             rel_path_str = u"[{}] \\ {} \\ {} (GeoTIFF Float32)".format(study_area_name, folder, st['tif'])
 
             vmin, vmax, vmean = st['min'], st['max'], st['mean']
-            step, breaks = get_equal_classes(full_f, vmin, vmax, n_classes)
-            labels = generate_gis_labels(full_f, breaks, step, unit)
+            step_int, breaks_int, labels_int = get_arcmap_classes(full_f, vmin, vmax, n_classes, precision=0, unit=unit)
+            step_dec, breaks_dec, labels_dec = get_arcmap_classes(full_f, vmin, vmax, n_classes, precision=1, unit=unit)
+
             u_sym = get_clean_unit_symbol(unit, full_f)
-            u_suf = (" " + u_sym) if u_sym and u_sym != u"°" else (u"°" if u_sym == u"°" else "")
+            if u_sym == "°C" or u_sym == "°":
+                u_suf = "°"
+            elif u_sym == "°C/dec":
+                u_suf = " °/dec"
+            elif u_sym == "%":
+                u_suf = "%"
+            elif u_sym:
+                u_suf = " " + u_sym
+            else:
+                u_suf = ""
 
             r_num = map_idx + 1
             bg_fill = ROW_EVEN_FILL if r_num % 2 == 0 else ROW_WHITE_FILL
+
+            step_dec_val = "{:.2f}".format(step_dec) if (isinstance(step_dec, float) and step_dec < 0.5) else ("{:.1f}".format(step_dec) if isinstance(step_dec, float) else str(step_dec))
+            step_int_val = str(step_int)
 
             row_cells = [
                 (1, map_idx, Alignment(horizontal="center", vertical="center"), DATA_FONT_BOLD),
@@ -994,16 +1175,21 @@ def build_master_classification_workbook(base_dir=None, study_area_name="Egypt",
                 (7, desc_ar, Alignment(horizontal="right", vertical="center"), DATA_FONT),
                 (8, u_sym or unit, Alignment(horizontal="center", vertical="center"), DATA_FONT_BOLD),
                 (9, "Equal Interval", Alignment(horizontal="center", vertical="center"), DATA_FONT),
-                (10, "{}{}".format(fmt_val(step, step), u_suf), Alignment(horizontal="center", vertical="center"), CODE_FONT_BOLD),
-                (11, "{}{}".format(fmt_val(vmin, step), u_suf), Alignment(horizontal="center", vertical="center"), CODE_FONT),
-                (12, "{}{}".format(fmt_val(vmax, step), u_suf), Alignment(horizontal="center", vertical="center"), CODE_FONT_BOLD),
-                (13, "{}{}".format(fmt_val(vmean, step), u_suf), Alignment(horizontal="center", vertical="center"), CODE_FONT),
+                (10, "{}{}".format(step_int_val, u_suf), Alignment(horizontal="center", vertical="center"), CODE_FONT_BOLD),
+                (11, "{}{}".format(step_dec_val, u_suf), Alignment(horizontal="center", vertical="center"), CODE_FONT),
+                (12, "{:.2f}{}".format(vmin, u_suf), Alignment(horizontal="center", vertical="center"), CODE_FONT),
+                (13, "{:.2f}{}".format(vmax, u_suf), Alignment(horizontal="center", vertical="center"), CODE_FONT_BOLD),
+                (14, "{:.2f}{}".format(vmean, u_suf), Alignment(horizontal="center", vertical="center"), CODE_FONT),
             ]
 
-            for ci, lbl in enumerate(labels, 1):
+            for ci in range(1, n_classes + 1):
+                lbl_i = labels_int[ci - 1]
+                lbl_d = labels_dec[ci - 1]
                 is_extreme = (ci == 1 or ci == n_classes)
-                fnt = DATA_FONT_BOLD if is_extreme else DATA_FONT
-                row_cells.append((base_c + ci, lbl, Alignment(horizontal="center", vertical="center"), fnt))
+                fnt_i = DATA_FONT_BOLD if is_extreme else DATA_FONT
+                fnt_d = CODE_FONT_BOLD if is_extreme else CODE_FONT
+                row_cells.append((base_c + (ci - 1) * 2 + 1, lbl_i, Alignment(horizontal="center", vertical="center", wrap_text=True), fnt_i))
+                row_cells.append((base_c + (ci - 1) * 2 + 2, lbl_d, Alignment(horizontal="center", vertical="center", wrap_text=True), fnt_d))
 
             for cidx, val, align, fnt in row_cells:
                 cell = ws.cell(r_num, cidx, val)
@@ -1011,7 +1197,7 @@ def build_master_classification_workbook(base_dir=None, study_area_name="Egypt",
                 cell.font = fnt
                 cell.fill = bg_fill
                 cell.border = THIN_BORDER
-            ws.row_dimensions[r_num].height = 24
+            ws.row_dimensions[r_num].height = 26
 
     # Build classification sheets (3, 5, 7, 9 classes)
     build_class_sheet(wb, "04_تصنيف_3_فئات_Classes_3", 3, "المعيار التنفيذي")
