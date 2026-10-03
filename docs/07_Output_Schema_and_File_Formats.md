@@ -7,9 +7,9 @@
 
 The Climate Atlas Generator produces multi-tiered geospatial deliverables to support diverse analytical environments:
 
-1. **ESRI File Geodatabase (FGDB)**: Primary repository containing feature classes with up to 259 attribute fields (247 Climate Indicators + 12 Admin), full descriptive aliases, and 64-bit floating point precision.
+1. **ESRI File Geodatabase (FGDB)**: Primary repository containing feature classes with up to 270 attribute fields (258 Climate Indicators + 12 Admin), full descriptive aliases, and 64-bit floating point precision.
 2. **ESRI Shapefile (.shp)**: Legacy vector interoperability layer with 10-character DBF field name truncation enforced via `SHP_FIELD_MAP`.
-3. **Floating-Point GeoTIFF / ESRI GRID Rasters**: 103 interpolated continuous surfaces covering annual and seasonal climatological horizons organized across 18 modular directories.
+3. **Floating-Point GeoTIFF / ESRI GRID Rasters**: 114 interpolated continuous surfaces covering annual, seasonal, and monthly mean climatological horizons organized across 18 modular directories.
 4. **Excel Data Dictionaries & Master Metadata Tables**: Dual-sheet workbooks (`Data` & `Month`) and human-readable spreadsheets with Arabic/English bilingual documentation.
 5. **NetCDF / Spatial Metadata**: CF-1.8 compliant metadata mappings for scientific exchange.
 
@@ -21,8 +21,8 @@ The Climate Atlas Generator produces multi-tiered geospatial deliverables to sup
 - **Primary Feature Class**: `Climate_Atlas_Points` (and modular element feature classes: `01_Temperature`, `02_Precipitation`, etc.)
 - **Geometry Type**: Point (`esriGeometryPoint`)
 - **Spatial Reference**: GCS_WGS_1984 (EPSG:4326) or user-specified Projected Coordinate System.
-- **Precision**: Double (`esriFieldTypeDouble`, 8-byte IEEE 754 floating point) for all 247 climate indicators.
-- **Field Alias Preservation**: All fields carry full bilingual aliases (e.g. `T_Annual_Mean` alias: `Annual Mean Air Temperature (°C) / المتوسط السنوي لدرجة حرارة الهواء`).
+- **Precision**: Double (`esriFieldTypeDouble`, 8-byte IEEE 754 floating point) for all 258 climate indicators.
+- **Field Alias Preservation**: All fields carry full bilingual aliases (e.g. `T_Annual_Mean` alias: `المتوسط السنوي لدرجة الحرارة`, `T_Month_Mean` alias: `المتوسط الشهري لدرجة الحرارة`).
 
 ---
 
@@ -35,6 +35,7 @@ Because the dBASE IV format underlying Shapefiles strictly limits field names to
 SHP_FIELD_MAP = {
     # Temperature
     "T_Annual_Mean": "T_AnnMean",
+    "T_Month_Mean": "T_MonMean",
     "T_Winter_Mean": "T_WinMean",
     "T_Spring_Mean": "T_SprMean",
     "T_Summer_Mean": "T_SumMean",

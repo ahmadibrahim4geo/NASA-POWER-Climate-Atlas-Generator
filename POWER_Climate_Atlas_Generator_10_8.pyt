@@ -1272,6 +1272,7 @@ def compute_temperature_fields(m_tmean, m_tmax, m_tmin, m_rh=None, m_td=None):
     s_td = seasonal_means_from_monthly(m_td or {})
     out = {
         "T_Annual_Mean": s_mean["Annual"],
+        "T_Month_Mean": s_mean["Annual"],
         "T_Winter_Mean": s_mean["Winter"],
         "T_Spring_Mean": s_mean["Spring"],
         "T_Summer_Mean": s_mean["Summer"],
@@ -1286,7 +1287,7 @@ def compute_temperature_fields(m_tmean, m_tmax, m_tmin, m_rh=None, m_td=None):
         "HI_Winter_Mean": _ts["HI_Winter_Mean"],
         "HI_Annual_Range": _ts["HI_Annual_Range"],
         "WBGT_Summer_Mean": _ts["WBGT_Summer_Mean"],
-        "Td_Annual_Mean": s_td["Annual"],
+        "Td_Annual_Mean": s_td["Annual"], "Td_Month_Mean": s_td["Annual"],
         "Td_Summer_Mean": s_td["Summer"],
         "Td_Winter_Mean": s_td["Winter"],
     }
@@ -1303,6 +1304,7 @@ def compute_wind_fields(m_spd, m_dir):
     spd_vals = [v for v in clim_spd.values() if v is not None]
     out = {
         "W_Spd_Annual_Mean": s_spd["Annual"],
+        "W_Spd_Month_Mean": s_spd["Annual"],
         "W_Spd_Winter_Mean": s_spd["Winter"],
         "W_Spd_Spring_Mean": s_spd["Spring"],
         "W_Spd_Summer_Mean": s_spd["Summer"],
@@ -1318,6 +1320,7 @@ def compute_wind_fields(m_spd, m_dir):
         out["W_Dir_" + _suffix[season] + "_Mean"] = circular_mean_deg(vals)
     allv = [v for v in m_dir.values() if not is_missing(v)]
     out["W_Dir_Annual_Mean"] = circular_mean_deg(allv)
+    out["W_Dir_Month_Mean"] = circular_mean_deg(allv)
     _months_en = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
     for m_idx, m_name in enumerate(_months_en, 1):
         out["W_Spd_%s_Mean" % m_name] = round(clim_spd.get(m_idx), 2) if clim_spd.get(m_idx) is not None else None
@@ -1348,6 +1351,7 @@ def compute_solar_fields(m_sol_mj, years):
     total = sum(per_year) / len(per_year) if per_year else None
     out = {
         "Sol_Annual_Mean": s["Annual"],
+        "Sol_Month_Mean": s["Annual"],
         "Sol_Annual_Total": total,
         "Sol_Winter_Mean": s["Winter"],
         "Sol_Spring_Mean": s["Spring"],
@@ -1480,6 +1484,7 @@ def compute_drought_fields(m_tmean, m_tmax, m_tmin, m_precip, lat=0.0):
         "DM_Aridity_Annual": round(dm_aridity, 2) if dm_aridity is not None else None,
         "ET_Annual_Total": round(pet_annual, 1),
         "ET_Annual_Mean": round(pet_mean, 1),
+        "ET_Month_Mean": round(pet_mean, 1),
         "ET_Annual_Range": round(pet_range, 1),
         "ET_Seasonal_Range": round(et_sea_range, 1),
         "ET_Winter_Total": round(et_win, 1),
@@ -1501,6 +1506,17 @@ def compute_drought_fields(m_tmean, m_tmax, m_tmin, m_precip, lat=0.0):
 # Field dictionary (spec sections 5-13 + 16-17). Single source of truth.
 # ---------------------------------------------------------------------------
 FIELD_DEFS = [
+    ("T_Month_Mean", "Mean Monthly Air Temperature", u"المتوسط الشهري لدرجة الحرارة", "T2M", "Temperature", "Annual", "Mean", "C", u"المتوسط الشهري لدرجة الحرارة (متوسط الـ 12 شهراً)", "Mean of 12 climatological monthly means", "Mean of valid monthly T2M values"),
+    ("PSL_Month_Mean", "Mean Monthly Sea Level Pressure", u"المتوسط الشهري لضغط مستوى سطح البحر", "SLP", "Sea Level Pressure", "Annual", "Mean", "mbar/hPa", u"المتوسط الشهري لضغط مستوى سطح البحر", "Mean monthly sea-level pressure", "Mean of valid values"),
+    ("PS_Month_Mean", "Mean Monthly Surface Pressure", u"المتوسط الشهري للضغط الجوي السطحي", "PS", "Surface Pressure", "Annual", "Mean", "mbar/hPa", u"المتوسط الشهري للضغط السطحي الفعلي", "Mean monthly surface pressure", "Mean of valid values"),
+    ("W_Spd_Month_Mean", "Mean Monthly Wind Speed", u"المتوسط الشهري لسرعة الرياح", "WS10M", "Wind", "Annual", "Mean", "m/s", u"المتوسط الشهري لسرعة الرياح", "Mean monthly 10-m wind speed", "Mean of valid values"),
+    ("W_Dir_Month_Mean", "Mean Monthly Wind Direction", u"المتوسط الشهري لاتجاه الرياح السائدة", "WD10M", "Wind", "Annual", "Circular Mean", "degree", u"المتوسط الشهري لاتجاه الرياح", "Mean monthly wind direction", "atan2(mean sin, mean cos)"),
+    ("RH_Month_Mean", "Mean Monthly Relative Humidity", u"المتوسط الشهري للرطوبة النسبية", "RH2M", "Relative Humidity", "Annual", "Mean", "%", u"المتوسط الشهري للرطوبة النسبية", "Mean monthly 2-m relative humidity", "Mean of valid values"),
+    ("Td_Month_Mean", "Mean Monthly Dew Point Temperature", u"المتوسط الشهري لدرجة حرارة نقطة الندى", "T2MDEW", "Dew Point", "Annual", "Mean", "C", u"المتوسط الشهري لنقطة الندى", "Mean monthly dew point temperature", "Mean of valid monthly T2MDEW values"),
+    ("Sol_Month_Mean", "Mean Monthly Daily Solar Radiation", u"المتوسط الشهري للإشعاع الشمسي اليومي", "ALLSKY_SFC_SW_DWN", "Solar Radiation", "Annual", "Mean", "kWh/m2/day", u"المتوسط الشهري لمعدل الإشعاع اليومي", "Mean monthly daily solar radiation", "Mean of MJ/3.6"),
+    ("UV_Month_Mean", "Mean Monthly UV Index", u"المتوسط الشهري لمؤشر الأشعة فوق البنفسجية", "ALLSKY_SFC_UV_INDEX", "UV Index", "Annual", "Mean", "Index", u"المتوسط الشهري لمؤشر الأشعة فوق البنفسجية", "Mean monthly UV index", "Mean of valid values"),
+    ("Cld_Month_Mean", "Mean Monthly Cloud Cover", u"المتوسط الشهري للغطاء السحابي", "CLOUD_AMT", "Cloud Cover", "Annual", "Mean", "%", u"المتوسط الشهري لكمية السحب", "Mean monthly cloud amount", "Mean of valid values"),
+    ("ET_Month_Mean", "Mean Monthly Evapotranspiration", u"المتوسط الشهري للبخر والنتح", "T2M+T2M_MAX+T2M_MIN", "Evapotranspiration", "Annual", "Mean", "mm/month", u"المتوسط الشهري للبخر والنتح المحسوب بطريقة هارجريفز", "Mean monthly potential evapotranspiration", "ET_Annual_Total / 12"),
     ("T_Annual_Mean", "Annual Mean Air Temperature", u"المتوسط السنوي لدرجة الحرارة", "T2M", "Temperature", "Annual", "Mean", "C", u"متوسط قيم درجة الحرارة الشهرية خلال السنة", "Mean of monthly T2M over the period", "Mean of valid monthly T2M values"),
     ("T_Winter_Mean", "Winter Mean Air Temperature", u"متوسط درجة الحرارة في الشتاء", "T2M", "Temperature", "Winter", "Mean", "C", u"متوسط أشهر 1 و2 و12", "Mean of Dec/Jan/Feb monthly means", "Mean of climatological months 12,1,2"),
     ("T_Spring_Mean", "Spring Mean Air Temperature", u"متوسط درجة الحرارة في الربيع", "T2M", "Temperature", "Spring", "Mean", "C", u"متوسط أشهر 3 و4 و5", "Mean of Mar/Apr/May monthly means", "Mean of climatological months 3,4,5"),
@@ -1752,6 +1768,7 @@ FIELD_DEFS = [
 ]
 
 FIELD_BY_NAME = dict((r[0], r) for r in FIELD_DEFS)
+FIELD_ALIAS_AR = dict((r[0], r[2]) for r in FIELD_DEFS)
 
 MODULE_FIELDS = {}
 for _r in FIELD_DEFS:
@@ -1789,6 +1806,17 @@ MODULE_SHORT = {
 }
 
 SHP_FIELD_MAP = {
+    "T_Month_Mean": "T_MonMean",
+    "PSL_Month_Mean": "PSL_MonMea",
+    "PS_Month_Mean": "PS_MonMean",
+    "W_Spd_Month_Mean": "WSp_MonMea",
+    "W_Dir_Month_Mean": "WDr_MonMea",
+    "RH_Month_Mean": "RH_MonMean",
+    "Td_Month_Mean": "Td_MonMean",
+    "Sol_Month_Mean": "Sol_MonMea",
+    "UV_Month_Mean": "UV_MonMean",
+    "Cld_Month_Mean": "Cld_MonMea",
+    "ET_Month_Mean": "ET_MonMean",
     "Cld_Annual_Mean": "Cld_AnMean",
     "Cld_Annual_Range": "Cld_AnRng",
     "Cld_Autumn_Mean": "Cld_AuMean",
@@ -2551,28 +2579,7 @@ def get_units_mapping(unit_sys=None, unit_temp=None, unit_precip=None, unit_pres
 REQUIRED_COLUMNS = [
     "OBJECTID", "Source_ID", "Point_Lat", "Point_Lon", "Data_Start", "Data_End",
     "Temporal", "Interp_Meth", "Cell_Size", "Wind_Cell", "Measurement_Unit", "Status", "Error_Msg",
-    "T_Annual_Mean", "T_Winter_Mean", "T_Spring_Mean", "T_Summer_Mean", "T_Autumn_Mean",
-    "T_Annual_Range", "T_Max_Summer_Month_Mean", "T_Min_Winter_Month_Mean",
-    "T_Annual_Max_Mean", "T_Annual_Min_Mean", "HI_Annual_Mean", "HI_Summer_Mean", "HI_Winter_Mean", "HI_Annual_Range", "WBGT_Summer_Mean",
-    "Td_Annual_Mean", "Td_Winter_Mean", "Td_Spring_Mean", "Td_Summer_Mean", "Td_Autumn_Mean", "Td_Annual_Range",
-    "R_Annual_Mean", "R_Month_Mean", "R_Annual_Range", "R_Seasonal_Range", "R_Winter_Mean", "R_Spring_Mean",
-    "R_Summer_Mean", "R_Autumn_Mean",
-    "PSL_Annual_Mean", "PSL_Winter_Mean", "PSL_Spring_Mean", "PSL_Summer_Mean", "PSL_Autumn_Mean", "PSL_Annual_Range",
-    "PS_Annual_Mean", "PS_Winter_Mean", "PS_Spring_Mean", "PS_Summer_Mean", "PS_Autumn_Mean", "PS_Annual_Range",
-    "W_Spd_Annual_Mean", "W_Spd_Winter_Mean", "W_Spd_Spring_Mean", "W_Spd_Summer_Mean", "W_Spd_Autumn_Mean",
-    "W_Spd_Annual_Max_Month", "W_Spd_Annual_Min_Month", "W_Spd_Annual_Range",
-    "W_Dir_Annual_Mean", "W_Dir_Winter_Mean", "W_Dir_Spring_Mean", "W_Dir_Summer_Mean", "W_Dir_Autumn_Mean",
-    "RH_Annual_Mean", "RH_Winter_Mean", "RH_Spring_Mean", "RH_Summer_Mean", "RH_Autumn_Mean", "RH_Annual_Range",
-    "Sol_Annual_Mean", "Sol_Annual_Total", "Sol_Winter_Mean", "Sol_Spring_Mean", "Sol_Summer_Mean", "Sol_Autumn_Mean", "Sol_Annual_Range",
-    "UV_Annual_Mean", "UV_Winter_Mean", "UV_Spring_Mean", "UV_Summer_Mean", "UV_Autumn_Mean", "UV_Annual_Range",
-    "Cld_Annual_Mean", "Cld_Winter_Mean", "Cld_Spring_Mean", "Cld_Summer_Mean", "Cld_Autumn_Mean", "Cld_Annual_Range",
-    "DM_Aridity_Annual", "ET_Annual_Total", "ET_Annual_Mean", "ET_Annual_Range", "ET_Seasonal_Range",
-    "ET_Winter_Total", "ET_Spring_Total", "ET_Summer_Total", "ET_Autumn_Total", "PET_Hargreaves_Annual",
-    "UNEP_Aridity_Annual", "Water_Deficit_Annual", "Dry_Months_Count",
-    "WC_Winter_Mean", "WC_Annual_Mean",
-    "T_Trend_Decade", "R_Trend_Decade", "T_Anom_Annual", "T_Anom_Winter", "T_Anom_Summer",
-    "R_Anom_Annual", "R_Anom_Annual_Pct", "R_Anom_Winter", "R_Anom_Winter_Pct",
-]
+] + [r[0] for r in FIELD_DEFS]
 
 
 OM_BASE = "https://archive-api.open-meteo.com/v1/archive"
@@ -2917,7 +2924,7 @@ def compute_point_fields(monthly, years, modules, temporal, daily_raw=None,
         conv = dict((ym, pressure_kpa_to_mbar(v)) for ym, v in monthly.get("SLP", {}).items())
         s = seasonal_means_from_monthly(conv)
         c_slp = climat_monthly_means(conv)
-        res.update({"PSL_Annual_Mean": s["Annual"], "PSL_Winter_Mean": s["Winter"],
+        res.update({"PSL_Annual_Mean": s["Annual"], "PSL_Month_Mean": s["Annual"], "PSL_Winter_Mean": s["Winter"],
                     "PSL_Spring_Mean": s["Spring"], "PSL_Summer_Mean": s["Summer"],
                     "PSL_Autumn_Mean": s["Autumn"],
                     "PSL_Annual_Range": monthly_range(conv)})
@@ -2927,7 +2934,7 @@ def compute_point_fields(monthly, years, modules, temporal, daily_raw=None,
         conv = dict((ym, pressure_kpa_to_mbar(v)) for ym, v in monthly.get("PS", {}).items())
         s = seasonal_means_from_monthly(conv)
         c_ps = climat_monthly_means(conv)
-        res.update({"PS_Annual_Mean": s["Annual"], "PS_Winter_Mean": s["Winter"],
+        res.update({"PS_Annual_Mean": s["Annual"], "PS_Month_Mean": s["Annual"], "PS_Winter_Mean": s["Winter"],
                     "PS_Spring_Mean": s["Spring"], "PS_Summer_Mean": s["Summer"],
                     "PS_Autumn_Mean": s["Autumn"],
                     "PS_Annual_Range": monthly_range(conv)})
@@ -2939,7 +2946,7 @@ def compute_point_fields(monthly, years, modules, temporal, daily_raw=None,
         _rh_monthly = monthly.get("RH2M", {})
         s = seasonal_means_from_monthly(_rh_monthly)
         c_rh = climat_monthly_means(_rh_monthly)
-        res.update({"RH_Annual_Mean": s["Annual"], "RH_Winter_Mean": s["Winter"],
+        res.update({"RH_Annual_Mean": s["Annual"], "RH_Month_Mean": s["Annual"], "RH_Winter_Mean": s["Winter"],
                     "RH_Spring_Mean": s["Spring"], "RH_Summer_Mean": s["Summer"],
                     "RH_Autumn_Mean": s["Autumn"],
                     "RH_Annual_Range": monthly_range(_rh_monthly)})
@@ -2949,7 +2956,7 @@ def compute_point_fields(monthly, years, modules, temporal, daily_raw=None,
         _td_monthly = monthly.get("T2MDEW", {})
         s_td = seasonal_means_from_monthly(_td_monthly)
         c_td = climat_monthly_means(_td_monthly)
-        res.update({"Td_Annual_Mean": s_td["Annual"], "Td_Winter_Mean": s_td["Winter"],
+        res.update({"Td_Annual_Mean": s_td["Annual"], "Td_Month_Mean": s_td["Annual"], "Td_Winter_Mean": s_td["Winter"],
                     "Td_Spring_Mean": s_td["Spring"], "Td_Summer_Mean": s_td["Summer"],
                     "Td_Autumn_Mean": s_td["Autumn"],
                     "Td_Annual_Range": monthly_range(_td_monthly)})
@@ -2961,7 +2968,7 @@ def compute_point_fields(monthly, years, modules, temporal, daily_raw=None,
         _uv_monthly = monthly.get("ALLSKY_SFC_UV_INDEX", {})
         s = seasonal_means_from_monthly(_uv_monthly)
         c_uv = climat_monthly_means(_uv_monthly)
-        res.update({"UV_Annual_Mean": s["Annual"], "UV_Winter_Mean": s["Winter"],
+        res.update({"UV_Annual_Mean": s["Annual"], "UV_Month_Mean": s["Annual"], "UV_Winter_Mean": s["Winter"],
                     "UV_Spring_Mean": s["Spring"], "UV_Summer_Mean": s["Summer"],
                     "UV_Autumn_Mean": s["Autumn"],
                     "UV_Annual_Range": monthly_range(_uv_monthly)})
@@ -2971,7 +2978,7 @@ def compute_point_fields(monthly, years, modules, temporal, daily_raw=None,
         _cld_monthly = monthly.get("CLOUD_AMT", {})
         s = seasonal_means_from_monthly(_cld_monthly)
         c_cld = climat_monthly_means(_cld_monthly)
-        res.update({"Cld_Annual_Mean": s["Annual"], "Cld_Winter_Mean": s["Winter"],
+        res.update({"Cld_Annual_Mean": s["Annual"], "Cld_Month_Mean": s["Annual"], "Cld_Winter_Mean": s["Winter"],
                     "Cld_Spring_Mean": s["Spring"], "Cld_Summer_Mean": s["Summer"],
                     "Cld_Autumn_Mean": s["Autumn"],
                     "Cld_Annual_Range": monthly_range(_cld_monthly)})
@@ -6581,15 +6588,17 @@ class PowerClimateAtlasGenerator(object):
                 existing = set(f.name for f in arcpy.ListFields(fc))
                 for name, typ, _alias in ADMIN_FIELDS:
                     if name not in existing:
+                        ar_alias = ADMIN_AR.get(name, name)
                         if typ == "TEXT":
-                            arcpy.management.AddField(fc, name, typ, field_length=255, field_alias=name)
+                            arcpy.management.AddField(fc, name, typ, field_length=255, field_alias=ar_alias)
                         else:
-                            arcpy.management.AddField(fc, name, typ, field_alias=name)
+                            arcpy.management.AddField(fc, name, typ, field_alias=ar_alias)
                 wanted = wanted_fields_by_module.get(m, MODULE_FIELDS.get(m, []))
                 for wf in wanted:
                     if wf not in existing:
                         field_type = "LONG" if wf == "Dry_Months_Count" else "DOUBLE"
-                        arcpy.management.AddField(fc, wf, field_type, field_alias=wf)
+                        ar_alias = FIELD_ALIAS_AR.get(wf, wf)
+                        arcpy.management.AddField(fc, wf, field_type, field_alias=ar_alias)
                 oid_name = arcpy.Describe(fc).OIDFieldName
                 with arcpy.da.UpdateCursor(fc, [oid_name, "SHAPE@"] + admin_names + wanted) as ucur:
                     for row in ucur:
@@ -6670,10 +6679,11 @@ class PowerClimateAtlasGenerator(object):
             existing = set(f.name for f in arcpy.ListFields(fc))
             for name, typ, _alias in ADMIN_FIELDS:
                 if name not in existing:
+                    ar_alias = ADMIN_AR.get(name, name)
                     if typ == "TEXT":
-                        arcpy.management.AddField(fc, name, typ, field_length=255, field_alias=name)
+                        arcpy.management.AddField(fc, name, typ, field_length=255, field_alias=ar_alias)
                     else:
-                        arcpy.management.AddField(fc, name, typ, field_alias=name)
+                        arcpy.management.AddField(fc, name, typ, field_alias=ar_alias)
             if wanted_fields is not None:
                 wanted = wanted_fields
             else:
@@ -6681,7 +6691,8 @@ class PowerClimateAtlasGenerator(object):
             for f in wanted:
                 if f not in existing:
                     field_type = "LONG" if f == "Dry_Months_Count" else "DOUBLE"
-                    arcpy.management.AddField(fc, f, field_type, field_alias=f)
+                    ar_alias = FIELD_ALIAS_AR.get(f, f)
+                    arcpy.management.AddField(fc, f, field_type, field_alias=ar_alias)
 
             by_oid = dict((r.get("oid"), r) for r in results if r.get("oid") is not None)
             by_coord = {}

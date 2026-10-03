@@ -131,6 +131,15 @@ FIELDS_DATA = [
         "map_title": u"خريطة المتوسط السنوي لدرجة الحرارة (°C)"
     },
     {
+        "short_name": "T_MonMean",
+        "full_name": "T_Month_Mean",
+        "module_code": "01_Temperature",
+        "module_name": "01_Temperature (درجة الحرارة)",
+        "desc_ar": u"المتوسط الشهري لدرجة حرارة الهواء عند ارتفاع 2 متر (متوسط الـ 12 شهراً المناخي).",
+        "unit": u"°C",
+        "map_title": u"خريطة المتوسط الشهري لدرجة الحرارة (°C)"
+    },
+    {
         "short_name": "T_WinMean",
         "full_name": "T_Winter_Mean",
         "module_code": "01_Temperature",
@@ -376,6 +385,15 @@ FIELDS_DATA = [
         "desc_ar": u"المتوسط الحسابي السنوي لدرجة حرارة نقطة الندى عند ارتفاع 2 متر.",
         "unit": u"°C",
         "map_title": u"خريطة المتوسط السنوي لدرجة حرارة نقطة الندى (°C)"
+    },
+    {
+        "short_name": "Td_MonMean",
+        "full_name": "Td_Month_Mean",
+        "module_code": "07_Dew_Point",
+        "module_name": "07_Dew_Point (درجة حرارة نقطة الندى)",
+        "desc_ar": u"المتوسط الشهري لدرجة حرارة نقطة الندى عند ارتفاع 2 متر (متوسط الـ 12 شهراً).",
+        "unit": u"°C",
+        "map_title": u"خريطة المتوسط الشهري لنقطة الندى (°C)"
     },
     {
         "short_name": "Td_WinMean",
@@ -724,6 +742,15 @@ FIELDS_DATA = [
         "map_title": u"خريطة متوسط الضغط الجوي عند مستوى سطح البحر (hPa)"
     },
     {
+        "short_name": "PSL_MonMea",
+        "full_name": "PSL_Month_Mean",
+        "module_code": "03_Sea_Level_Pressure",
+        "module_name": "03_Sea_Level_Pressure (ضغط مستوى البحر)",
+        "desc_ar": u"المتوسط الشهري للضغط الجوي المصحح عند مستوى سطح البحر القياسي (متوسط الـ 12 شهراً).",
+        "unit": u"hPa / mbar",
+        "map_title": u"خريطة المتوسط الشهري لضغط مستوى سطح البحر (hPa)"
+    },
+    {
         "short_name": "PSL_WnMean",
         "full_name": "PSL_Winter_Mean",
         "module_code": "03_Sea_Level_Pressure",
@@ -886,6 +913,15 @@ FIELDS_DATA = [
         "desc_ar": u"المتوسط السنوي للضغط الجوي السطحي الفعلي الحقيقي عند منسوب تضاريس المحطة.",
         "unit": u"hPa / mbar",
         "map_title": u"خريطة المتوسط السنوي للضغط الجوي السطحي (hPa)"
+    },
+    {
+        "short_name": "PS_MonMean",
+        "full_name": "PS_Month_Mean",
+        "module_code": "04_Surface_Pressure",
+        "module_name": "04_Surface_Pressure (الضغط السطحي)",
+        "desc_ar": u"المتوسط الشهري للضغط الجوي السطحي الفعلي للمحطة (متوسط الـ 12 شهراً).",
+        "unit": u"hPa / mbar",
+        "map_title": u"خريطة المتوسط الشهري للضغط الجوي السطحي (hPa)"
     },
     {
         "short_name": "PS_WinMean",
@@ -1052,6 +1088,15 @@ FIELDS_DATA = [
         "map_title": u"خريطة المتوسط السنوي لسرعة الرياح (م/ث)"
     },
     {
+        "short_name": "WSp_MonMea",
+        "full_name": "W_Spd_Month_Mean",
+        "module_code": "05_Wind",
+        "module_name": "05_Wind (الرياح السطحية)",
+        "desc_ar": u"المتوسط الشهري لسرعة الرياح على ارتفاع 10 أمتار (متوسط الـ 12 شهراً).",
+        "unit": u"m/s",
+        "map_title": u"خريطة المتوسط الشهري لسرعة الرياح (m/s)"
+    },
+    {
         "short_name": "WSp_WnMean",
         "full_name": "W_Spd_Winter_Mean",
         "module_code": "05_Wind",
@@ -1122,6 +1167,15 @@ FIELDS_DATA = [
         "desc_ar": u"الاتجاه السائد السنوي للرياح بالدرجات الزاوية (محسوب بالمتوسط الدائري للمتجهات الدائرية atan2).",
         "unit": u"درجة (°)",
         "map_title": u"خريطة الاتجاه السائد السنوي للرياح (درجات)"
+    },
+    {
+        "short_name": "WDr_MonMea",
+        "full_name": "W_Dir_Month_Mean",
+        "module_code": "05_Wind",
+        "module_name": "05_Wind (الرياح السطحية)",
+        "desc_ar": u"المتوسط الشهري لاتجاه الرياح السائدة (المتوسط الدائري للشهور الـ 12).",
+        "unit": u"°",
+        "map_title": u"خريطة المتوسط الشهري لاتجاه الرياح السائدة (°)"
     },
     {
         "short_name": "WDr_WnMean",
@@ -1387,6 +1441,15 @@ FIELDS_DATA = [
         "map_title": u"خريطة المتوسط السنوي للرطوبة النسبية (%)"
     },
     {
+        "short_name": "RH_MonMean",
+        "full_name": "RH_Month_Mean",
+        "module_code": "06_Relative_Humidity",
+        "module_name": "06_Relative_Humidity (الرطوبة النسبية)",
+        "desc_ar": u"المتوسط الشهري للرطوبة النسبية عند ارتفاع 2 متر (متوسط الـ 12 شهراً).",
+        "unit": u"%",
+        "map_title": u"خريطة المتوسط الشهري للرطوبة النسبية (%)"
+    },
+    {
         "short_name": "RH_WnMean",
         "full_name": "RH_Winter_Mean",
         "module_code": "06_Relative_Humidity",
@@ -1549,6 +1612,15 @@ FIELDS_DATA = [
         "desc_ar": u"المتوسط اليومي السنوي للإشعاع الشمسي الكلي السطحي الواصل لسطح الأرض في كافة ظروف السماء.",
         "unit": u"kWh/m²/day",
         "map_title": u"خريطة المتوسط اليومي السنوي للإشعاع الشمسي (kWh/m²/day)"
+    },
+    {
+        "short_name": "Sol_MonMea",
+        "full_name": "Sol_Month_Mean",
+        "module_code": "08_Solar_Radiation",
+        "module_name": "08_Solar_Radiation (الإشعاع الشمسي)",
+        "desc_ar": u"المتوسط الشهري للإشعاع الشمسي اليومي الساقط على السطح الأفقي (متوسط الـ 12 شهراً).",
+        "unit": u"kWh/m²/day",
+        "map_title": u"خريطة المتوسط الشهري للإشعاع الشمسي اليومي (kWh/m²/day)"
     },
     {
         "short_name": "Sol_AnTot",
@@ -1724,6 +1796,15 @@ FIELDS_DATA = [
         "map_title": u"خريطة المتوسط السنوي لمؤشر الأشعة فوق البنفسجية (UV)"
     },
     {
+        "short_name": "UV_MonMean",
+        "full_name": "UV_Month_Mean",
+        "module_code": "09_UV_Index",
+        "module_name": "09_UV_Index (مؤشر الأشعة فوق البنفسجية)",
+        "desc_ar": u"المتوسط الشهري لمؤشر الأشعة فوق البنفسجية في سماء صافية (متوسط الـ 12 شهراً).",
+        "unit": u"Index",
+        "map_title": u"خريطة المتوسط الشهري لمؤشر الأشعة فوق البنفسجية"
+    },
+    {
         "short_name": "UV_WnMean",
         "full_name": "UV_Winter_Mean",
         "module_code": "09_UV_Index",
@@ -1886,6 +1967,15 @@ FIELDS_DATA = [
         "desc_ar": u"المتوسط السنوي لنسبة تغطية السماء بالغيوم والسحب كنسبة مئوية.",
         "unit": u"%",
         "map_title": u"خريطة المتوسط السنوي لنسبة الغطاء السحابي (%)"
+    },
+    {
+        "short_name": "Cld_MonMea",
+        "full_name": "Cld_Month_Mean",
+        "module_code": "10_Cloud_Cover",
+        "module_name": "10_Cloud_Cover (الغطاء السحابي)",
+        "desc_ar": u"المتوسط الشهري لكمية الغطاء السحابي الكلي (متوسط الـ 12 شهراً).",
+        "unit": u"%",
+        "map_title": u"خريطة المتوسط الشهري للغطاء السحابي (%)"
     },
     {
         "short_name": "Cld_WnMean",
@@ -2090,6 +2180,15 @@ FIELDS_DATA = [
         "desc_ar": u"المعدل الشهري للبخر والنتح المرجعي (المجموع التراكمي السنوي مقسوماً على 12 شهراً).",
         "unit": u"ملم (mm)",
         "map_title": u"خريطة المعدل الشهري للبخر والنتح (ملم)"
+    },
+    {
+        "short_name": "ET_MonMean",
+        "full_name": "ET_Month_Mean",
+        "module_code": "14_Evapotranspiration",
+        "module_name": "14_Evapotranspiration (البخر-نتح المرجعي)",
+        "desc_ar": u"المعدل الشهري للبخر-نتح المرجعي المحسوب بطريقة هارجريفز (متوسط الشهور = المجموع السنوي / 12).",
+        "unit": u"mm/month",
+        "map_title": u"خريطة المتوسط الشهري للبخر والنتح المرجعي (mm/month)"
     },
     {
         "short_name": "ET_AnnRng",
@@ -2387,7 +2486,7 @@ MODULES_SUMMARY = [
         "name_ar": u"درجة الحرارة",
         "folder": "01_Temperature",
         "fc": "01_Temperature",
-        "count": 22,
+        "count": 23,
         "unit": u"°C",
         "method": u"NASA POWER T2M, T2M_MAX, T2M_MIN / WMO Climatological Normals"
     },
@@ -2407,7 +2506,7 @@ MODULES_SUMMARY = [
         "name_ar": u"ضغط مستوى سطح البحر",
         "folder": "03_Sea_Level_Pressure",
         "fc": "03_Sea_Level_Pressure",
-        "count": 18,
+        "count": 19,
         "unit": u"hPa / mbar",
         "method": u"NASA POWER SLP / Reduced to Standard Mean Sea Level"
     },
@@ -2417,7 +2516,7 @@ MODULES_SUMMARY = [
         "name_ar": u"الضغط السطحي الفعلي",
         "folder": "04_Surface_Pressure",
         "fc": "04_Surface_Pressure",
-        "count": 18,
+        "count": 19,
         "unit": u"hPa / mbar",
         "method": u"NASA POWER PS / Actual Local Topographic Station Pressure"
     },
@@ -2427,7 +2526,7 @@ MODULES_SUMMARY = [
         "name_ar": u"الرياح السطحية (سرعة واتجاه)",
         "folder": "05_Wind",
         "fc": "05_Wind",
-        "count": 37,
+        "count": 39,
         "unit": u"m/s, °",
         "method": u"NASA POWER WS10M, WD10M / Circular Mean Vector atan2"
     },
@@ -2437,7 +2536,7 @@ MODULES_SUMMARY = [
         "name_ar": u"الرطوبة النسبية",
         "folder": "06_Relative_Humidity",
         "fc": "06_Relative_Humidity",
-        "count": 18,
+        "count": 19,
         "unit": u"%",
         "method": u"NASA POWER RH2M / Climatological Relative Humidity at 2m"
     },
@@ -2447,7 +2546,7 @@ MODULES_SUMMARY = [
         "name_ar": u"نقطة الندى",
         "folder": "07_Dew_Point",
         "fc": "07_Dew_Point",
-        "count": 18,
+        "count": 19,
         "unit": u"°C",
         "method": u"NASA POWER T2MDEW / Dew Point Temperature at 2m"
     },

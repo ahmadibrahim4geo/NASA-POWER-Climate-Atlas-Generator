@@ -69,25 +69,25 @@
 
 | رقم | اسم العنصر في واجهة الأداة | اسم طبقة المعالم (Feature Class) | اسم مجلد الراستر (Raster Folder) | عدد المؤشرات | تفصيل المؤشرات (سنوي/فصلي + شهري) | الوحدة الفيزيائية |
 |:---:|---|---|---|:---:|---|:---:|
-| **01** | `Temperature` | `01_Temperature` | `01_Temperature` | **22** | 10 سنوي وفصلي + 12 شهري مناخي | °C |
+| **01** | `Temperature` | `01_Temperature` | `01_Temperature` | **23** | 11 سنوي وفصلي ومعدل شهري + 12 شهري مناخي | °C |
 | **02** | `Precipitation` | `02_Precipitation` | `02_Precipitation` | **20** | 8 سنوي وفصلي + 12 شهري تراكمي | mm, mm/month |
-| **03** | `Sea Level Pressure` | `03_Sea_Level_Pressure` | `03_Sea_Level_Pressure` | **18** | 6 سنوي وفصلي + 12 شهري مناخي | hPa / mbar |
-| **04** | `Surface Pressure` | `04_Surface_Pressure` | `04_Surface_Pressure` | **18** | 6 سنوي وفصلي + 12 شهري مناخي | hPa / mbar |
-| **05** | `Wind` | `05_Wind` | `05_Wind` | **37** | 13 سنوي وفصلي + 24 شهري (سرعة + اتجاه) | m/s, degrees (°) |
-| **06** | `Relative Humidity` | `06_Relative_Humidity` | `06_Relative_Humidity` | **18** | 6 سنوي وفصلي + 12 شهري مناخي | % |
-| **07** | `Dew Point` | `07_Dew_Point` | `07_Dew_Point` | **18** | 6 سنوي وفصلي + 12 شهري مناخي | °C |
-| **08** | `Solar Radiation` | `08_Solar_Radiation` | `08_Solar_Radiation` | **19** | 7 سنوي وفصلي + 12 شهري مناخي | kWh/m²/day |
-| **09** | `UV Index` | `09_UV_Index` | `09_UV_Index` | **18** | 6 سنوي وفصلي + 12 شهري مناخي | مؤشر (0–16+) |
-| **10** | `Cloud Cover` | `10_Cloud_Cover` | `10_Cloud_Cover` | **18** | 6 سنوي وفصلي + 12 شهري مناخي | % |
+| **03** | `Sea Level Pressure` | `03_Sea_Level_Pressure` | `03_Sea_Level_Pressure` | **19** | 7 سنوي وفصلي ومعدل شهري + 12 شهري مناخي | hPa / mbar |
+| **04** | `Surface Pressure` | `04_Surface_Pressure` | `04_Surface_Pressure` | **19** | 7 سنوي وفصلي ومعدل شهري + 12 شهري مناخي | hPa / mbar |
+| **05** | `Wind` | `05_Wind` | `05_Wind` | **39** | 15 سنوي وفصلي ومعدل شهري + 24 شهري (سرعة + اتجاه) | m/s, degrees (°) |
+| **06** | `Relative Humidity` | `06_Relative_Humidity` | `06_Relative_Humidity` | **19** | 7 سنوي وفصلي ومعدل شهري + 12 شهري مناخي | % |
+| **07** | `Dew Point` | `07_Dew_Point` | `07_Dew_Point` | **19** | 7 سنوي وفصلي ومعدل شهري + 12 شهري مناخي | °C |
+| **08** | `Solar Radiation` | `08_Solar_Radiation` | `08_Solar_Radiation` | **20** | 8 سنوي وفصلي ومعدل شهري + 12 شهري مناخي | kWh/m²/day |
+| **09** | `UV Index` | `09_UV_Index` | `09_UV_Index` | **19** | 7 سنوي وفصلي ومعدل شهري + 12 شهري مناخي | مؤشر (0–16+) |
+| **10** | `Cloud Cover` | `10_Cloud_Cover` | `10_Cloud_Cover` | **19** | 7 سنوي وفصلي ومعدل شهري + 12 شهري مناخي | % |
 | **11** | `Heat Index` | `11_Heat_Index` | `11_Heat_Index` | **5** | 5 مؤشرات سنوية وفصلية ومجمعة | °C |
 | **12** | `Wind Chill` | `12_Wind_Chill` | `12_Wind_Chill` | **2** | مؤشران شتويان للبرودة الريحية | °C |
 | **13** | `De Martonne Aridity` | `13_De_Martonne_Aridity` | `13_De_Martonne_Aridity` | **1** | مؤشر جفاف سنوي لدي مارتون | مؤشر لا بُعدي |
-| **14** | `Evapotranspiration` | `14_Evapotranspiration` | `14_Evapotranspiration` | **21** | 9 سنوي وفصلي + 12 شهري FAO-56 | mm, mm/month |
+| **14** | `Evapotranspiration` | `14_Evapotranspiration` | `14_Evapotranspiration` | **22** | 10 سنوي وفصلي ومعدل شهري + 12 شهري FAO-56 | mm, mm/month |
 | **15** | `UNEP Aridity` | `15_UNEP_Aridity` | `15_UNEP_Aridity` | **1** | مؤشر قحولة سنوي لبرنامج الأمم المتحدة | نسبة |
 | **16** | `Water Deficit` | `16_Water_Deficit` | `16_Water_Deficit` | **1** | عجز وموازنة مائية سنوية | mm/year |
 | **17** | `Dry Months` | `17_Dry_Months` | `17_Dry_Months` | **1** | عدد شهور الجفاف البيولوجي | شهور (0–12) |
 | **18** | `Trends & Baseline Anomalies` | `18_Trends_And_Anomalies` | `18_Trends_And_Anomalies` | **9** | اتجاهات وشذوذ خط الأساس 1991–2020 | °C/decade, mm/decade, % |
-| **الإجمالي** | **18 عنصراً وموديولاً** | **18 Feature Class** | **18 مجلد راستر** | **247** | **103 مؤشراً سنوياً وفصلياً + 144 متوسطاً شهرياً** | — |
+| **الإجمالي** | **18 عنصراً وموديولاً** | **18 Feature Class** | **18 مجلد راستر** | **258** | **114 مؤشراً سنوياً وفصلياً ومعدلاً شهرياً + 144 متوسطاً شهرياً** | — |
 
 ---
 

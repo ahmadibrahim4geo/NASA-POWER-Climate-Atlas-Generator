@@ -244,6 +244,7 @@ SUBMODEL_DEPS = {
         "fields": [
             ("ET_Annual_Total", "Annual Total Evapotranspiration"),
             ("ET_Annual_Mean", "Annual Mean Monthly Evapotranspiration"),
+        ("ET_Month_Mean", "Mean Monthly Evapotranspiration"),
             ("ET_Annual_Range", "Annual Evapotranspiration Range"),
             ("ET_Seasonal_Range", "Seasonal Evapotranspiration Range"),
             ("ET_Winter_Total", "Winter Total Evapotranspiration"),
@@ -459,6 +460,17 @@ COLOR_RAMPS = {
 }
 
 SHP_FIELD_MAP = {
+    "T_Month_Mean": "T_MonMean",
+    "PSL_Month_Mean": "PSL_MonMea",
+    "PS_Month_Mean": "PS_MonMean",
+    "W_Spd_Month_Mean": "WSp_MonMea",
+    "W_Dir_Month_Mean": "WDr_MonMea",
+    "RH_Month_Mean": "RH_MonMean",
+    "Td_Month_Mean": "Td_MonMean",
+    "Sol_Month_Mean": "Sol_MonMea",
+    "UV_Month_Mean": "UV_MonMean",
+    "Cld_Month_Mean": "Cld_MonMea",
+    "ET_Month_Mean": "ET_MonMean",
     "Cld_Annual_Mean": "Cld_AnMean",
     "Cld_Annual_Range": "Cld_AnRng",
     "Cld_Autumn_Mean": "Cld_AuMean",
@@ -576,6 +588,7 @@ REV_SHP_MAP = dict((v, k) for k, v in SHP_FIELD_MAP.items())
 MODULE_INDICATOR_FIELDS = {
     "Temperature": [
         ("T_Annual_Mean", "Annual Mean Air Temperature"),
+        ("T_Month_Mean", "Mean Monthly Air Temperature"),
         ("T_Winter_Mean", "Winter Mean Air Temperature"),
         ("T_Spring_Mean", "Spring Mean Air Temperature"),
         ("T_Summer_Mean", "Summer Mean Air Temperature"),
@@ -598,6 +611,7 @@ MODULE_INDICATOR_FIELDS = {
     ],
     "Relative Humidity": [
         ("RH_Annual_Mean", "Annual Mean Relative Humidity"),
+        ("RH_Month_Mean", "Mean Monthly Relative Humidity"),
         ("RH_Winter_Mean", "Winter Mean Relative Humidity"),
         ("RH_Spring_Mean", "Spring Mean Relative Humidity"),
         ("RH_Summer_Mean", "Summer Mean Relative Humidity"),
@@ -606,6 +620,7 @@ MODULE_INDICATOR_FIELDS = {
     ],
     "Dew Point": [
         ("Td_Annual_Mean", "Annual Mean Dew Point Temperature"),
+        ("Td_Month_Mean", "Mean Monthly Dew Point Temperature"),
         ("Td_Winter_Mean", "Winter Mean Dew Point Temperature"),
         ("Td_Spring_Mean", "Spring Mean Dew Point Temperature"),
         ("Td_Summer_Mean", "Summer Mean Dew Point Temperature"),
@@ -614,6 +629,7 @@ MODULE_INDICATOR_FIELDS = {
     ],
     "Wind": [
         ("W_Spd_Annual_Mean", "Annual Mean Wind Speed"),
+        ("W_Spd_Month_Mean", "Mean Monthly Wind Speed"),
         ("W_Spd_Winter_Mean", "Winter Mean Wind Speed"),
         ("W_Spd_Spring_Mean", "Spring Mean Wind Speed"),
         ("W_Spd_Summer_Mean", "Summer Mean Wind Speed"),
@@ -622,6 +638,7 @@ MODULE_INDICATOR_FIELDS = {
         ("W_Spd_Annual_Min_Month", "Minimum Monthly Mean Wind Speed"),
         ("W_Spd_Annual_Range", "Annual Wind Speed Range"),
         ("W_Dir_Annual_Mean", "Annual Prevailing Wind Direction"),
+        ("W_Dir_Month_Mean", "Mean Monthly Wind Direction"),
         ("W_Dir_Winter_Mean", "Winter Prevailing Wind Direction"),
         ("W_Dir_Spring_Mean", "Spring Prevailing Wind Direction"),
         ("W_Dir_Summer_Mean", "Summer Prevailing Wind Direction"),
@@ -629,6 +646,7 @@ MODULE_INDICATOR_FIELDS = {
     ],
     "Solar Radiation": [
         ("Sol_Annual_Mean", "Annual Mean Daily Solar Radiation"),
+        ("Sol_Month_Mean", "Mean Monthly Daily Solar Radiation"),
         ("Sol_Annual_Total", "Annual Total Solar Radiation"),
         ("Sol_Winter_Mean", "Winter Mean Daily Solar Radiation"),
         ("Sol_Spring_Mean", "Spring Mean Daily Solar Radiation"),
@@ -638,6 +656,7 @@ MODULE_INDICATOR_FIELDS = {
     ],
     "Surface Pressure": [
         ("PS_Annual_Mean", "Annual Mean Surface Pressure"),
+        ("PS_Month_Mean", "Mean Monthly Surface Pressure"),
         ("PS_Winter_Mean", "Winter Mean Surface Pressure"),
         ("PS_Spring_Mean", "Spring Mean Surface Pressure"),
         ("PS_Summer_Mean", "Summer Mean Surface Pressure"),
@@ -646,6 +665,7 @@ MODULE_INDICATOR_FIELDS = {
     ],
     "Sea Level Pressure": [
         ("PSL_Annual_Mean", "Annual Mean Sea Level Pressure"),
+        ("PSL_Month_Mean", "Mean Monthly Sea Level Pressure"),
         ("PSL_Winter_Mean", "Winter Mean Sea Level Pressure"),
         ("PSL_Spring_Mean", "Spring Mean Sea Level Pressure"),
         ("PSL_Summer_Mean", "Summer Mean Sea Level Pressure"),
@@ -654,6 +674,7 @@ MODULE_INDICATOR_FIELDS = {
     ],
     "Cloud Cover": [
         ("Cld_Annual_Mean", "Annual Mean Cloud Cover"),
+        ("Cld_Month_Mean", "Mean Monthly Cloud Cover"),
         ("Cld_Winter_Mean", "Winter Mean Cloud Cover"),
         ("Cld_Spring_Mean", "Spring Mean Cloud Cover"),
         ("Cld_Summer_Mean", "Summer Mean Cloud Cover"),
@@ -662,6 +683,7 @@ MODULE_INDICATOR_FIELDS = {
     ],
     "UV Index": [
         ("UV_Annual_Mean", "Annual Mean UV Index"),
+        ("UV_Month_Mean", "Mean Monthly UV Index"),
         ("UV_Winter_Mean", "Winter Mean UV Index"),
         ("UV_Spring_Mean", "Spring Mean UV Index"),
         ("UV_Summer_Mean", "Summer Mean UV Index"),
@@ -685,6 +707,7 @@ MODULE_INDICATOR_FIELDS = {
     "Evapotranspiration": [
         ("ET_Annual_Total", "Annual Total Evapotranspiration (Hargreaves)"),
         ("ET_Annual_Mean", "Annual Mean Monthly Evapotranspiration"),
+        ("ET_Month_Mean", "Mean Monthly Evapotranspiration"),
         ("ET_Annual_Range", "Annual Evapotranspiration Range"),
         ("ET_Seasonal_Range", "Seasonal Evapotranspiration Range"),
         ("ET_Winter_Total", "Winter Total Evapotranspiration"),
@@ -695,6 +718,7 @@ MODULE_INDICATOR_FIELDS = {
     "Hargreaves PET": [
         ("ET_Annual_Total", "Annual Total Evapotranspiration (Hargreaves)"),
         ("ET_Annual_Mean", "Annual Mean Monthly Evapotranspiration"),
+        ("ET_Month_Mean", "Mean Monthly Evapotranspiration"),
         ("ET_Annual_Range", "Annual Evapotranspiration Range"),
         ("ET_Seasonal_Range", "Seasonal Evapotranspiration Range"),
         ("ET_Winter_Total", "Winter Total Evapotranspiration"),
@@ -3669,6 +3693,17 @@ class RasterDataClimateAtlasGenerator(object):
 
         header_ar = ["العنصر", "اسم_الحقل", "الوصف", "الوحدة", "المصدر"]
         rows_ar = [
+            [u"درجة الحرارة", u"T_Month_Mean", u"المتوسط الشهري لدرجة الحرارة", u"مئوية", u"بيانات شبكية"],
+            [u"ضغط مستوى سطح البحر", u"PSL_Month_Mean", u"المتوسط الشهري لضغط مستوى سطح البحر", u"هيكتوباسكال", u"بيانات شبكية"],
+            [u"الضغط الجوي السطحي", u"PS_Month_Mean", u"المتوسط الشهري للضغط السطحي", u"هيكتوباسكال", u"بيانات شبكية"],
+            [u"الرياح", u"W_Spd_Month_Mean", u"المتوسط الشهري لسرعة الرياح", u"م/ث", u"بيانات شبكية"],
+            [u"الرياح", u"W_Dir_Month_Mean", u"المتوسط الشهري لاتجاه الرياح", u"درجة", u"بيانات شبكية"],
+            [u"الرطوبة النسبية", u"RH_Month_Mean", u"المتوسط الشهري للرطوبة النسبية", u"%", u"بيانات شبكية"],
+            [u"نقطة الندى", u"Td_Month_Mean", u"المتوسط الشهري لدرجة حرارة نقطة الندى", u"مئوية", u"بيانات شبكية"],
+            [u"الإشعاع الشمسي", u"Sol_Month_Mean", u"المتوسط الشهري للإشعاع الشمسي", u"ميجاجول/م2/يوم", u"بيانات شبكية"],
+            [u"مؤشر الأشعة فوق البنفسجية", u"UV_Month_Mean", u"المتوسط الشهري لمؤشر UV", u"مؤشر", u"بيانات شبكية"],
+            [u"الغطاء السحابي", u"Cld_Month_Mean", u"المتوسط الشهري لكمية السحب", u"%", u"بيانات شبكية"],
+            [u"البخر والنتح", u"ET_Month_Mean", u"المتوسط الشهري للبخر والنتح", u"ملم/شهر", u"مشتق من بيانات شبكية"],
             [u"درجة الحرارة", u"T_Annual_Mean", u"المتوسط السنوي لدرجة الحرارة", u"مئوية", u"بيانات شبكية"],
             [u"درجة الحرارة", u"T_Winter_Mean", u"متوسط درجة الحرارة لفصل الشتاء", u"مئوية", u"بيانات شبكية"],
             [u"الأمطار", u"R_Annual_Mean", u"المتوسط السنوي لتساقط الأمطار", u"ملم/سنة", u"بيانات شبكية"],

@@ -3,6 +3,7 @@
 
 [![Developer](https://img.shields.io/badge/Developer-Ahmad%20Ibrahim-1F4E79.svg?style=for-the-badge&logo=github)](https://github.com/ahmadibrahim4geo)
 [![Repository](https://img.shields.io/badge/Repository-NASA--POWER--Climate--Atlas--Generator-blue.svg)](https://github.com/ahmadibrahim4geo/NASA-POWER-Climate-Atlas-Generator)
+[![Email](https://img.shields.io/badge/Email-ahmadibrahim.geo%40gmail.com-red.svg)](mailto:ahmadibrahim.geo@gmail.com)
 [![Excel Reference](https://img.shields.io/badge/Excel%20Dictionary-Fields__AR__EN__Units.xlsx-green.svg)](../Fields_AR_EN_Units.xlsx)
 
 ---
@@ -39,6 +40,7 @@
 | اسم الحقل (Field Name) | الاسم بالعربية (Name AR) | الفترة (Period) | الوحدة (Unit) | المعادلة والتوصيف الفيزيائي |
 |:---|---|:---:|:---:|---|
 | `T_Annual_Mean` | متوسط درجة الحرارة السنوي | Annual | °C | المتوسط الحسابي للشهور الـ 12: $\bar{T}_{ann} = \frac{1}{12}\sum T_m$ |
+| `T_Month_Mean` | المتوسط الشهري لدرجة الحرارة | Monthly | °C | المتوسط الحسابي للشهور الـ 12 (متوسط الشهر الاعتيادي): $\bar{T}_{ann} = \frac{1}{12}\sum T_m$ |
 | `T_Winter_Mean` | متوسط درجة حرارة الشتاء | Winter (DJF) | °C | متوسط شهور ديسمبر، يناير، فبراير |
 | `T_Spring_Mean` | متوسط درجة حرارة الربيع | Spring (MAM) | °C | متوسط شهور مارس، أبريل، مايو |
 | `T_Summer_Mean` | متوسط درجة حرارة الصيف | Summer (JJA) | °C | متوسط شهور يونيو، يوليو، أغسطس |
@@ -71,6 +73,7 @@
 | اسم الحقل (Field Name) | الاسم بالعربية (Name AR) | الفترة (Period) | الوحدة (Unit) | المعادلة والتوصيف الفيزيائي |
 |:---|---|:---:|:---:|---|
 | `PSL_Annual_Mean` | متوسط الضغط عند مستوى سطح البحر | Annual | hPa / mbar | الضغط الجوي المناخي المصحح لمستوى البحر القياسي |
+| `PSL_Month_Mean` | المتوسط الشهري لضغط مستوى سطح البحر | Monthly | hPa / mbar | المتوسط الشهري للضغط المصحح لمستوى البحر القياسي (متوسط الـ 12 شهراً) |
 | `PSL_Winter_Mean` | متوسط ضغط سطح البحر شتاءً | Winter (DJF) | hPa / mbar | متوسط الضغط المصحح لشهور الشتاء |
 | `PSL_Spring_Mean` | متوسط ضغط سطح البحر ربيعاً | Spring (MAM) | hPa / mbar | متوسط الضغط المصحح لشهور الربيع |
 | `PSL_Summer_Mean` | متوسط ضغط سطح البحر صيفاً | Summer (JJA) | hPa / mbar | متوسط الضغط المصحح لشهور الصيف |
@@ -84,6 +87,7 @@
 | اسم الحقل (Field Name) | الاسم بالعربية (Name AR) | الفترة (Period) | الوحدة (Unit) | المعادلة والتوصيف الفيزيائي |
 |:---|---|:---:|:---:|---|
 | `PS_Annual_Mean` | متوسط الضغط الجوي السطحي الفعلي | Annual | hPa / mbar | الضغط الجوي الحقيقي عند منسوب المحطة الطبوغرافي |
+| `PS_Month_Mean` | المتوسط الشهري للضغط الجوي السطحي | Monthly | hPa / mbar | المتوسط الشهري للضغط السطحي الفعلي (متوسط الـ 12 شهراً) |
 | `PS_Winter_Mean` | متوسط الضغط السطحي شتاءً | Winter (DJF) | hPa / mbar | متوسط الضغط السطحي لشهور الشتاء |
 | `PS_Spring_Mean` | متوسط الضغط السطحي ربيعاً | Spring (MAM) | hPa / mbar | متوسط الضغط السطحي لشهور الربيع |
 | `PS_Summer_Mean` | متوسط الضغط السطحي صيفاً | Summer (JJA) | hPa / mbar | متوسط الضغط السطحي لشهور الصيف |
@@ -97,11 +101,13 @@
 | اسم الحقل (Field Name) | الاسم بالعربية (Name AR) | الفترة (Period) | الوحدة (Unit) | المعادلة والتوصيف الفيزيائي |
 |:---|---|:---:|:---:|---|
 | `W_Spd_Annual_Mean` | متوسط سرعة الرياح السنوي | Annual | m/s | متوسط سرعة الرياح عند ارتفاع 10 أمتار |
+| `W_Spd_Month_Mean` | المتوسط الشهري لسرعة الرياح | Monthly | m/s | المتوسط الشهري لسرعة الرياح (متوسط الـ 12 شهراً) |
 | `W_Spd_Winter_Mean` | متوسط سرعة الرياح شتاءً | Winter (DJF) | m/s | متوسط سرعة الرياح لشهور الشتاء |
 | `W_Spd_Spring_Mean` | متوسط سرعة الرياح ربيعاً | Spring (MAM) | m/s | متوسط سرعة الرياح لشهور الربيع |
 | `W_Spd_Summer_Mean` | متوسط سرعة الرياح صيفاً | Summer (JJA) | m/s | متوسط سرعة الرياح لشهور الصيف |
 | `W_Spd_Autumn_Mean` | متوسط سرعة الرياح خريفاً | Autumn (SON) | m/s | متوسط سرعة الرياح لشهور الخريف |
 | `W_Dir_Annual_Mean` | الاتجاه السائد السنوي للرياح | Annual | degrees (°) | المتوسط الدائري للمتجهات: $\text{atan2}(\sum \sin \theta, \sum \cos \theta)$ |
+| `W_Dir_Month_Mean` | المتوسط الشهري لاتجاه الرياح السائدة | Monthly | degrees (°) | المتوسط الدائري للشهور الـ 12 لاتجاه الرياح السائدة |
 | `W_Dir_Winter_Mean` | اتجاه الرياح السائد شتاءً | Winter (DJF) | degrees (°) | المتوسط الدائري للاتجاه في الشتاء |
 | `W_Dir_Spring_Mean` | اتجاه الرياح السائد ربيعاً | Spring (MAM) | degrees (°) | المتوسط الدائري للاتجاه في الربيع |
 | `W_Dir_Summer_Mean` | اتجاه الرياح السائد صيفاً | Summer (JJA) | degrees (°) | المتوسط الدائري للاتجاه في الصيف |
@@ -117,6 +123,7 @@
 | اسم الحقل (Field Name) | الاسم بالعربية (Name AR) | الفترة (Period) | الوحدة (Unit) | المعادلة والتوصيف الفيزيائي |
 |:---|---|:---:|:---:|---|
 | `RH_Annual_Mean` | متوسط الرطوبة النسبية السنوي | Annual | % | متوسط الرطوبة النسبية للهواء عند ارتفاع مترين |
+| `RH_Month_Mean` | المتوسط الشهري للرطوبة النسبية | Monthly | % | المتوسط الشهري للرطوبة النسبية (متوسط الـ 12 شهراً) |
 | `RH_Winter_Mean` | متوسط الرطوبة النسبية شتاءً | Winter (DJF) | % | متوسط الرطوبة النسبية لشهور الشتاء |
 | `RH_Spring_Mean` | متوسط الرطوبة النسبية ربيعاً | Spring (MAM) | % | متوسط الرطوبة النسبية لشهور الربيع |
 | `RH_Summer_Mean` | متوسط الرطوبة النسبية صيفاً | Summer (JJA) | % | متوسط الرطوبة النسبية لشهور الصيف |
@@ -130,6 +137,7 @@
 | اسم الحقل (Field Name) | الاسم بالعربية (Name AR) | الفترة (Period) | الوحدة (Unit) | المعادلة والتوصيف الفيزيائي |
 |:---|---|:---:|:---:|---|
 | `Td_Annual_Mean` | المتوسط السنوي لدرجة حرارة نقطة الندى | Annual | °C | متوسط درجة حرارة نقطة الندى السنوية المحسوبة عند 2 متر |
+| `Td_Month_Mean` | المتوسط الشهري لدرجة حرارة نقطة الندى | Monthly | °C | المتوسط الشهري لدرجة حرارة نقطة الندى (متوسط الـ 12 شهراً) |
 | `Td_Winter_Mean` | متوسط نقطة الندى لفصل الشتاء | Winter (DJF) | °C | متوسط نقطة الندى لشهور الشتاء (ديسمبر، يناير، فبراير) |
 | `Td_Spring_Mean` | متوسط نقطة الندى لفصل الربيع | Spring (MAM) | °C | متوسط نقطة الندى لشهور الربيع (مارس، أبريل، مايو) |
 | `Td_Summer_Mean` | متوسط نقطة الندى لفصل الصيف | Summer (JJA) | °C | متوسط نقطة الندى لشهور الصيف (مؤشر مباشر للرطوبة الخانقة والكتمة) |
@@ -143,6 +151,7 @@
 | اسم الحقل (Field Name) | الاسم بالعربية (Name AR) | الفترة (Period) | الوحدة (Unit) | المعادلة والتوصيف الفيزيائي |
 |:---|---|:---:|:---:|---|
 | `Sol_Annual_Mean` | متوسط الإشعاع الشمسي اليومي | Annual | kWh/m²/day | تدفق الإشعاع الشمسي الكلي السطحي في كافة ظروف السماء |
+| `Sol_Month_Mean` | المتوسط الشهري للإشعاع الشمسي اليومي | Monthly | kWh/m²/day | المتوسط الشهري للإشعاع الشمسي اليومي (متوسط الـ 12 شهراً) |
 | `Sol_Annual_Total` | إجمالي الطاقة الشمسية السنوية التراكمية | Annual | kWh/m²/year | الإشعاع التراكمي السنوي: $\sum (Sol_m \times \text{days}_m)$ |
 | `Sol_Winter_Mean` | متوسط الإشعاع الشمسي شتاءً | Winter (DJF) | kWh/m²/day | متوسط الإشعاع اليومي لشهور الشتاء |
 | `Sol_Spring_Mean` | متوسط الإشعاع الشمسي ربيعاً | Spring (MAM) | kWh/m²/day | متوسط الإشعاع اليومي لشهور الربيع |
@@ -157,6 +166,7 @@
 | اسم الحقل (Field Name) | الاسم بالعربية (Name AR) | الفترة (Period) | الوحدة (Unit) | المعادلة والتوصيف الفيزيائي |
 |:---|---|:---:|:---:|---|
 | `UV_Annual_Mean` | متوسط مؤشر الأشعة فوق البنفسجية السنوي | Annual | index (0–15+) | مؤشر شدة الأشعة عند الظهيرة وفق منظمة الصحة العالمية |
+| `UV_Month_Mean` | المتوسط الشهري لمؤشر الأشعة فوق البنفسجية | Monthly | index (0–15+) | المتوسط الشهري لمؤشر الأشعة فوق البنفسجية (متوسط الـ 12 شهراً) |
 | `UV_Winter_Mean` | متوسط مؤشر UV شتاءً | Winter (DJF) | index | متوسط مؤشر الأشعة لشهور الشتاء |
 | `UV_Spring_Mean` | متوسط مؤشر UV ربيعاً | Spring (MAM) | index | متوسط مؤشر الأشعة لشهور الربيع |
 | `UV_Summer_Mean` | متوسط مؤشر UV صيفاً | Summer (JJA) | index | متوسط مؤشر الأشعة لشهور الصيف (مخاطر التعرض القصوى) |
@@ -170,6 +180,7 @@
 | اسم الحقل (Field Name) | الاسم بالعربية (Name AR) | الفترة (Period) | الوحدة (Unit) | المعادلة والتوصيف الفيزيائي |
 |:---|---|:---:|:---:|---|
 | `Cld_Annual_Mean` | متوسط نسبة تغطية السحب السنوي | Annual | % | النسبة المئوية للمتوسط السنوي لتغطية الغيوم |
+| `Cld_Month_Mean` | المتوسط الشهري للغطاء السحابي | Monthly | % | المتوسط الشهري للغطاء السحابي (متوسط الـ 12 شهراً) |
 | `Cld_Winter_Mean` | متوسط تغطية السحب شتاءً | Winter (DJF) | % | نسبة تغطية السحب لشهور الشتاء |
 | `Cld_Spring_Mean` | متوسط تغطية السحب ربيعاً | Spring (MAM) | % | نسبة تغطية السحب لشهور الربيع |
 | `Cld_Summer_Mean` | متوسط تغطية السحب صيفاً | Summer (JJA) | % | نسبة تغطية السحب لشهور الصيف |
@@ -216,6 +227,7 @@ $$ET_o = 0.0023 \cdot R_a \cdot (T_{mean} + 17.8) \cdot \sqrt{T_{max} - T_{min}}
 |:---|---|:---:|:---:|---|
 | `ET_Annual_Total` | المجموع السنوي للبخر والنتح الممكن | Annual | mm/year | التراكم السنوي للبخر والنتح بهارجريفز: $\sum ET_{month}$ |
 | `ET_Annual_Mean` | المتوسط الشهري السنوي للبخر والنتح | Annual | mm/month | المعدل الشهري للبخر والنتح: $ET_{ann} / 12$ |
+| `ET_Month_Mean` | المتوسط الشهري للبخر والنتح المرجعي | Monthly | mm/month | المعدل الشهري للبخر والنتح المحسوب بطريقة هارجريفز (رديف متطابق لـ $ET_{Annual\_Mean}$) |
 | `ET_Annual_Range` | المدى الشهري السنوي للبخر والنتح | Annual | mm/month | الفارق بين أعلى شهر في البخر والنتح وأدنى شهر: $\max(ET_m) - \min(ET_m)$ |
 | `ET_Seasonal_Range` | المدى الفصلي للبخر والنتح | Annual | mm | الفارق بين أعلى فصل في البخر والنتح وأدنى فصل: $\max(ET_{seas}) - \min(ET_{seas})$ |
 | `ET_Winter_Total` | مجموع البخر والنتح لفصل الشتاء | Winter (DJF) | mm | مجموع البخر والنتح لشهور ديسمبر، يناير، فبراير |
@@ -266,9 +278,9 @@ $$ET_o = 0.0023 \cdot R_a \cdot (T_{mean} + 17.8) \cdot \sqrt{T_{max} - T_{min}}
 
 ---
 
-## Architectural System Statistics
-* **Total Independent Modular Layers:** 18 Feature Classes and 18 1:1 matching Raster Folders.
-* **Total Specialized Scientific Indicators:** 247 Climate & Bioclimatic Indicators (103 annual, seasonal, and derived + 144 climatological monthly indicators across all 12 calendar months).
-* **Total Schema Columns:** 259 Total Defined Fields (including 12 administrative, geodetic, and run tracking fields).
-* **Dual-Sheet Excel Workbooks:** Every element Excel workbook contains `Data` (Annual/Seasonal) and `Month` (12-month profile) sheets.
-* **Export Interoperability:** Full export support for File Geodatabase (`.gdb`), Shapefiles (`.shp` with collision-free $\le 10$-character abbreviations via `SHP_FIELD_MAP`), and formatted Excel workbooks (`.xlsx` and `.xls`).
+## إحصائيات المنظومة المعمارية
+* **إجمالي الطبقات الموديلية المستقلة:** 18 طبقة معالم (`Feature Classes`) ومجلد راستر موحد بنسبة 1:1.
+* **إجمالي المؤشرات المناخية المتخصصة:** 258 مؤشراً مناخياً وبيومناخياً (114 مؤشراً سنوياً وفصلياً وشهرياً كلياً ومشتقاً + 144 متوسطاً ومجموعاً شهرياً مناخياً تفصيلياً للشهور الـ 12).
+* **إجمالي أعمدة المخطط القياسي الكامل:** 271 حقلاً شاملاً الحقول الإدارية والإحداثيات وبيانات المعالجة (13 حقلاً إدارياً + 258 مؤشراً مناخياً).
+* **هيكلة مصنفات الإكسيل المهنية:** تشتمل كافة ملفات إكسيل العناصر على صفحتين (`Data` للمؤشرات السنوية والفصلية والمتوسط الشهري الكلي `Month_Mean`، و `Month` للمتوسطات الشهرية للـ 12 شهراً).
+* **توافقية التصدير:** تدعم التصدير الكامل لقواعد البيانات الجغرافية (`.gdb`)، وملفات الشيب فايل (`.shp` بأطوال حقول $\le 10$ أحرف فريدة)، ومصنفات الإكسيل المنسقة (`.xlsx` و `.xls`).

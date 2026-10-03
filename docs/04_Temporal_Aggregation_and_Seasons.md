@@ -123,10 +123,23 @@ In addition to annual and seasonal integrations, the platform computes and store
    - Monthly Hargreaves-Samani potential evapotranspiration depth according to FAO-56 standard:
      $$\overline{ET}_m = \frac{1}{N_{years}} \sum_{y=1}^{N_{years}} ET_{y, m}, \quad m \in \{1, 2, \dots, 12\}$$
 
-### 5.2 Structured Dual-Sheet Excel Architecture
+### 5.2 Climatological Overall Monthly Mean (`*_Month_Mean`)
+To represent the typical climatological monthly baseline for each atmospheric variable across the full 12 calendar months:
+1. **Precipitation Monthly Depth (`R_Month_Mean`)**:
+   - Evaluated as the multi-year annual depth divided by 12:
+     $$R_{Month\_Mean} = \frac{R_{Annual\_Mean}}{12} \quad (\text{mm/month})$$
+2. **Atmospheric State Variables & Rates (`T_Month_Mean`, `PSL_Month_Mean`, etc.)**:
+   - For continuous state variables (Temperature, Sea Level Pressure, Surface Pressure, Wind Speed, Relative Humidity, Dew Point, Solar Radiation daily flux, UV Index, Cloud Cover, and Evapotranspiration daily rate):
+     $$\overline{X}_{Month\_Mean} = \frac{1}{12}\sum_{m=1}^{12} \overline{X}_m = X_{Annual\_Mean}$$
+     *(Note: Dividing temperature or pressure by 12 would violate physical units and dimensions; the climatological monthly mean represents the mean level across all months).*
+3. **Circular Vector Wind Direction (`W_Dir_Month_Mean`)**:
+   - Evaluated via circular mean over the 12 monthly vector angles:
+     $$W\_Dir_{Month\_Mean} = \text{atan2}\left(\frac{1}{12}\sum_{m=1}^{12} \sin \overline{\theta}_m, \frac{1}{12}\sum_{m=1}^{12} \cos \overline{\theta}_m\right) \pmod{360^{\circ}}$$
+
+### 5.3 Structured Dual-Sheet Excel Architecture
 All individual element Excel workbooks (`00_Tables_And_Reports\*.xls`) are structured with two synchronized sheets:
-- **Sheet 1 (`Data`)**: Contains station coordinates, metadata, annual indicators, and seasonal indicators (DJF, MAM, JJA, SON).
-- **Sheet 2 (`Month`)**: Contains station coordinates, metadata, and all 12 climatological monthly indicators.
+- **Sheet 1 (`Data`)**: Contains station coordinates, metadata, annual indicators, overall monthly mean (`*_Month_Mean`), and seasonal indicators (DJF, MAM, JJA, SON).
+- **Sheet 2 (`Month`)**: Contains station coordinates, metadata, and all 12 individual climatological monthly indicators (Jan–Dec).
 - **Persistent Local Raw Archive**: Complete 30-year monthly time-series JSON records are archived in `Egypt_Monthly_Raw_1996_2025.json` (~54 MB) to permit instant offline re-aggregations without network latency.
-- **Cartographic Surface Generation Policy**: Surface raster interpolations are maintained for annual and seasonal horizons, preserving clean GIS project structures while providing complete monthly tabular fidelity.
+- **Cartographic Surface Generation Policy**: Surface raster interpolations are maintained for annual, seasonal, and overall monthly mean (`*_Month_Mean`) horizons across all 18 folders (114 rasters total). Individual month-by-month raster generation can optionally be toggled for fine-scale analysis into dedicated `Month` subfolders.
 
