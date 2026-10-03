@@ -1301,11 +1301,216 @@ def build_excel(output_path):
     align_left = Alignment(horizontal="left", vertical="center", wrap_text=True)
     align_right = Alignment(horizontal="right", vertical="center", wrap_text=True)
     
+    section_fill = PatternFill(start_color="D9E1F2", end_color="D9E1F2", fill_type="solid")
+    font_section = Font(name="Segoe UI", size=11, bold=True, color="1F4E79")
+    font_banner = Font(name="Segoe UI", size=14, bold=True, color="FFFFFF")
+
     # ----------------------------------------------------
-    # Sheet 1: Climate Fields
+    # Sheet 1: 01_عن_القاموس_About_Dictionary
     # ----------------------------------------------------
-    ws1 = wb.active
-    ws1.title = "Climate_Fields"
+    ws0 = wb.active
+    ws0.title = "01_عن_القاموس_About_Dictionary"
+    ws0.views.sheetView[0].showGridLines = True
+
+    # Title Banner (Row 1)
+    ws0.merge_cells("A1:G1")
+    tcell = ws0.cell(1, 1, u"القاموس المرجعي الشامل لحقول ومؤشرات أطلس المناخ الرقمي\nComprehensive Data Dictionary — NASA POWER Climate Atlas Engine")
+    tcell.font = font_banner
+    tcell.fill = header_fill
+    tcell.alignment = align_center
+    ws0.row_dimensions[1].height = 45
+
+    # Section 1: Engine Profile (Row 3)
+    ws0.merge_cells("A3:G3")
+    s1 = ws0.cell(3, 1, u"1. بطاقة الهوية الفنية ومصدر البيانات المناخية (Technical Engine & Data Source Profile)")
+    s1.font = font_section
+    s1.fill = section_fill
+    s1.alignment = align_right
+    ws0.row_dimensions[3].height = 24
+
+    engine_meta = [
+        (u"اسم الأداة والمنصة البرمجية (Software Platform)", u"NASA POWER Climate Atlas Generator (ArcGIS 10.8 & Pro)", u"أداة المعالجة الكارتوجرافية والتحليل المناخي الآلي لمنظومة ArcGIS"),
+        (u"مزود ونماذج البيانات المناخية (Data Source & Models)", u"NASA POWER API (CERES & MERRA-2 Gridded Reanalysis)", u"نماذج الاستشعار الفضائي وإعادة التحليل المناخي المعتمدة لوكالة ناسا"),
+        (u"الفترة الزمنية المناخية القياسية (Climate Normal Period)", u"1996 – 2025 (سلسلة مناخية قياسية مكتملة 30 عاماً)", u"تطابق المعيار الدولي للمعدلات المناخية القياسية (WMO 30-Year Normal)"),
+        (u"المعايير العلمية والمرجعيات الدولية (Scientific Standards)", u"WMO-No. 1203 / FAO-56 Irrigation / Steadman & ISO 7243", u"المنهجيات المعتمدة عالمياً لحساب الراحة الحرارية والقحولة والتبخر"),
+        (u"التغطية الجغرافية ونظام الإحداثيات (Spatial Scope & Coordinate System)", u"Global Coverage (WGS 1984 / EPSG:4326)", u"تغطية عالمية شاملة بدقة شبكية منتظمة وقابلة للقص على أي دولة أو إقليم"),
+        (u"إجمالي الحقول الموصوفة في القاموس (Total Defined Fields)", u"116 حقلاً معيارياً (Standard Fields)", u"تشمل الحقول الإدارية والفيزيائية والفصلية ومتجهات الرياح والموديلات"),
+        (u"عدد الحزم والعناصر المناخية (Climate Modules)", u"18 حزمة موديولية متكاملة (18 Complete Modules)", u"مجلدات راسترات وطبقات معالم بقاعدة البيانات الجغرافية متطابقة 1:1"),
+    ]
+
+    for idx, (prop, val, note) in enumerate(engine_meta, 4):
+        ws0.row_dimensions[idx].height = 22
+        r_fill = zebra_odd if idx % 2 == 0 else zebra_even
+        c1 = ws0.cell(idx, 1, idx - 3)
+        c1.alignment = align_center
+        c1.font = font_bold
+        c1.fill = r_fill
+        c1.border = thin_border
+        
+        c2 = ws0.cell(idx, 2, prop)
+        c2.alignment = align_right
+        c2.font = font_bold
+        c2.fill = r_fill
+        c2.border = thin_border
+        
+        ws0.merge_cells(start_row=idx, start_column=3, end_row=idx, end_column=4)
+        c3 = ws0.cell(idx, 3, val)
+        c3.alignment = align_center
+        c3.font = font_code
+        c3.fill = r_fill
+        c3.border = thin_border
+        ws0.cell(idx, 4).border = thin_border
+        ws0.cell(idx, 4).fill = r_fill
+        
+        ws0.merge_cells(start_row=idx, start_column=5, end_row=idx, end_column=7)
+        c5 = ws0.cell(idx, 5, note)
+        c5.alignment = align_right
+        c5.font = font_regular
+        c5.fill = r_fill
+        c5.border = thin_border
+        for c_i in (6, 7):
+            ws0.cell(idx, c_i).border = thin_border
+            ws0.cell(idx, c_i).fill = r_fill
+
+    # Section 2: 18 Modules Summary Table (Row 12)
+    ws0.merge_cells("A12:G12")
+    s2 = ws0.cell(12, 1, u"2. هيكل حزم البيانات والموديلات الـ 18 المتطابقة 1:1 (The 18 Climate Modules Architecture)")
+    s2.font = font_section
+    s2.fill = section_fill
+    s2.alignment = align_right
+    ws0.row_dimensions[12].height = 24
+
+    headers_sec2 = [
+        u"م",
+        u"كود الموديول في الأداة\nModule Code",
+        u"الاسم باللغة العربية\nArabic Module Name",
+        u"الاسم بالإنجليزية\nEnglish Module Name",
+        u"المؤشرات\nIndicators",
+        u"الوحدة الرئيسية\nMain Unit",
+        u"المنهجية والمعيار العلمي المعتمد\nScientific Methodology & Standards"
+    ]
+    ws0.row_dimensions[13].height = 28
+    for col_idx, h_text in enumerate(headers_sec2, 1):
+        c = ws0.cell(row=13, column=col_idx, value=h_text)
+        c.font = font_header
+        c.fill = summary_fill
+        c.alignment = align_center
+        c.border = thin_border
+
+    for idx, mod in enumerate(MODULES_SUMMARY, 14):
+        ws0.row_dimensions[idx].height = 22
+        r_fill = zebra_odd if idx % 2 == 0 else zebra_even
+        
+        c1 = ws0.cell(idx, 1, mod["num"])
+        c1.alignment = align_center
+        c1.font = font_bold
+        c1.fill = r_fill
+        c1.border = thin_border
+        
+        c2 = ws0.cell(idx, 2, mod["folder"])
+        c2.alignment = align_left
+        c2.font = font_code
+        c2.fill = r_fill
+        c2.border = thin_border
+        
+        c3 = ws0.cell(idx, 3, mod["name_ar"])
+        c3.alignment = align_right
+        c3.font = font_bold
+        c3.fill = r_fill
+        c3.border = thin_border
+        
+        c4 = ws0.cell(idx, 4, mod["name_en"])
+        c4.alignment = align_left
+        c4.font = font_regular
+        c4.fill = r_fill
+        c4.border = thin_border
+        
+        c5 = ws0.cell(idx, 5, mod["count"])
+        c5.alignment = align_center
+        c5.font = font_bold
+        c5.fill = r_fill
+        c5.border = thin_border
+        
+        c6 = ws0.cell(idx, 6, mod["unit"])
+        c6.alignment = align_center
+        c6.font = font_unit
+        c6.fill = r_fill
+        c6.border = thin_border
+        
+        c7 = ws0.cell(idx, 7, mod["method"])
+        c7.alignment = align_left
+        c7.font = font_regular
+        c7.fill = r_fill
+        c7.border = thin_border
+
+    # Section 3: Columns Guide (Row 33)
+    ws0.merge_cells("A33:G33")
+    s3 = ws0.cell(33, 1, u"3. دليل قراءة أعمدة القاموس المرجعي واستخدامها في نظم المعلومات الجغرافية (Field Dictionary Columns Guide)")
+    s3.font = font_section
+    s3.fill = section_fill
+    s3.alignment = align_right
+    ws0.row_dimensions[33].height = 24
+
+    cols_meta = [
+        (u"اسم الحقل المختصر (Short Field Name)", u"صيغة Shapefile / DBF (حتى 10 أحرف)", u"متوافق 100% مع طبقات الشيب فايل لمنع اقتطاع الأسماء وتشوهها عند التصدير."),
+        (u"اسم الحقل الكامل (Full Field Name)", u"صيغة Geodatabase و NASA POWER API", u"الاسم المعياري الشامل المعتمد في قواعد البيانات الجغرافية (GDB) وبرمجية الأداة."),
+        (u"الموديول / العنصر المناخي (Climate Module)", u"الحزمة المناخية (1 من 18 موديول)", u"يتطابق بنسبة 1:1 مع اسم مجلد الراستر واسم طبقة المعالم في قاعدة البيانات."),
+        (u"الشرح والتوصيف العلمي (Scientific Description)", u"البيان الفيزيائي والمعادلة الرياضية", u"التوصيف الرياضي والفيزيائي الدقيق لكيفية حساب المؤشر وفترته الزمنية المعتمدة."),
+        (u"وحدة القياس القياسية (Measurement Unit)", u"الوحدات الدولية المعتمدة (SI Units)", u"درجات مئوية (°C)، ملم، هيكتوباسكال (hPa)، م/ث، ميجاجول/م²، نسب مئوية (%)."),
+        (u"اسم الخريطة المقترح (Suggested Map Title)", u"الصياغة الكارتوجرافية الاحترافية", u"العنوان الكارتوجرافي الرسمي المعتمد لوضعه في عنوان الخريطة ومفتاح المصطلحات (Legend)."),
+    ]
+
+    for idx, (prop, val, note) in enumerate(cols_meta, 34):
+        ws0.row_dimensions[idx].height = 22
+        r_fill = zebra_odd if idx % 2 == 0 else zebra_even
+        c1 = ws0.cell(idx, 1, idx - 33)
+        c1.alignment = align_center
+        c1.font = font_bold
+        c1.fill = r_fill
+        c1.border = thin_border
+        
+        c2 = ws0.cell(idx, 2, prop)
+        c2.alignment = align_right
+        c2.font = font_bold
+        c2.fill = r_fill
+        c2.border = thin_border
+        
+        ws0.merge_cells(start_row=idx, start_column=3, end_row=idx, end_column=4)
+        c3 = ws0.cell(idx, 3, val)
+        c3.alignment = align_center
+        c3.font = font_code
+        c3.fill = r_fill
+        c3.border = thin_border
+        ws0.cell(idx, 4).border = thin_border
+        ws0.cell(idx, 4).fill = r_fill
+        
+        ws0.merge_cells(start_row=idx, start_column=5, end_row=idx, end_column=7)
+        c5 = ws0.cell(idx, 5, note)
+        c5.alignment = align_right
+        c5.font = font_regular
+        c5.fill = r_fill
+        c5.border = thin_border
+        for c_i in (6, 7):
+            ws0.cell(idx, c_i).border = thin_border
+            ws0.cell(idx, c_i).fill = r_fill
+
+    # Set column widths for Sheet 1
+    col_widths_0 = {
+        1: 6,   # م
+        2: 32,  # Module / Property
+        3: 28,  # Value / Code
+        4: 28,  # Sub-value / English
+        5: 14,  # Count
+        6: 18,  # Unit
+        7: 48   # Note / Method
+    }
+    for col_idx, width in col_widths_0.items():
+        ws0.column_dimensions[get_column_letter(col_idx)].width = width
+
+    # ----------------------------------------------------
+    # Sheet 2: Climate Fields
+    # ----------------------------------------------------
+    ws1 = wb.create_sheet(title="Climate_Fields")
     
     headers_ws1 = [
         u"م",
