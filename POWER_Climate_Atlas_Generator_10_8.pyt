@@ -1497,8 +1497,8 @@ FIELD_DEFS = [
     ("HI_Winter_Mean", "Winter Mean Heat Index", u"متوسط مؤشر الحرارة المحسوسة في فصل الشتاء", "T2M+RH2M", "Heat Index", "Winter", "Mean", "C", u"متوسط مؤشر الحرارة المحسوسة (الهيوميدكس IH) شتاءً", "Winter mean perceived temperature (Humidex/IH)", "Mean of monthly Humidex IH for months 12,1,2"),
     ("HI_Annual_Range", "Annual Heat Index Range", u"المدى السنوي لمؤشر الحرارة المحسوسة (الإجهاد الحراري)", "T2M+RH2M", "Heat Index", "Annual", "Range", "C", u"أعلى مؤشر شهري بروثفوز ناقص أدناه", "Highest monthly Rothfusz heat index minus lowest monthly heat index", "max(monthly Rothfusz HI) - min(monthly Rothfusz HI)"),
     ("WBGT_Summer_Mean", "Summer Mean WBGT Heat Stress", u"متوسط الإجهاد الحراري صيفاً (WBGT)", "T2M+RH2M", "Heat Index", "Summer", "Mean", "C", u"متوسط مؤشر WBGT الظلي صيفاً من الحرارة والرطوبة", "Summer mean shade WBGT from T2M and RH2M (Stull + ISO 7243)", "Mean of monthly shade WBGT for months 6,7,8"),
-    ("R_Annual_Total", "Annual Total Precipitation", u"التراكم السنوي الإجمالي للأمطار", "PRECTOTCORR", "Precipitation", "Annual", "Sum", "mm/year", u"مجموع كميات المطر السنوي", "Mean annual total across years (single year: yearly sum)", "Mean of per-year annual sums"),
-    ("R_Annual_Mean", "Mean Monthly Precipitation", u"المتوسط السنوي لمعدلات الأمطار الشهرية", "PRECTOTCORR", "Precipitation", "Annual", "Mean", "mm", u"متوسط الإجماليات الشهرية", "Mean of climatological monthly totals", "Mean of 12 climatological monthly totals (= Annual Total / 12)"),
+    ("R_Annual_Mean", "Annual Mean Precipitation", u"المتوسط السنوي لتساقط الأمطار", "PRECTOTCORR", "Precipitation", "Annual", "Mean", "mm/year", u"متوسط مجاميع كميات المطر السنوية", "Mean annual total across years (single year: yearly sum)", "Mean of per-year annual sums"),
+    ("R_Month_Mean", "Mean Monthly Precipitation", u"المعدل الشهري لتساقط الأمطار", "PRECTOTCORR", "Precipitation", "Annual", "Mean", "mm", u"متوسط الإجماليات الشهرية", "Mean of climatological monthly totals", "Mean of 12 climatological monthly totals (= Annual Mean / 12)"),
     ("R_Annual_Range", "Annual Precipitation Range", u"المدى السنوي للأمطار", "PRECTOTCORR", "Precipitation", "Annual", "Range", "mm", u"أعلى متوسط شهري للأمطار ناقص أدنى متوسط شهري", "Highest monthly precipitation minus lowest monthly precipitation", "max(clim monthly) - min(clim monthly)"),
     ("R_Seasonal_Range", "Seasonal Precipitation Range", u"المدى الفصلي للأمطار", "PRECTOTCORR", "Precipitation", "Annual", "Range", "mm", u"أعلى تراكم فصلي للأمطار ناقص أدنى تراكم فصلي", "Highest seasonal precipitation total minus lowest seasonal precipitation total", "max(seasonal totals) - min(seasonal totals)"),
     ("R_Winter_Total", "Winter Total Precipitation", u"إجمالي أمطار فصل الشتاء", "PRECTOTCORR", "Precipitation", "Winter", "Sum", "mm", u"مجموع أمطار أشهر الشتاء", "Mean winter total across years", "Mean of per-year Dec+Jan+Feb totals"),
@@ -1661,6 +1661,7 @@ SHP_FIELD_MAP = {
     "R_Annual_Mean": "R_AnnMean",
     "R_Annual_Range": "R_AnnRng",
     "R_Annual_Total": "R_AnnTot",
+    "R_Month_Mean": "R_MonMean",
     "R_Autumn_Total": "R_AutTot",
     "R_Seasonal_Range": "R_SeaRng",
     "R_Spring_Total": "R_SprTot",
@@ -2241,7 +2242,7 @@ REQUIRED_COLUMNS = [
     "T_Annual_Range", "T_Max_Summer_Month_Mean", "T_Min_Winter_Month_Mean",
     "T_Annual_Max_Mean", "T_Annual_Min_Mean", "HI_Annual_Mean", "HI_Summer_Mean", "HI_Winter_Mean", "HI_Annual_Range", "WBGT_Summer_Mean",
     "Td_Annual_Mean", "Td_Winter_Mean", "Td_Spring_Mean", "Td_Summer_Mean", "Td_Autumn_Mean", "Td_Annual_Range",
-    "R_Annual_Total", "R_Annual_Mean", "R_Annual_Range", "R_Seasonal_Range", "R_Winter_Total", "R_Spring_Total",
+    "R_Annual_Mean", "R_Month_Mean", "R_Annual_Range", "R_Seasonal_Range", "R_Winter_Total", "R_Spring_Total",
     "R_Summer_Total", "R_Autumn_Total",
     "PSL_Annual_Mean", "PSL_Winter_Mean", "PSL_Spring_Mean", "PSL_Summer_Mean", "PSL_Autumn_Mean", "PSL_Annual_Range",
     "PS_Annual_Mean", "PS_Winter_Mean", "PS_Spring_Mean", "PS_Summer_Mean", "PS_Autumn_Mean", "PS_Annual_Range",
@@ -2544,8 +2545,9 @@ def compute_point_fields(monthly, years, modules, temporal, daily_raw=None,
         agg = seasonal_totals_from_monthly_totals(totals, years)
         clim_m = climat_monthly_means(totals)
         clim_vals = [v for v in clim_m.values() if v is not None]
-        res["R_Annual_Total"] = agg["Annual_Mean"]
-        res["R_Annual_Mean"] = (sum(clim_vals) / len(clim_vals)) if clim_vals else None
+        res["R_Annual_Mean"] = agg["Annual_Mean"]
+        res["R_Month_Mean"] = (sum(clim_vals) / len(clim_vals)) if clim_vals else None
+        res["R_Annual_Total"] = res["R_Annual_Mean"]  # backward compatibility alias
         res["R_Annual_Range"] = (max(clim_vals) - min(clim_vals)) if len(clim_vals) >= 2 else None
         s_vals = [agg["Winter"], agg["Spring"], agg["Summer"], agg["Autumn"]]
         valid_s = [v for v in s_vals if v is not None]
@@ -3660,7 +3662,7 @@ class PowerClimateAtlasGenerator(object):
                         has_inp = False
                         if "Temperature" in sinfo["modules"] and "Precipitation" in sinfo["modules"]:
                             has_inp = any(f in layer_fnames for f in ("T_Annual_Mean", "T_AnMean", "T2M")) and \
-                                      any(f in layer_fnames for f in ("R_Annual_Total", "R_AnnTot", "PRECTOTCORR"))
+                                      any(f in layer_fnames for f in ("R_Annual_Mean", "R_AnnMean", "R_Annual_Total", "R_AnnTot", "PRECTOTCORR"))
                         elif "Temperature" in sinfo["modules"] and "Relative Humidity" in sinfo["modules"]:
                             has_inp = any(f in layer_fnames for f in ("T_Summer_Mean", "T_SumMean", "T_Annual_Mean", "T_AnMean", "T2M")) and \
                                       any(f in layer_fnames for f in ("RH_Summer_Mean", "RH_SuMean", "RH_Annual_Mean", "RH_AnMean", "RH2M"))
@@ -6089,9 +6091,15 @@ class PowerClimateAtlasGenerator(object):
 
                     t_val = (f.get("T_Annual_Mean") if f.get("T_Annual_Mean") is not None else
                              (f.get("T_AnnMean") if f.get("T_AnnMean") is not None else f.get("T2M")))
-                    p_val = (f.get("R_Annual_Total") if f.get("R_Annual_Total") is not None else
-                             (f.get("R_AnnTot") if f.get("R_AnnTot") is not None else
-                              (f.get("R_AnnTotal") if f.get("R_AnnTotal") is not None else f.get("PRECTOTCORR"))))
+                    if f.get("R_Month_Mean") is not None or f.get("R_MonMean") is not None:
+                        p_val = (f.get("R_Annual_Mean") if f.get("R_Annual_Mean") is not None else f.get("R_AnnMean"))
+                    elif f.get("R_Annual_Total") is not None or f.get("R_AnnTot") is not None or f.get("R_AnnTotal") is not None:
+                        p_val = (f.get("R_Annual_Total") if f.get("R_Annual_Total") is not None else
+                                 (f.get("R_AnnTot") if f.get("R_AnnTot") is not None else f.get("R_AnnTotal")))
+                    else:
+                        p_val = (f.get("R_Annual_Mean") if f.get("R_Annual_Mean") is not None else
+                                 (f.get("R_AnnMean") if f.get("R_AnnMean") is not None else
+                                  (f.get("Precip_Annual_Sum") if f.get("Precip_Annual_Sum") is not None else f.get("PRECTOTCORR"))))
                     tx_val = (f.get("T_Annual_Max_Mean") if f.get("T_Annual_Max_Mean") is not None else
                               (f.get("T_MaxMean") if f.get("T_MaxMean") is not None else f.get("T2M_MAX")))
                     if tx_val is None and t_val is not None:
@@ -6950,10 +6958,10 @@ class PowerClimateAtlasGenerator(object):
     def _write_dictionaries(self, vec_dir, modules, msg, provider="NASA POWER API", wanted_fields_by_module=None):
         rows = metadata_rows_for_modules(modules, wanted_fields_by_module=wanted_fields_by_module)
         for r in rows:
-            if r["Field_Name"] == "R_Annual_Total":
-                r["Notes"] = "Climatological annual total (mean of per-year sums)"
             if r["Field_Name"] == "R_Annual_Mean":
-                r["Notes"] = "Mean of climatological monthly totals (= Total/12)"
+                r["Notes"] = "Climatological annual mean (mean of per-year sums)"
+            if r["Field_Name"] == "R_Month_Mean":
+                r["Notes"] = "Mean of climatological monthly totals (= Annual Mean / 12)"
             if r["Field_Name"] == "R_Annual_Range":
                 r["Notes"] = "Difference between wettest and driest climatological months"
             if r["Field_Name"] == "R_Seasonal_Range":

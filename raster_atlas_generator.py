@@ -491,6 +491,7 @@ SHP_FIELD_MAP = {
     "R_Annual_Mean": "R_AnnMean",
     "R_Annual_Range": "R_AnnRng",
     "R_Annual_Total": "R_AnnTot",
+    "R_Month_Mean": "R_MonMean",
     "R_Autumn_Total": "R_AutTot",
     "R_Seasonal_Range": "R_SeaRng",
     "R_Spring_Total": "R_SprTot",
@@ -578,8 +579,8 @@ MODULE_INDICATOR_FIELDS = {
         ("T_Annual_Min_Mean", "Annual Mean Minimum Temperature"),
     ],
     "Precipitation": [
-        ("R_Annual_Total", "Annual Total Precipitation"),
-        ("R_Annual_Mean", "Mean Monthly Precipitation"),
+        ("R_Annual_Mean", "Annual Mean Precipitation"),
+        ("R_Month_Mean", "Mean Monthly Precipitation"),
         ("R_Annual_Range", "Annual Precipitation Range"),
         ("R_Seasonal_Range", "Seasonal Precipitation Range"),
         ("R_Winter_Total", "Winter Total Precipitation"),
@@ -2423,7 +2424,7 @@ class RasterDataClimateAtlasGenerator(object):
                         except Exception:
                             pass
 
-                ann_mean_flds = [f for f, _ in indicator_fields if f in ("R_Annual_Mean", "ET_Annual_Mean")]
+                ann_mean_flds = [f for f, _ in indicator_fields if f in ("R_Month_Mean", "ET_Annual_Mean")]
                 if is_sum and ann_mean_flds:
                     # MEAN + DATA skips NoData months; a plain /12 sum would null
                     # the whole year when a single month is NoData.
@@ -2631,8 +2632,17 @@ class RasterDataClimateAtlasGenerator(object):
         p_map = {}
         precip_fc = element_layers.get("Precipitation") or intermediate_points.get("Precipitation")
         if precip_fc and arcpy.Exists(precip_fc):
-            p_fld = "R_Annual_Total" if "R_Annual_Total" in [f.name for f in arcpy.ListFields(precip_fc)] else (
-                "R_AnnTot" if "R_AnnTot" in [f.name for f in arcpy.ListFields(precip_fc)] else "Precip_Annual_Sum")
+            fc_flds = [f.name for f in arcpy.ListFields(precip_fc)]
+            if "R_Month_Mean" in fc_flds or "R_MonMean" in fc_flds:
+                p_fld = "R_Annual_Mean" if "R_Annual_Mean" in fc_flds else "R_AnnMean"
+            elif "R_Annual_Total" in fc_flds or "R_AnnTot" in fc_flds:
+                p_fld = "R_Annual_Total" if "R_Annual_Total" in fc_flds else "R_AnnTot"
+            elif "R_Annual_Mean" in fc_flds:
+                p_fld = "R_Annual_Mean"
+            elif "R_AnnMean" in fc_flds:
+                p_fld = "R_AnnMean"
+            else:
+                p_fld = "Precip_Annual_Sum"
             with arcpy.da.SearchCursor(precip_fc, ["POINT_X", "POINT_Y", p_fld]) as cur:
                 for r in cur:
                     p_map[(round(r[0], 4), round(r[1], 4))] = r[2]
@@ -2871,10 +2881,15 @@ class RasterDataClimateAtlasGenerator(object):
 
                     t_val = (f.get("T_Annual_Mean") if f.get("T_Annual_Mean") is not None else
                              (f.get("T_AnnMean") if f.get("T_AnnMean") is not None else f.get("T2M")))
-                    p_val = (f.get("R_Annual_Total") if f.get("R_Annual_Total") is not None else
-                             (f.get("R_AnnTot") if f.get("R_AnnTot") is not None else
-                              (f.get("R_AnnTotal") if f.get("R_AnnTotal") is not None else
-                               (f.get("Precip_Annual_Sum") if f.get("Precip_Annual_Sum") is not None else f.get("PRECTOTCORR")))))
+                    if f.get("R_Month_Mean") is not None or f.get("R_MonMean") is not None:
+                        p_val = (f.get("R_Annual_Mean") if f.get("R_Annual_Mean") is not None else f.get("R_AnnMean"))
+                    elif f.get("R_Annual_Total") is not None or f.get("R_AnnTot") is not None or f.get("R_AnnTotal") is not None:
+                        p_val = (f.get("R_Annual_Total") if f.get("R_Annual_Total") is not None else
+                                 (f.get("R_AnnTot") if f.get("R_AnnTot") is not None else f.get("R_AnnTotal")))
+                    else:
+                        p_val = (f.get("R_Annual_Mean") if f.get("R_Annual_Mean") is not None else
+                                 (f.get("R_AnnMean") if f.get("R_AnnMean") is not None else
+                                  (f.get("Precip_Annual_Sum") if f.get("Precip_Annual_Sum") is not None else f.get("PRECTOTCORR"))))
                     tx_val = (f.get("T_Annual_Max_Mean") if f.get("T_Annual_Max_Mean") is not None else
                               (f.get("T_MaxMean") if f.get("T_MaxMean") is not None else f.get("T2M_MAX")))
                     if tx_val is None and t_val is not None:
@@ -3531,8 +3546,8 @@ class RasterDataClimateAtlasGenerator(object):
             ["Temperature", "T_Summer_Mean", "Summer (JJA) Mean Temperature", "deg C", "Gridded Reanalysis"],
             ["Temperature", "T_Autumn_Mean", "Autumn (SON) Mean Temperature", "deg C", "Gridded Reanalysis"],
             ["Temperature", "T_Annual_Range", "Annual Temperature Range", "deg C", "Gridded Reanalysis"],
-            ["Precipitation", "R_Annual_Total", "Annual Accumulated Total Precipitation", "mm/yr", "Gridded Reanalysis"],
             ["Precipitation", "R_Annual_Mean", "Annual Mean Precipitation", "mm/yr", "Gridded Reanalysis"],
+            ["Precipitation", "R_Month_Mean", "Mean Monthly Precipitation", "mm/month", "Gridded Reanalysis"],
             ["Precipitation", "R_Annual_Range", "Annual Precipitation Range", "mm", "Gridded Reanalysis"],
             ["Precipitation", "R_Seasonal_Range", "Seasonal Precipitation Range", "mm", "Gridded Reanalysis"],
             ["Precipitation", "R_Winter_Total", "Winter (DJF) Precipitation Total", "mm", "Gridded Reanalysis"],
@@ -3648,7 +3663,8 @@ class RasterDataClimateAtlasGenerator(object):
         rows_ar = [
             [u"درجة الحرارة", u"T_Annual_Mean", u"المتوسط السنوي لدرجة الحرارة", u"مئوية", u"بيانات شبكية"],
             [u"درجة الحرارة", u"T_Winter_Mean", u"متوسط درجة الحرارة لفصل الشتاء", u"مئوية", u"بيانات شبكية"],
-            [u"الأمطار", u"R_Annual_Total", u"المجموع السنوي التراكمي للأمطار", u"ملم/سنة", u"بيانات شبكية"],
+            [u"الأمطار", u"R_Annual_Mean", u"المتوسط السنوي لتساقط الأمطار", u"ملم/سنة", u"بيانات شبكية"],
+            [u"الأمطار", u"R_Month_Mean", u"المعدل الشهري لتساقط الأمطار", u"ملم/شهر", u"بيانات شبكية"],
             [u"الرطوبة النسبية", u"RH_Annual_Mean", u"المتوسط السنوي للرطوبة النسبية", u"%", u"بيانات شبكية"],
             [u"نقطة الندى", u"Td_Annual_Mean", u"المتوسط السنوي لدرجة حرارة نقطة الندى", u"مئوية", u"بيانات شبكية"],
             [u"الرياح", u"W_Spd_Annual_Mean", u"المتوسط السنوي لسرعة الرياح", u"م/ث", u"بيانات شبكية"],

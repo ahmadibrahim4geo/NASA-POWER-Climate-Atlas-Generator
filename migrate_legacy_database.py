@@ -178,8 +178,8 @@ MODULES_INFO = [
         "folder": "02_Precipitation",
         "short": "Precipitation",
         "fields": [
-            ("R_Annual_Total", "Annual Total Precipitation"),
-            ("R_Annual_Mean", "Mean Monthly Precipitation"),
+            ("R_Annual_Mean", "Annual Mean Precipitation"),
+            ("R_Month_Mean", "Mean Monthly Precipitation"),
             ("R_Winter_Total", "Winter Total Precipitation"),
             ("R_Spring_Total", "Spring Total Precipitation"),
             ("R_Summer_Total", "Summer Total Precipitation"),
@@ -399,6 +399,7 @@ SHP_FIELD_MAP = {
     "RH_Winter_Mean": "RH_WnMean",
     "R_Annual_Mean": "R_AnnMean",
     "R_Annual_Total": "R_AnnTot",
+    "R_Month_Mean": "R_MonMean",
     "R_Autumn_Total": "R_AutTot",
     "R_Spring_Total": "R_SprTot",
     "R_Summer_Total": "R_SumTot",
@@ -617,10 +618,15 @@ class LegacyAtlasMigrator(object):
 
             t_val = (f.get("T_Annual_Mean") if f.get("T_Annual_Mean") is not None else
                      (f.get("T_AnnMean") if f.get("T_AnnMean") is not None else f.get("T2M")))
-            p_val = (f.get("R_Annual_Total") if f.get("R_Annual_Total") is not None else
-                     (f.get("R_AnnTot") if f.get("R_AnnTot") is not None else
-                      (f.get("R_AnnTotal") if f.get("R_AnnTotal") is not None else
-                       (f.get("Precip_Annual_Sum") if f.get("Precip_Annual_Sum") is not None else f.get("PRECTOTCORR")))))
+            if f.get("R_Month_Mean") is not None or f.get("R_MonMean") is not None:
+                p_val = (f.get("R_Annual_Mean") if f.get("R_Annual_Mean") is not None else f.get("R_AnnMean"))
+            elif f.get("R_Annual_Total") is not None or f.get("R_AnnTot") is not None or f.get("R_AnnTotal") is not None:
+                p_val = (f.get("R_Annual_Total") if f.get("R_Annual_Total") is not None else
+                         (f.get("R_AnnTot") if f.get("R_AnnTot") is not None else f.get("R_AnnTotal")))
+            else:
+                p_val = (f.get("R_Annual_Mean") if f.get("R_Annual_Mean") is not None else
+                         (f.get("R_AnnMean") if f.get("R_AnnMean") is not None else
+                          (f.get("Precip_Annual_Sum") if f.get("Precip_Annual_Sum") is not None else f.get("PRECTOTCORR"))))
             tx_val = (f.get("T_Annual_Max_Mean") if f.get("T_Annual_Max_Mean") is not None else
                       (f.get("T_MaxMean") if f.get("T_MaxMean") is not None else f.get("T2M_MAX")))
             if tx_val is None and t_val is not None:

@@ -317,20 +317,20 @@ FIELDS_DATA = [
 
     # --- 5. التساقط والأمطار (02_Precipitation) ---
     {
-        "short_name": "R_AnnTot",
-        "full_name": "R_Annual_Total",
-        "module_code": "02_Precipitation",
-        "module_name": "02_Precipitation (الأمطار)",
-        "desc_ar": u"المجموع التراكمي السنوي لتساقط الأمطار (مجموع كميات الهطول لجميع شهور السنة).",
-        "unit": u"ملم (mm)",
-        "map_title": u"خريطة المجموع السنوي لتساقط الأمطار (ملم)"
-    },
-    {
         "short_name": "R_AnnMean",
         "full_name": "R_Annual_Mean",
         "module_code": "02_Precipitation",
         "module_name": "02_Precipitation (الأمطار)",
-        "desc_ar": u"المعدل الشهري لتساقط الأمطار (المجموع التراكمي السنوي مقسوماً على 12 شهراً).",
+        "desc_ar": u"المتوسط السنوي لتساقط الأمطار (متوسط مجاميع السنين على مدار فترة الرصد 1996–2025).",
+        "unit": u"ملم (mm)",
+        "map_title": u"خريطة المتوسط السنوي لتساقط الأمطار (ملم)"
+    },
+    {
+        "short_name": "R_MonMean",
+        "full_name": "R_Month_Mean",
+        "module_code": "02_Precipitation",
+        "module_name": "02_Precipitation (الأمطار)",
+        "desc_ar": u"المعدل الشهري لتساقط الأمطار (المتوسط السنوي مقسوماً على 12 شهراً).",
         "unit": u"ملم (mm)",
         "map_title": u"خريطة المعدل الشهري لتساقط الأمطار (ملم)"
     },
@@ -1510,5 +1510,10 @@ def build_excel(output_path):
 
 
 if __name__ == "__main__":
-    out_file = r"Fields_AR_EN_Units.xlsx"
+    import os
+    cur_dir = os.path.dirname(os.path.abspath(__file__))
+    docs_dir = os.path.join(cur_dir, "docs")
+    if not os.path.exists(docs_dir):
+        os.makedirs(docs_dir)
+    out_file = os.path.join(docs_dir, "Climate_Atlas_Fields_Dictionary_AR_EN_Units.xlsx")
     build_excel(out_file)

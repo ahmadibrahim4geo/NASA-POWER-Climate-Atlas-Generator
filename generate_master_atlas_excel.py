@@ -25,9 +25,20 @@ except Exception:
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_BASE_DIR = r"C:\Users\ahmad\Desktop\Egypt Climate Data 1996-2025"
-EXCEL_TEMPLATE = os.path.join(SCRIPT_DIR, "Fields_AR_EN_Units.xlsx")
-if not os.path.exists(EXCEL_TEMPLATE):
-    EXCEL_TEMPLATE = r"D:\My Software\NASA POWER Climate Atlas Generator\Fields_AR_EN_Units.xlsx"
+def find_excel_template():
+    candidates = [
+        os.path.join(SCRIPT_DIR, "docs", "Climate_Atlas_Fields_Dictionary_AR_EN_Units.xlsx"),
+        os.path.join(SCRIPT_DIR, "docs", "Fields_AR_EN_Units.xlsx"),
+        os.path.join(SCRIPT_DIR, "Fields_AR_EN_Units.xlsx"),
+        r"D:\My Software\NASA POWER Climate Atlas Generator\docs\Climate_Atlas_Fields_Dictionary_AR_EN_Units.xlsx",
+        r"D:\My Software\NASA POWER Climate Atlas Generator\Fields_AR_EN_Units.xlsx",
+    ]
+    for c in candidates:
+        if os.path.exists(c):
+            return c
+    return candidates[0]
+
+EXCEL_TEMPLATE = find_excel_template()
 
 MODULE_FOLDER_MAP = {
     "Temperature": "01_Temperature",
