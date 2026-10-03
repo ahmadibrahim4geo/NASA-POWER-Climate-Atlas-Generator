@@ -1,0 +1,101 @@
+# 04. Temporal Aggregation and Climatological Seasons
+## NASA POWER & Open-Meteo Climate Atlas Generator
+
+---
+
+## 1. Climatological Seasons Definition
+
+In atmospheric science and climatological analysis, standard calendar quarters do not align with physical thermal lags and radiative cycles. In accordance with the World Meteorological Organization (WMO) standards, the **Climate Atlas Generator** defines the four meteorological seasons based on whole calendar months:
+
+| Season Name | Code | Component Months | Astronomical & Meteorological Rationale |
+|:---|:---:|:---|:---|
+| **Winter** | **DJF** | December, January, February | Period of lowest solar declination, minimum insolation, and peak mid-latitude cyclonic frontal incursions. |
+| **Spring** | **MAM** | March, April, May | Vernal equinox transition, rapid continental surface heating, and desert depression genesis (e.g. Khamaseen). |
+| **Summer** | **JJA** | June, July, August | Period of maximum solar elevation, highest insolation, and subtropical high-pressure / Indian monsoon low dominance. |
+| **Autumn** | **SON** | September, October, November | Autumnal equinox transition, radiative cooling, and early-season atmospheric destabilization (e.g. Red Sea Trough). |
+
+> **Southern Hemisphere Handling**: For study areas situated south of the equator ($	ext{Latitude} < 0$), the tool preserves meteorological month definitions while documenting that DJF corresponds to austral summer and JJA corresponds to austral winter.
+
+---
+
+## 2. Additive vs. Continuous / State Climate Variables
+
+A fundamental scientific principle enforced across the platform is the rigorous distinction between **additive (flux/depth)** variables and **continuous (state/intensive)** atmospheric variables:
+
+```
++--------------------------------------------------------------------------------------------------+
+| CLIMATOLOGICAL VARIABLE TAXONOMY                                                                 |
++--------------------------------------------------------------------------------------------------+
+|                                                                                                  |
+|   1. CONTINUOUS / STATE VARIABLES (Intensive Properties)                                         |
+|      - Temperature (T, Tmax, Tmin), Pressure (PS, PSL), Humidity (RH), Dew Point (Td),           |
+|        Cloud Cover (Cld), UV Index (UV), Daily Solar Insolation Rate (Sol_Mean).                 |
+|      - Temporal Aggregation: Arithmetic Mean (or Circular Vector Mean for Wind Direction).       |
+|      - Multi-Year Climatology: Mean of monthly means across 30 years.                            |
+|                                                                                                  |
+|   2. ADDITIVE / FLUX VARIABLES (Extensive Properties)                                            |
+|      - Precipitation (R), Annual Solar Radiation Yield (Sol_Total), Evapotranspiration (ET).      |
+|      - Temporal Aggregation: Time-integrated Accumulation (Sum over days/months).                |
+|      - Multi-Year Climatology: Mean of annual totals across 30 years (or sum of 12 monthly totals)|
+|                                                                                                  |
++--------------------------------------------------------------------------------------------------+
+```
+
+---
+
+## 3. Dedicated Precipitation Aggregation Mathematics
+
+### 3.1 The Physical Problem: Rate to Depth Integration
+NASA POWER supplies precipitation as a flux rate: $PRECTOTCORR$ in units of $	ext{mm/day}$ (or $	ext{kg}/(	ext{m}^2\cdot	ext{s})$). Open-Meteo supplies daily or monthly accumulated depths in $	ext{mm}$.
+
+To compute monthly precipitation depth $P_{y, m}$ for month $m$ of year $y$:
+$$P_{y, m} = PRECTOTCORR_{y, m} 	imes N_{days, m}$$
+where $N_{days, m}$ is the exact number of days in month $m$ (accounting for leap years in February: 29 days in 1992, 1996, 2000, 2004, 2008, 2012, 2016, 2020).
+
+### 3.2 Annual Accumulation vs. Monthly Rate: Resolving Field Naming
+In the Climate Atlas Generator schema, precipitation outputs are strictly standardized to eliminate historical confusion:
+
+1. **Annual Mean Precipitation (`R_Annual_Mean`)**:
+   - **Definition**: The 30-year climatological mean of total annual accumulated precipitation.
+   - **Mathematical Formulation**:
+     $$R_{Annual\_Mean} = rac{1}{N_{years}} \sum_{y=1}^{N_{years}} \left(\sum_{m=1}^{12} P_{y, m}ight) = \sum_{m=1}^{12} \overline{P}_m$$
+   - **Units**: $	ext{mm/year}$.
+   - **Physical Scale**: In northern Egypt (e.g. Alexandria / coastal Mediterranean), this value is approximately **$200 - 224	ext{ mm/year}$**. In Cairo it is **$pprox 25	ext{ mm/year}$**, and in Aswan it is **$< 5	ext{ mm/year}$**.
+   - **Legacy Mapping**: In early prototype versions of the tool, this field was labeled `R_Annual_Total`. It was standardized to `R_Annual_Mean` because across a 30-year baseline, it represents the **climatological mean of annual accumulations**.
+
+2. **Monthly Mean Precipitation (`R_Month_Mean`)**:
+   - **Definition**: The annual mean precipitation distributed evenly across the 12 calendar months.
+   - **Mathematical Formulation**:
+     $$R_{Month\_Mean} = rac{R_{Annual\_Mean}}{12} = rac{1}{12} \sum_{m=1}^{12} \overline{P}_m$$
+   - **Units**: $	ext{mm/month}$.
+   - **Physical Scale**: In northern Egypt with $R_{Annual\_Mean} = 224.0	ext{ mm}$, $R_{Month\_Mean} = 224.0 / 12 = \mathbf{18.67	ext{ mm/month}}$.
+   - **Legacy Mapping**: In early prototype versions, this field was labeled `R_Annual_Mean`. It was renamed to `R_Month_Mean` to reflect its true mathematical nature as a **monthly rate**.
+
+3. **Seasonal Precipitation Totals (`R_WinTot`, `R_SprTot`, `R_SumTot`, `R_AutTot`)**:
+   - Seasonal accumulated depth in millimeters:
+     $$R_{Winter\_Total} = \overline{P}_{Dec} + \overline{P}_{Jan} + \overline{P}_{Feb}$$
+     $$R_{Spring\_Total} = \overline{P}_{Mar} + \overline{P}_{Apr} + \overline{P}_{May}$$
+     $$R_{Summer\_Total} = \overline{P}_{Jun} + \overline{P}_{Jul} + \overline{P}_{Aug}$$
+     $$R_{Autumn\_Total} = \overline{P}_{Sep} + \overline{P}_{Oct} + \overline{P}_{Nov}$$
+   - Note: In Mediterranean climates, $R_{Summer\_Total} pprox 0	ext{ mm}$, while $R_{Winter\_Total}$ represents 60–70% of the entire annual accumulation.
+
+---
+
+## 4. Circular Direction Vector Mathematics (Wind Direction)
+
+A critical error in naive climate scripts is computing the arithmetic mean of angular wind directions (e.g. averaging $350^\circ$ and $10^\circ$ arithmetically yields $(350+10)/2 = 180^\circ$, which is due South—exactly opposite to the true prevailing Northerly wind of $0^\circ / 360^\circ$).
+
+The Climate Atlas Generator avoids this via **Circular Trigonometric Vector Averaging** implemented in `circular_mean_deg` (line 663):
+
+1. **Vector Decomposition**: Each directional observation $	heta_i \in [0^\circ, 360^\circ)$ is decomposed into Cartesian unit vector components:
+   $$u_i = -\sin\left(rac{\pi \cdot 	heta_i}{180}ight), \quad v_i = -\cos\left(rac{\pi \cdot 	heta_i}{180}ight)$$
+   *(Meteorological convention: $	heta$ represents the direction FROM which the wind blows).*
+
+2. **Mean Component Accumulation**:
+   $$\overline{u} = rac{1}{N} \sum_{i=1}^N u_i, \quad \overline{v} = rac{1}{N} \sum_{i=1}^N v_i$$
+
+3. **Four-Quadrant Arctangent Reconstruction**:
+   $$	heta_{rad} = 	ext{atan2}(-\overline{u}, -\overline{v})$$
+   $$\overline{	heta}_{deg} = \left(rac{180}{\pi} \cdot 	heta_{rad}ight) \pmod{360^\circ}$$
+
+This guarantees mathematically rigorous prevailing wind directions across annual and seasonal cycles.
