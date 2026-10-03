@@ -131,8 +131,8 @@ All 12 rasters of one element share a single unified color stretch (global min/m
 
 ### 5.1 Element Workbook Structure (`00_Tables_And_Reports/*.xls`)
 Every exported element workbook is generated with two comprehensive worksheets:
-1. **Sheet `Data`**: Preserves station identifiers (`Source_ID`, `Point_Lat`, `Point_Lon`), run parameters (`Data_Start`, `Data_End`, `Temporal`, `Interp_Meth`, `Cell_Size`), annual indicators, and seasonal indicators (DJF, MAM, JJA, SON).
-2. **Sheet `Month`**: Contains complete 12-month climatological profiles (`T_January_Mean` .. `T_December_Mean`, `R_January_Mean` .. `R_December_Mean`, etc.) across all monitoring stations.
+1. **Sheet `Data`**: Preserves station identifiers (`Source_ID`, `Point_Lat`, `Point_Lon`), run parameters (`Data_Start`, `Data_End`, `Temporal`, `Interp_Meth`, `Cell_Size`), annual indicators, seasonal indicators (DJF, MAM, JJA, SON), and the overall monthly mean (`*_Month_Mean`). It NEVER carries the 12 detailed monthly fields (`*_January_Mean` … `*_December_Mean`).
+2. **Sheet `Month`**: Contains station identifiers plus all 12 individual climatological monthly indicators (Jan–Dec) — the exclusive home of the detailed monthly means.
 
 ### 5.2 Local Raw Time-Series Archive (`Egypt_Monthly_Raw_1996_2025.json`)
 The complete 30-year monthly raw time-series downloaded from NASA POWER is preserved as a permanent structured JSON document in `00_Tables_And_Reports\Egypt_Monthly_Raw_1996_2025.json`. This provides:

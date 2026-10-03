@@ -1229,6 +1229,52 @@ def write_excel_file(path, header, rows, sheet_name="Data", rtl=False):
     return True
 
 
+def write_master_excel_workbook(path, sheets_list):
+    """Multi-sheet styled .xls workbook. sheets_list: [(name, header, rows, rtl)]."""
+    try:
+        import xlwt
+    except ImportError:
+        return False
+    wb = xlwt.Workbook(encoding="utf-8")
+    header_style = xlwt.easyxf(
+        "font: bold on, color white, height 220; "
+        "pattern: pattern solid, fore_colour dark_blue; "
+        "align: horiz center, vert center; "
+        "borders: left thin, right thin, top thin, bottom thin;"
+    )
+    data_style = xlwt.easyxf(
+        "borders: left thin, right thin, top thin, bottom thin; align: vert center;"
+    )
+    for item in sheets_list:
+        sheet_name, header, rows, rtl = item[0], item[1], item[2], item[3]
+        ws = wb.add_sheet((sheet_name or "Sheet")[:31])
+        if rtl:
+            try:
+                ws.cols_right_to_left = True
+            except Exception:
+                pass
+        for col_idx, h in enumerate(header):
+            ws.write(0, col_idx, _excel_text(h), header_style)
+        for row_idx, r in enumerate(rows):
+            for col_idx, cell in enumerate(r):
+                val = cell
+                if cell is None:
+                    val = ""
+                elif isinstance(cell, _binary_type):
+                    try:
+                        val = cell.decode("utf-8")
+                    except Exception:
+                        pass
+                elif isinstance(cell, float):
+                    if math.isnan(cell) or abs(cell - (-999.0)) < 1e-5:
+                        val = ""
+                    else:
+                        val = round(cell, 3)
+                ws.write(row_idx + 1, col_idx, val, data_style)
+    wb.save(path)
+    return True
+
+
 # ---------------------------------------------------------------------------
 # Tool Class: RasterDataClimateAtlasGenerator
 # ---------------------------------------------------------------------------
@@ -3710,8 +3756,24 @@ class RasterDataClimateAtlasGenerator(object):
             header.append("Unit")
         header.extend(fld_names)
 
-        write_excel_file(xls_path, header, rows, sheet_name=module[:31])
-        msg("  -> Exported table: %s" % os.path.basename(xls_path))
+        # Data sheet: annual/seasonal/overall-monthly only. The 12 detailed
+        # monthly fields live exclusively in the Month sheet.
+        m_names = [f for f in fld_names if is_monthly_field(f)]
+        data_names = [f for f in fld_names if f not in m_names]
+        admin_names = [h for h in header if h not in fld_names]
+        data_header = admin_names + data_names
+        data_rows = [[r[header.index(c)] for c in data_header] for r in rows]
+        sheets = [("Data", data_header, data_rows, False)]
+        if m_names:
+            month_base = [h for h in admin_names if h in (
+                "Point_ID", "Longitude", "Latitude", "Data_Start", "Data_End",
+                "Measurement_Unit", "Unit")]
+            month_header = month_base + m_names
+            month_rows = [[r[header.index(c)] for c in month_header] for r in rows]
+            sheets.append(("Month", month_header, month_rows, False))
+        write_master_excel_workbook(xls_path, sheets)
+        msg("  -> Exported table: %s (sheets: %s)" % (
+            os.path.basename(xls_path), ", ".join(s[0] for s in sheets)))
 
     # -----------------------------------------------------------------------
     # Helper: Generate .lyr file with embedded color ramp

@@ -6120,8 +6120,11 @@ class PowerClimateAtlasGenerator(object):
             ]
             m_fnames = [fn for fn in fields if any(mk in fn for mk in month_keywords)]
             base_fnames = [fn for fn in fields if fn in ("OBJECTID", "Source_ID", "Point_Lat", "Point_Lon")]
-            
-            sheets_to_write = [("Data", fields, rows, False)]
+            # Data sheet carries annual/seasonal/overall-monthly indicators ONLY;
+            # the 12 detailed monthly fields live exclusively in the Month sheet.
+            data_fields = [fn for fn in fields if fn not in m_fnames]
+            data_rows = [[r[fields.index(c)] for c in data_fields] for r in rows]
+            sheets_to_write = [("Data", data_fields, data_rows, False)]
             if m_fnames:
                 month_cols = base_fnames + m_fnames
                 month_indices = [fields.index(c) for c in month_cols if c in fields]
