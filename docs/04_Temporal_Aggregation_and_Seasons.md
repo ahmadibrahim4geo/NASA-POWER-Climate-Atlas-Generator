@@ -143,3 +143,13 @@ All individual element Excel workbooks (`00_Tables_And_Reports\*.xls`) are struc
 - **Persistent Local Raw Archive**: Complete 30-year monthly time-series JSON records are archived in `Egypt_Monthly_Raw_1996_2025.json` (~54 MB) to permit instant offline re-aggregations without network latency.
 - **Cartographic Surface Generation Policy**: Surface raster interpolations are maintained for annual, seasonal, and overall monthly mean (`*_Month_Mean`) horizons across all 18 folders (114 rasters total). Individual month-by-month raster generation can optionally be toggled for fine-scale analysis into dedicated `Month` subfolders.
 
+### 5.4 Monthly Gating Rule (≥ 2 Years)
+Twelve-month climatologies are meaningful only over multi-year spans. The **Generate Monthly Climatology Rasters (Jan–Dec)** option (`GPBoolean`, default OFF) takes effect only when the selected period covers **2 years or more**; shorter spans keep the flag inert with a logged warning, while annual/seasonal/`*_Month_Mean` outputs are always produced.
+
+---
+
+## 6. Seasonal Range (`*_Seasonal_Range`) — All Elements
+Like the annual range and annual mean, every mean-type element carries a seasonal range: the warmest (highest) seasonal mean minus the coldest (lowest) seasonal mean over Winter/Spring/Summer/Autumn:
+$$X_{Seasonal\_Range} = \max(X_{Winter}, X_{Spring}, X_{Summer}, X_{Autumn}) - \min(X_{Winter}, X_{Spring}, X_{Summer}, X_{Autumn})$$
+Covered fields: `T_Seasonal_Range`, `R_Seasonal_Range` (seasonal totals), `PSL_Seasonal_Range`, `PS_Seasonal_Range`, `W_Spd_Seasonal_Range`, `RH_Seasonal_Range`, `Td_Seasonal_Range`, `Sol_Seasonal_Range`, `UV_Seasonal_Range`, `Cld_Seasonal_Range`, `ET_Seasonal_Range`. Each is stored in the GDB, shapefiles, Excel, dictionaries and interpolated as a clipped raster with the user's selected method — exactly like the annual indicators. Threshold-type derived indices (Heat Index, Wind Chill, aridity/drought annual indices) intentionally carry annual ranges only.
+

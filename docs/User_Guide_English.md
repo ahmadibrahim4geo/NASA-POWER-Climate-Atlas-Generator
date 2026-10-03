@@ -141,6 +141,16 @@ Polygon mask clipping (`Study_Area_Mask`) is applied exclusively to derived spat
 - Produces continuous wind speed surfaces alongside circular vector mean wind direction surfaces (0–360° azimuth).
 - Generates a regularized point grid whose spatial density is controlled via `Wind_Factor_Cell_Size`.
 - Samples speed and azimuth values onto grid points, clips the grid to the study mask, and configures directional arrow symbology to depict airflow patterns.
+- Vector periods are Annual, Winter, Spring, Summer, Autumn, and Month — all sampled from the annual/seasonal/`Month_Mean` rasters and clipped to the mask. The 12 detailed monthly surfaces (`Month/` folder) are never used as vector sources.
+- PSL/PS isobar contours are likewise derived from the Annual/Seasonal/`Month_Mean` pressure rasters and clipped to the mask.
+
+---
+
+## 8b. Seasonal Range and Monthly Climatology Rasters
+
+- Every mean-type element carries `*_Seasonal_Range` (max seasonal mean minus min seasonal mean), computed, stored and interpolated exactly like the annual indicators.
+- **Generate Monthly Climatology Rasters (Jan–Dec)** (`GPBoolean`, default OFF, after Temporal Scope): adds the 12 `*_January_Mean … *_December_Mean` fields (Wind: 24) to points/tables/Excel and interpolates one raster per month into each element's `Month/` subfolder with the same method, cell size and mask. Requires a period of ≥ 2 years; all 12 rasters of one element share a unified color stretch.
+- Field aliases in the main GDB equal the field names; no raster is ever written inside the GDB.
 
 ---
 

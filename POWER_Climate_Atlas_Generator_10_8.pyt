@@ -1278,6 +1278,7 @@ def compute_temperature_fields(m_tmean, m_tmax, m_tmin, m_rh=None, m_td=None):
         "T_Summer_Mean": s_mean["Summer"],
         "T_Autumn_Mean": s_mean["Autumn"],
         "T_Annual_Range": annual_temp_range(m_tmean),
+        "T_Seasonal_Range": (max([s_mean["Winter"], s_mean["Spring"], s_mean["Summer"], s_mean["Autumn"]]) - min([s_mean["Winter"], s_mean["Spring"], s_mean["Summer"], s_mean["Autumn"]])) if all(s_mean.get(k) is not None for k in ["Winter", "Spring", "Summer", "Autumn"]) else None,
         "T_Max_Summer_Month_Mean": max(sum_max) if sum_max else None,
         "T_Min_Winter_Month_Mean": min(win_min) if win_min else None,
         "T_Annual_Max_Mean": s_max["Annual"],
@@ -1522,6 +1523,15 @@ FIELD_DEFS = [
     ("T_Spring_Mean", "Spring Mean Air Temperature", u"متوسط درجة الحرارة في الربيع", "T2M", "Temperature", "Spring", "Mean", "C", u"متوسط أشهر 3 و4 و5", "Mean of Mar/Apr/May monthly means", "Mean of climatological months 3,4,5"),
     ("T_Summer_Mean", "Summer Mean Air Temperature", u"متوسط درجة الحرارة في الصيف", "T2M", "Temperature", "Summer", "Mean", "C", u"متوسط أشهر 6 و7 و8", "Mean of Jun/Jul/Aug monthly means", "Mean of climatological months 6,7,8"),
     ("T_Autumn_Mean", "Autumn Mean Air Temperature", u"متوسط درجة الحرارة في الخريف", "T2M", "Temperature", "Autumn", "Mean", "C", u"متوسط أشهر 9 و10 و11", "Mean of Sep/Oct/Nov monthly means", "Mean of climatological months 9,10,11"),
+    ("T_Seasonal_Range", "Seasonal Temperature Range", u"المدى الفصلي لدرجة الحرارة", "T2M", "Temperature", "Annual", "Range", "C", u"المدى الفصلي لدرجة الحرارة", "Warmest seasonal mean minus coldest seasonal mean", "max(seasons) - min(seasons)"),
+    ("PSL_Seasonal_Range", "Seasonal Sea Level Pressure Range", u"المدى الفصلي لضغط مستوى البحر", "PSL", "Sea Level Pressure", "Annual", "Range", "hPa", u"المدى الفصلي لضغط مستوى سطح البحر", "Highest seasonal PSL minus lowest seasonal PSL", "max(seasons) - min(seasons)"),
+    ("PS_Seasonal_Range", "Seasonal Surface Pressure Range", u"المدى الفصلي للضغط السطحي", "PS", "Surface Pressure", "Annual", "Range", "hPa", u"المدى الفصلي للضغط السطحي", "Highest seasonal PS minus lowest seasonal PS", "max(seasons) - min(seasons)"),
+    ("W_Spd_Seasonal_Range", "Seasonal Wind Speed Range", u"المدى الفصلي لسرعة الرياح", "WS10M", "Wind", "Annual", "Range", "m/s", u"المدى الفصلي لسرعة الرياح", "Windiest seasonal mean minus calmest seasonal mean", "max(seasons) - min(seasons)"),
+    ("RH_Seasonal_Range", "Seasonal Relative Humidity Range", u"المدى الفصلي للرطوبة النسبية", "RH2M", "Relative Humidity", "Annual", "Range", "%", u"المدى الفصلي للرطوبة النسبية", "Humidest seasonal mean minus driest seasonal mean", "max(seasons) - min(seasons)"),
+    ("Td_Seasonal_Range", "Seasonal Dew Point Range", u"المدى الفصلي لنقطة الندى", "T2MDEW", "Dew Point", "Annual", "Range", "C", u"المدى الفصلي لنقطة الندى", "Highest seasonal Td minus lowest seasonal Td", "max(seasons) - min(seasons)"),
+    ("Sol_Seasonal_Range", "Seasonal Solar Radiation Range", u"المدى الفصلي للإشعاع الشمسي", "ALLSKY_SFC_SW_DWN", "Solar Radiation", "Annual", "Range", "kWh/m2/day", u"المدى الفصلي للإشعاع الشمسي", "Highest seasonal daily mean minus lowest seasonal daily mean", "max(seasons) - min(seasons)"),
+    ("UV_Seasonal_Range", "Seasonal UV Index Range", u"المدى الفصلي للأشعة فوق البنفسجية", "ALLSKY_SFC_UV_INDEX", "UV Index", "Annual", "Range", "Index", u"المدى الفصلي لمؤشر الأشعة فوق البنفسجية", "Highest seasonal UV index minus lowest seasonal UV index", "max(seasons) - min(seasons)"),
+    ("Cld_Seasonal_Range", "Seasonal Cloud Cover Range", u"المدى الفصلي للغطاء السحابي", "CLOUD_AMT", "Cloud Cover", "Annual", "Range", "%", u"المدى الفصلي للغطاء السحابي", "Highest seasonal cloud cover minus lowest seasonal cloud cover", "max(seasons) - min(seasons)"),
     ("T_Annual_Range", "Annual Temperature Range", u"المدى الحراري السنوي العام", "T2M", "Temperature", "Annual", "Range", "C", u"أعلى متوسط شهري ناقص أدنى متوسط شهري", "Highest monthly mean minus lowest monthly mean", "max(clim monthly) - min(clim monthly)"),
     ("T_Max_Summer_Month_Mean", "Maximum Summer Monthly Mean Temperature", u"أقصى متوسط شهري لدرجة الحرارة في الصيف", "T2M", "Temperature", "Summer", "Max", "C", u"أعلى متوسط شهري صيفي", "Max of climatological T2M for months 6,7,8", "max of monthly means 6,7,8"),
     ("T_Min_Winter_Month_Mean", "Minimum Winter Monthly Mean Temperature", u"أدنى متوسط شهري لدرجة الحرارة في الشتاء", "T2M", "Temperature", "Winter", "Min", "C", u"أدنى متوسط شهري شتوي", "Min of climatological T2M for months 12,1,2", "min of monthly means 12,1,2"),
@@ -1781,6 +1791,37 @@ MODULE_FIELDS["Drought & Aridity"] = [
     "Water_Deficit_Annual", "Dry_Months_Count"
 ]
 
+# Monthly-climatology helpers: FIELD_DEFS index 5 holds the temporal period
+# ("Monthly" for *_January_Mean ... *_December_Mean / ET_*_Total fields).
+FIELD_PERIOD = {}
+for _r in FIELD_DEFS:
+    FIELD_PERIOD[_r[0]] = _r[5]
+
+MONTH_NAMES_EN = ["January", "February", "March", "April", "May", "June",
+                  "July", "August", "September", "October", "November", "December"]
+
+
+def is_monthly_field(fname):
+    """True for 12-month climatology fields (*_January_Mean ... *_December_Mean,
+    ET_*_Total). Used to route their rasters into the Month/ subfolder and to
+    apply the unified monthly color stretch."""
+    if not fname:
+        return False
+    if FIELD_PERIOD.get(fname) == "Monthly":
+        return True
+    for _mn in MONTH_NAMES_EN:
+        if fname.endswith("_%s_Mean" % _mn) or fname.endswith("_%s_Total" % _mn):
+            return True
+    return False
+
+
+def monthly_group_key(module, field):
+    """Grouping key for the unified monthly stretch: one global min/max per
+    element, with Wind speed and direction kept separate (different units)."""
+    if module == "Wind":
+        return (module, "Spd" if field.startswith("W_Spd") else "Dir")
+    return (module, "")
+
 MODULE_SHORT = {
     "Temperature": "Temperature",
     "Precipitation": "Precipitation",
@@ -1807,6 +1848,15 @@ MODULE_SHORT = {
 
 SHP_FIELD_MAP = {
     "T_Month_Mean": "T_MonMean",
+    "T_Seasonal_Range": "T_SeaRng",
+    "PSL_Seasonal_Range": "PSL_SeaRng",
+    "PS_Seasonal_Range": "PS_SeaRng",
+    "W_Spd_Seasonal_Range": "WSp_SeaRng",
+    "RH_Seasonal_Range": "RH_SeaRng",
+    "Td_Seasonal_Range": "Td_SeaRng",
+    "Sol_Seasonal_Range": "Sol_SeaRng",
+    "UV_Seasonal_Range": "UV_SeaRng",
+    "Cld_Seasonal_Range": "Cld_SeaRng",
     "PSL_Month_Mean": "PSL_MonMea",
     "PS_Month_Mean": "PS_MonMean",
     "W_Spd_Month_Mean": "WSp_MonMea",
@@ -3460,6 +3510,22 @@ class PowerClimateAtlasGenerator(object):
             "Cartesian product of selected Climate Modules and selected Temporal Scope."
         )
 
+        p_monthly_rasters = arcpy.Parameter(
+            displayName="Generate Monthly Climatology Rasters (Jan–Dec) / توليد راستر مناخي مستقل لكل شهر من أشهر السنة",
+            name="Generate_Monthly_Rasters",
+            datatype="GPBoolean",
+            parameterType="Optional",
+            direction="Input")
+        p_monthly_rasters.value = False
+        p_monthly_rasters.category = "Variable & Field Selection"
+        p_monthly_rasters.description = (
+            "GENERATE 12 INDIVIDUAL MONTHLY RASTERS (Jan-Dec). When checked, interpolates independent "
+            "climatological surface rasters for all 12 calendar months into a dedicated 'Month' subfolder "
+            "for each selected element (same interpolation method, cell size and clip mask; LZW, 128x128 "
+            "blocks). Requires a multi-year period (>= 2 years); single years are skipped with a warning. "
+            "Wind produces 24 surfaces (12 speed W_Spd_* + 12 direction W_Dir_*)."
+        )
+
         # NOTE: Field Filter Scope comes FIRST: it drives the enabled state of
         # the two filter boxes below it (Included Summary Periods / Seasons)
         # and of the Variables checklist at the end of this group.
@@ -3877,7 +3943,7 @@ class PowerClimateAtlasGenerator(object):
                 p_exp_shp, p_ar_db, p14, p_om_model,
                 p3, p4, p5, p6, p_start_date, p_end_date, p7, p_gf,
                 p24,
-                p8, p_temporal_scope, p_filter_scope, p_inc_aggs, p_inc_seasons, p_sel_fields,
+                p8, p_temporal_scope, p_monthly_rasters, p_filter_scope, p_inc_aggs, p_inc_seasons, p_sel_fields,
                 p11, p9, p10, p_idw_prof, p15, p16, p17, p18, p19, p20, p21,
                 p_sp_type, p_sp_weight, p_sp_pts,
                 p_reclass_en, p_reclass_cnt, p_reclass_meth,
@@ -4502,6 +4568,8 @@ class PowerClimateAtlasGenerator(object):
             out_ws = p_ows.valueAsText if (p_ows and p_ows.valueAsText) else ""
             p_iso = pdict.get("Create_Isobars")
             create_isobars = bool(p_iso.value) if (p_iso and p_iso.value is not None) else False
+            p_gmr = pdict.get("Generate_Monthly_Rasters")
+            generate_monthly_rasters = bool(p_gmr.value) if (p_gmr and p_gmr.value is not None) else False
             p_pv = pdict.get("Purge_Cache")
             purge = True if (p_pv is None or p_pv.value is None) else bool(p_pv.value)
             p_am = pdict.get("Add_To_Map")
@@ -4705,6 +4773,20 @@ class PowerClimateAtlasGenerator(object):
                 period_label = "%s to %s (Custom Date Range)" % (s_txt, e_txt)
                 col_data_start = str(s_txt)
                 col_data_end = str(e_txt)
+
+            # --- Monthly climatology gate: 12-month means are climatologically
+            # meaningful only for multi-year spans (>= 2 years). A single year
+            # (or < 2 years) keeps the flag OFF with a warning.
+            try:
+                _span_yrs = int(y1) - int(y0) + 1
+            except Exception:
+                _span_yrs = 1
+            monthly_enabled = bool(generate_monthly_rasters) and _span_yrs >= 2
+            if generate_monthly_rasters and not monthly_enabled:
+                warn("Monthly climatology rasters skipped: the selected period spans %d year(s); "
+                     "at least 2 years are required for monthly means (Jan-Dec)." % _span_yrs)
+            elif monthly_enabled:
+                msg("Monthly climatology rasters: ENABLED (12 Month/ surfaces per element, unified stretch).")
 
             msg("POWER Climate Atlas Generator v%s (ArcMap 10.x)" % TOOL_VERSION)
             if download_only:
@@ -4989,7 +5071,8 @@ class PowerClimateAtlasGenerator(object):
                             iopts, kopts, is_geo, purge, scratch_dir, focal,
                             {m: fc}, wanted_fields_by_module=wanted_fields_by_module,
                             reclass_opts=reclass_opts,
-                            raster_mask=raster_mask)
+                            raster_mask=raster_mask,
+                            monthly_enabled=monthly_enabled)
                         raster_registry.extend(elem_rasters)
                         if purge and os.path.exists(scratch_dir):
                             for sf in os.listdir(scratch_dir):
@@ -5300,7 +5383,8 @@ class PowerClimateAtlasGenerator(object):
                                     {m: fc}, wanted_fields_by_module=wanted_fields_by_module,
                                     reclass_opts=reclass_opts,
                                     raster_mask=raster_mask,
-                                    raster_timings=raster_timings)
+                                    raster_timings=raster_timings,
+                                    monthly_enabled=monthly_enabled)
                                 t_mod_interp_elapsed = time.time() - t_interp_start
                                 raster_registry.extend(elem_rasters)
                                 if purge and os.path.exists(scratch_dir):
@@ -6177,14 +6261,19 @@ class PowerClimateAtlasGenerator(object):
 
     def _raster_paths(self, out_ws, module, field):
         # Rasters are written directly inside the element folder (no Rasters/
-        # subfolder, no Layers/ subfolder, no .lyr files). The second return
-        # value is kept (None) so existing unpacking call sites keep working.
+        # subfolder, no Layers/ subfolder, no .lyr files). Monthly climatology
+        # rasters (*_January_Mean ... *_December_Mean) go into a dedicated
+        # Month/ subfolder so they never mix with annual/seasonal surfaces.
+        # The second return value is kept (None) so existing unpacking call
+        # sites keep working.
         folder = MODULE_FOLDER[module]
         if module == "Wind":
             sub = "Speed" if field.startswith("W_Spd") else "Direction"
             rdir = os.path.join(out_ws, folder, sub)
         else:
             rdir = os.path.join(out_ws, folder)
+        if is_monthly_field(field):
+            rdir = os.path.join(rdir, "Month")
         makedirs_ok(rdir)
         return os.path.join(rdir, field + ".tif"), None
 
@@ -6204,8 +6293,8 @@ class PowerClimateAtlasGenerator(object):
         if field.startswith("HI_"):
             return COLOR_RAMPS["Temperature"]
         return COLOR_RAMPS.get(module, COLOR_RAMPS["Temperature"])
-
-    def _build_display(self, rp, field, module, colors, nclass, method_name, msg, warn, purge=True):
+    def _build_display(self, rp, field, module, colors, nclass, method_name, msg, warn,
+                   purge=True, fixed_breaks=None):
         """Classified display raster for real on-open colors in ArcMap.
 
         Slice according to method_name -> integer zones -> VAT -> .clr colormap applied
@@ -6213,6 +6302,11 @@ class PowerClimateAtlasGenerator(object):
         is the HIGHEST interval (descending legend) with colors matched (hottest
         color on the highest zone). Returns (cls_path, clr_path, breaks) or (None, None, None)
         on failure (caller falls back to the continuous raster).
+
+        fixed_breaks: optional list of nclass+1 global class edges (unified
+        monthly stretch). When given, zones come from Reclassify with these
+        exact edges instead of per-raster Slice, so all 12 Month/ rasters of
+        one element share identical classes.
         """
         from arcpy.sa import Slice
         rdir = os.path.dirname(rp)
@@ -6228,30 +6322,42 @@ class PowerClimateAtlasGenerator(object):
                 except Exception:
                     pass
             try:
-                meth_str = str(method_name or "Natural Breaks (Jenks)").lower()
-                if "natural" in meth_str:
-                    Slice(rp, nclass, "NATURAL_BREAKS").save(ztmp)
-                elif "area" in meth_str or "quantile" in meth_str:
-                    Slice(rp, nclass, "EQUAL_AREA").save(ztmp)
-                elif "geometric" in meth_str:
-                    try:
-                        _mn = float(arcpy.GetRasterProperties_management(rp, "MINIMUM")[0])
-                    except Exception:
-                        _mn = 0.0
-                    shift = (1.0 - _mn) if _mn <= 0 else 0.0
-                    r_pos = (arcpy.Raster(rp) + shift) if shift > 0 else arcpy.Raster(rp)
-                    Slice(arcpy.sa.Ln(r_pos), nclass, "EQUAL_INTERVAL").save(ztmp)
-                elif "standard" in meth_str or "deviation" in meth_str:
-                    try:
-                        _mean = float(arcpy.GetRasterProperties_management(rp, "MEAN")[0])
-                        _std = float(arcpy.GetRasterProperties_management(rp, "STD")[0])
-                    except Exception:
-                        _mean, _std = 0.0, 1.0
-                    r_z = ((arcpy.Raster(rp) - _mean) / _std) if _std > 1e-9 else arcpy.Raster(rp)
-                    Slice(r_z, nclass, "EQUAL_INTERVAL").save(ztmp)
+                if fixed_breaks and len(fixed_breaks) == nclass + 1:
+                    # Unified monthly stretch: identical global classes for all
+                    # 12 Month/ rasters (open-ended outer classes keep extremes).
+                    from arcpy.sa import Reclassify, RemapRange
+                    _rr = [[-1e30, fixed_breaks[1], 1]]
+                    for _k in range(1, nclass - 1):
+                        _rr.append([fixed_breaks[_k], fixed_breaks[_k + 1], _k + 1])
+                    _rr.append([fixed_breaks[nclass - 1], 1e30, nclass])
+                    Reclassify(rp, "Value", RemapRange(_rr)).save(ztmp)
+                    msg("Display for %s: unified monthly classes (global stretch)." % field)
+                    breaks = list(fixed_breaks)
                 else:
-                    # Default: Equal Interval
-                    Slice(rp, nclass, "EQUAL_INTERVAL").save(ztmp)
+                    meth_str = str(method_name or "Natural Breaks (Jenks)").lower()
+                    if "natural" in meth_str:
+                        Slice(rp, nclass, "NATURAL_BREAKS").save(ztmp)
+                    elif "area" in meth_str or "quantile" in meth_str:
+                        Slice(rp, nclass, "EQUAL_AREA").save(ztmp)
+                    elif "geometric" in meth_str:
+                        try:
+                            _mn = float(arcpy.GetRasterProperties_management(rp, "MINIMUM")[0])
+                        except Exception:
+                            _mn = 0.0
+                        shift = (1.0 - _mn) if _mn <= 0 else 0.0
+                        r_pos = (arcpy.Raster(rp) + shift) if shift > 0 else arcpy.Raster(rp)
+                        Slice(arcpy.sa.Ln(r_pos), nclass, "EQUAL_INTERVAL").save(ztmp)
+                    elif "standard" in meth_str or "deviation" in meth_str:
+                        try:
+                            _mean = float(arcpy.GetRasterProperties_management(rp, "MEAN")[0])
+                            _std = float(arcpy.GetRasterProperties_management(rp, "STD")[0])
+                        except Exception:
+                            _mean, _std = 0.0, 1.0
+                        r_z = ((arcpy.Raster(rp) - _mean) / _std) if _std > 1e-9 else arcpy.Raster(rp)
+                        Slice(r_z, nclass, "EQUAL_INTERVAL").save(ztmp)
+                    else:
+                        # Default: Equal Interval
+                        Slice(rp, nclass, "EQUAL_INTERVAL").save(ztmp)
 
                 # descending remap: zone 1 = highest interval
                 (nclass + 1 - arcpy.Raster(ztmp)).save(cls_rp)
@@ -6588,17 +6694,16 @@ class PowerClimateAtlasGenerator(object):
                 existing = set(f.name for f in arcpy.ListFields(fc))
                 for name, typ, _alias in ADMIN_FIELDS:
                     if name not in existing:
-                        ar_alias = ADMIN_AR.get(name, name)
+                        # Main GDB: alias = field name (Latin). Arabic aliases live in the _AR copy.
                         if typ == "TEXT":
-                            arcpy.management.AddField(fc, name, typ, field_length=255, field_alias=ar_alias)
+                            arcpy.management.AddField(fc, name, typ, field_length=255, field_alias=name)
                         else:
-                            arcpy.management.AddField(fc, name, typ, field_alias=ar_alias)
+                            arcpy.management.AddField(fc, name, typ, field_alias=name)
                 wanted = wanted_fields_by_module.get(m, MODULE_FIELDS.get(m, []))
                 for wf in wanted:
                     if wf not in existing:
                         field_type = "LONG" if wf == "Dry_Months_Count" else "DOUBLE"
-                        ar_alias = FIELD_ALIAS_AR.get(wf, wf)
-                        arcpy.management.AddField(fc, wf, field_type, field_alias=ar_alias)
+                        arcpy.management.AddField(fc, wf, field_type, field_alias=wf)
                 oid_name = arcpy.Describe(fc).OIDFieldName
                 with arcpy.da.UpdateCursor(fc, [oid_name, "SHAPE@"] + admin_names + wanted) as ucur:
                     for row in ucur:
@@ -6679,11 +6784,11 @@ class PowerClimateAtlasGenerator(object):
             existing = set(f.name for f in arcpy.ListFields(fc))
             for name, typ, _alias in ADMIN_FIELDS:
                 if name not in existing:
-                    ar_alias = ADMIN_AR.get(name, name)
+                    # Main GDB: alias = field name (Latin). Arabic aliases live in the _AR copy.
                     if typ == "TEXT":
-                        arcpy.management.AddField(fc, name, typ, field_length=255, field_alias=ar_alias)
+                        arcpy.management.AddField(fc, name, typ, field_length=255, field_alias=name)
                     else:
-                        arcpy.management.AddField(fc, name, typ, field_alias=ar_alias)
+                        arcpy.management.AddField(fc, name, typ, field_alias=name)
             if wanted_fields is not None:
                 wanted = wanted_fields
             else:
@@ -6691,8 +6796,7 @@ class PowerClimateAtlasGenerator(object):
             for f in wanted:
                 if f not in existing:
                     field_type = "LONG" if f == "Dry_Months_Count" else "DOUBLE"
-                    ar_alias = FIELD_ALIAS_AR.get(f, f)
-                    arcpy.management.AddField(fc, f, field_type, field_alias=ar_alias)
+                    arcpy.management.AddField(fc, f, field_type, field_alias=f)
 
             by_oid = dict((r.get("oid"), r) for r in results if r.get("oid") is not None)
             by_coord = {}
@@ -6778,7 +6882,7 @@ class PowerClimateAtlasGenerator(object):
                          iopts=None, kopts=None, is_geo=False,
                          purge=True, scratch=None, focal=None, source_by_module=None,
                          wanted_fields_by_module=None, reclass_opts=None,
-                         raster_mask=None, raster_timings=None):
+                         raster_mask=None, raster_timings=None, monthly_enabled=False):
         from arcpy.sa import ExtractByMask
         out_ws = os.path.dirname(paths["vec"])
         if scratch is None:
@@ -6806,6 +6910,10 @@ class PowerClimateAtlasGenerator(object):
             else:
                 flist = MODULE_FIELDS.get(m, [])
             for f in flist:
+                # Monthly climatology surfaces are interpolated only when the
+                # monthly option is enabled (multi-year span, >= 2 years).
+                if is_monthly_field(f) and not monthly_enabled:
+                    continue
                 todo.append((m, f))
         # IDW max distance is entered in metres: convert for geographic output
         if iopts and iopts.get("maxdist") and is_geo and float(iopts["maxdist"]) > 1.0:
@@ -6813,9 +6921,16 @@ class PowerClimateAtlasGenerator(object):
             warn("IDW Maximum Distance converted to degrees: %.5f." % iopts["maxdist"])
         arcpy.SetProgressor("step", "Interpolating rasters ...", 0, len(todo), 1)
         # --- valid-value counts: one scan per source point layer ---
+        # The same scan also collects the global min/max of the 12 monthly
+        # fields per element, so all Month/ rasters of one element share one
+        # unified color stretch (true visual comparison across months).
         msg("Counting valid values ...")
         counts = {}
         _src_of = source_by_module or {}
+        _mod_of_field = {}
+        for _m, _f in todo:
+            _mod_of_field.setdefault(_f, _m)
+        monthly_minmax = {}
         try:
             _by_src = {}
             for _m, _f in todo:
@@ -6828,6 +6943,23 @@ class PowerClimateAtlasGenerator(object):
                         for _f, _v in zip(_fs, _row):
                             if _v is not None:
                                 counts[_f] = counts.get(_f, 0) + 1
+                                if is_monthly_field(_f):
+                                    try:
+                                        _fv = float(_v)
+                                    except Exception:
+                                        continue
+                                    _grp = monthly_group_key(_mod_of_field.get(_f), _f)
+                                    _mm = monthly_minmax.get(_grp)
+                                    if _mm is None:
+                                        monthly_minmax[_grp] = [_fv, _fv]
+                                    else:
+                                        if _fv < _mm[0]:
+                                            _mm[0] = _fv
+                                        if _fv > _mm[1]:
+                                            _mm[1] = _fv
+            for _grp, (_gmin, _gmax) in monthly_minmax.items():
+                _glabel = _grp[0] + ("/" + _grp[1] if _grp[1] else "")
+                msg("Monthly unified stretch [%s]: global %.4g .. %.4g over 12 months." % (_glabel, _gmin, _gmax))
         except Exception as ex:
             warn("Fast counting failed, falling back to per-field counts: %s" % ex)
             counts = {}
@@ -6997,8 +7129,19 @@ class PowerClimateAtlasGenerator(object):
                 if reclass_on:
                     nclass = 5 if (module == "UV Index" and reclass_nclass == 7) else reclass_nclass
                     interp_colors = interpolate_colors(colors, nclass)
+                    fixed_breaks = None
+                    if is_monthly_field(field):
+                        _grp = monthly_group_key(module, field)
+                        if _grp in monthly_minmax:
+                            _gmin, _gmax = monthly_minmax[_grp]
+                            try:
+                                fixed_breaks = equal_interval_breaks(_gmin, _gmax, nclass)
+                                msg("Raster %s: unified monthly stretch (global %.4g..%.4g)." % (field, _gmin, _gmax))
+                            except Exception:
+                                fixed_breaks = None
                     cls_rp, clr_path, breaks = self._build_display(
-                        rp, field, module, interp_colors, nclass, reclass_method, msg, warn, purge=purge)
+                        rp, field, module, interp_colors, nclass, reclass_method, msg, warn, purge=purge,
+                        fixed_breaks=fixed_breaks)
                     # No .lyr output: registry keeps the raster path only.
                     registry.append((field, rp, None, module, interp_colors, nclass))
                     msg("Raster: %s [raw float, LZW] + %s [%d classes, %s]" % (
@@ -7173,7 +7316,10 @@ class PowerClimateAtlasGenerator(object):
                    ("Winter", "W_Spd_Winter_Mean", "W_Dir_Winter_Mean"),
                    ("Spring", "W_Spd_Spring_Mean", "W_Dir_Spring_Mean"),
                    ("Summer", "W_Spd_Summer_Mean", "W_Dir_Summer_Mean"),
-                   ("Autumn", "W_Spd_Autumn_Mean", "W_Dir_Autumn_Mean")]
+                   ("Autumn", "W_Spd_Autumn_Mean", "W_Dir_Autumn_Mean"),
+                   # Monthly-mean vectors are sampled from the *_Month_Mean
+                   # rasters (mean-monthly surfaces), never from annual means.
+                   ("Month", "W_Spd_Month_Mean", "W_Dir_Month_Mean")]
         created = []
         vdir = os.path.join(out_ws, "05_Wind", "Direction", "Vector_Points")
         if export_shp:
@@ -7230,7 +7376,11 @@ class PowerClimateAtlasGenerator(object):
 
     def _build_isobars(self, gdb_path, registry, msg, warn, step=None, mask=None):
         from arcpy.sa import Contour
-        mapping = {"PSL_Winter_Mean": "Isobars_PSL_Winter_Mean",
+        mapping = {"PSL_Annual_Mean": "Isobars_PSL_Annual_Mean",
+                   "PSL_Month_Mean": "Isobars_PSL_Month_Mean",
+                   "PS_Annual_Mean": "Isobars_PS_Annual_Mean",
+                   "PS_Month_Mean": "Isobars_PS_Month_Mean",
+                   "PSL_Winter_Mean": "Isobars_PSL_Winter_Mean",
                    "PSL_Spring_Mean": "Isobars_PSL_Spring_Mean",
                    "PSL_Summer_Mean": "Isobars_PSL_Summer_Mean",
                    "PSL_Autumn_Mean": "Isobars_PSL_Autumn_Mean",

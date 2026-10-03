@@ -52,5 +52,14 @@ The system automatically selects appropriate regional Projected Coordinate Syste
 To ensure that cell $(r, c)$ in `T_Annual_Mean.tif` corresponds to the exact same ground footprint as cell $(r, c)$ in `R_Annual_Mean.tif`:
 - **Snap Raster Setting**: `arcpy.env.snapRaster = mask_boundary`
 - **Extent Alignment**: `arcpy.env.extent = mask_boundary`
-- **Cell Size Enforcement**: Uniform square cells (e.g. $0.05^\circ 	imes 0.05^\circ$ or $5000	ext{m} 	imes 5000	ext{m}$).
+- **Cell Size Enforcement**: Uniform square cells (e.g. $0.05^\circ \times 0.05^\circ$ or $5000\text{m} \times 5000\text{m}$).
 - **Masking & Clipping**: Automatically clips interpolated surfaces to the precise boundary polygon of the study area, setting background cells to standard NoData.
+
+---
+
+## 4. Monthly Climatology Surfaces: Unified Stretch and Storage
+
+- **Same engine, same parameters**: the 12 `Month/` rasters reuse the user-selected interpolation method, cell size and clip mask (LZW, 128×128 tiles, statistics + pyramids).
+- **Unified color stretch**: before interpolation the tool scans the 12 monthly fields and records one global min/max per element (Wind speed and direction separately). Classified displays built from these breaks are identical across all 12 months, so January vs. July differences are real, not an artifact of per-raster stretching.
+- **Wind direction**: circular U/V interpolation (sin/cos + atan2 → 0–360°). Linear interpolation of degrees is mathematically wrong (mean of 350° and 10° is 0°, not 180°) and is never used.
+- **Derived vectors from monthly-mean surfaces**: `Wind_Vector_Month` is sampled from the `W_Spd_Month_Mean` / `W_Dir_Month_Mean` rasters and `Isobars_PSL/PS_Month_Mean` are contoured from the `PSL/PS_Month_Mean` rasters — never from the 12 detailed monthly surfaces.

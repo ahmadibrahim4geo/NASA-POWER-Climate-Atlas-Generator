@@ -46,6 +46,7 @@
 | `T_Summer_Mean` | متوسط درجة حرارة الصيف | Summer (JJA) | °C | متوسط شهور يونيو، يوليو، أغسطس |
 | `T_Autumn_Mean` | متوسط درجة حرارة الخريف | Autumn (SON) | °C | متوسط شهور سبتمبر، أكتوبر، نوفمبر |
 | `T_Annual_Range` | المدى الحراري السنوي | Annual | °C | الفارق بين أدفأ وأبرد شهور السنة: $T_{max,m} - T_{min,m}$ |
+| `T_Seasonal_Range` | المدى الفصلي لدرجة الحرارة | Annual | °C | الفارق بين أدفأ فصول السنة وأبردها: max-min للمتوسطات الفصلية |
 | `T_Max_Summer_Month_Mean` | متوسط أدفأ شهور الصيف | Summer | °C | أعلى متوسط شهري مسجل خلال شهور الصيف (JJA) |
 | `T_Min_Winter_Month_Mean` | متوسط أبرد شهور الشتاء | Winter | °C | أدنى متوسط شهري مسجل خلال شهور الشتاء (DJF) |
 | `T_Annual_Max_Mean` | المتوسط السنوي للنهايات العظمى | Annual | °C | المتوسط المناخي للنهايات العظمى اليومية ($T_{2M,MAX}$) |
@@ -79,6 +80,7 @@
 | `PSL_Summer_Mean` | متوسط ضغط سطح البحر صيفاً | Summer (JJA) | hPa / mbar | متوسط الضغط المصحح لشهور الصيف |
 | `PSL_Autumn_Mean` | متوسط ضغط سطح البحر خريفاً | Autumn (SON) | hPa / mbar | متوسط الضغط المصحح لشهور الخريف |
 | `PSL_Annual_Range` | المدى السنوي لضغط سطح البحر | Annual | hPa / mbar | الفارق بين أعلى وأدنى متوسط شهري للضغط |
+| `PSL_Seasonal_Range` | المدى الفصلي لضغط مستوى البحر | Annual | hPa / mbar | الفارق بين أعلى فصول السنة ضغطاً وأدناها |
 
 ---
 
@@ -93,6 +95,7 @@
 | `PS_Summer_Mean` | متوسط الضغط السطحي صيفاً | Summer (JJA) | hPa / mbar | متوسط الضغط السطحي لشهور الصيف |
 | `PS_Autumn_Mean` | متوسط الضغط السطحي خريفاً | Autumn (SON) | hPa / mbar | متوسط الضغط السطحي لشهور الخريف |
 | `PS_Annual_Range` | المدى السنوي للضغط السطحي | Annual | hPa / mbar | التذبذب البارومتري السنوي للضغط السطحي |
+| `PS_Seasonal_Range` | المدى الفصلي للضغط السطحي | Annual | hPa / mbar | الفارق بين أعلى فصول السنة ضغطاً سطحياً وأدناها |
 
 ---
 
@@ -115,6 +118,7 @@
 | `W_Spd_Annual_Max_Month` | أقصى سرعة شهرية مسجلة للرياح | Annual | m/s | أعلى متوسط شهري مسجل للرياح |
 | `W_Spd_Annual_Min_Month` | أدنى سرعة شهرية مسجلة للرياح | Annual | m/s | أدنى متوسط شهري مسجل للرياح |
 | `W_Spd_Annual_Range` | المدى السنوي لسرعة الرياح | Annual | m/s | الفارق بين أشد وأهدأ الشهور رياحاً |
+| `W_Spd_Seasonal_Range` | المدى الفصلي لسرعة الرياح | Annual | m/s | الفارق بين أشد فصول السنة رياحاً وأهدئها |
 
 ---
 
@@ -129,6 +133,7 @@
 | `RH_Summer_Mean` | متوسط الرطوبة النسبية صيفاً | Summer (JJA) | % | متوسط الرطوبة النسبية لشهور الصيف |
 | `RH_Autumn_Mean` | متوسط الرطوبة النسبية خريفاً | Autumn (SON) | % | متوسط الرطوبة النسبية لشهور الخريف |
 | `RH_Annual_Range` | المدى السنوي للرطوبة النسبية | Annual | % | الفارق بين أكثر وأقل الشهور رطوبة |
+| `RH_Seasonal_Range` | المدى الفصلي للرطوبة النسبية | Annual | % | الفارق بين أكثر فصول السنة رطوبة وأجفها |
 
 ---
 
@@ -143,6 +148,7 @@
 | `Td_Summer_Mean` | متوسط نقطة الندى لفصل الصيف | Summer (JJA) | °C | متوسط نقطة الندى لشهور الصيف (مؤشر مباشر للرطوبة الخانقة والكتمة) |
 | `Td_Autumn_Mean` | متوسط نقطة الندى لفصل الخريف | Autumn (SON) | °C | متوسط نقطة الندى لشهور الخريف (سبتمبر، أكتوبر، نوفمبر) |
 | `Td_Annual_Range` | المدى السنوي لنقطة الندى | Annual | °C | الفارق بين أعلى وأدنى متوسط شهري لدرجة حرارة نقطة الندى |
+| `Td_Seasonal_Range` | المدى الفصلي لنقطة الندى | Annual | °C | الفارق بين أعلى فصول السنة نقطة ندى وأدناها |
 
 ---
 
@@ -158,6 +164,7 @@
 | `Sol_Summer_Mean` | متوسط الإشعاع الشمسي صيفاً | Summer (JJA) | kWh/m²/day | متوسط الإشعاع اليومي لشهور الصيف |
 | `Sol_Autumn_Mean` | متوسط الإشعاع الشمسي خريفاً | Autumn (SON) | kWh/m²/day | متوسط الإشعاع اليومي لشهور الخريف |
 | `Sol_Annual_Range` | المدى السنوي للإشعاع الشمسي | Annual | kWh/m²/day | الفارق بين ذروة الصيف وأدنى إشعاع في الشتاء |
+| `Sol_Seasonal_Range` | المدى الفصلي للإشعاع الشمسي | Annual | kWh/m2/day | الفارق بين أعلى فصول السنة إشعاعاً يومياً وأدناها |
 
 ---
 
@@ -172,6 +179,7 @@
 | `UV_Summer_Mean` | متوسط مؤشر UV صيفاً | Summer (JJA) | index | متوسط مؤشر الأشعة لشهور الصيف (مخاطر التعرض القصوى) |
 | `UV_Autumn_Mean` | متوسط مؤشر UV خريفاً | Autumn (SON) | index | متوسط مؤشر الأشعة لشهور الخريف |
 | `UV_Annual_Range` | المدى السنوي لمؤشر الأشعة UV | Annual | index | الفارق بين ذروة الصيف الشديدة وأدنى مستويات الشتاء |
+| `UV_Seasonal_Range` | المدى الفصلي للأشعة فوق البنفسجية | Annual | index | الفارق بين أعلى فصول السنة مؤشراً وأدناها |
 
 ---
 
@@ -186,6 +194,7 @@
 | `Cld_Summer_Mean` | متوسط تغطية السحب صيفاً | Summer (JJA) | % | نسبة تغطية السحب لشهور الصيف |
 | `Cld_Autumn_Mean` | متوسط تغطية السحب خريفاً | Autumn (SON) | % | نسبة تغطية السحب لشهور الخريف |
 | `Cld_Annual_Range` | المدى السنوي لتغطية السحب | Annual | % | الفارق بين أكثر الشهور غيوماً وأكثرها صفاءً |
+| `Cld_Seasonal_Range` | المدى الفصلي للغطاء السحابي | Annual | % | الفارق بين أعلى فصول السنة غيوماً وأصفاها |
 
 ---
 
@@ -277,6 +286,27 @@ $$ET_o = 0.0023 \cdot R_a \cdot (T_{mean} + 17.8) \cdot \sqrt{T_{max} - T_{min}}
 | `R_Anom_Winter_Pct` | شذوذ أمطار الشتاء بالنسبة المئوية | Winter (DJF) | % | الشذوذ النسبي المئوي لأمطار الشتاء |
 
 ---
+
+
+## 20. المتوسطات الشهرية التفصيلية (يناير - ديسمبر)
+تحسب الأداة لكل عنصر 12 متوسطاً شهرياً مناخياً (متوسط كل شهر تقويمي عبر كل سنوات المدة)، وتخزنها في الحقول والجداول والإكسل، وتولد لها راسترات مستقلة داخل مجلد `Month/` عند تفعيل خيار **Generate Monthly Climatology Rasters** (مطفي افتراضياً، ويتطلب مدة سنتين فأكثر):
+
+| العنصر | نمط الحقول (12 حقلاً) | الوحدة |
+|:---|:---|:---:|
+| Temperature | `T_January_Mean` .. `T_December_Mean` | °C |
+| Precipitation | `R_January_Mean` .. `R_December_Mean` | mm/month |
+| Sea Level Pressure | `PSL_January_Mean` .. `PSL_December_Mean` | hPa / mbar |
+| Surface Pressure | `PS_January_Mean` .. `PS_December_Mean` | hPa / mbar |
+| Wind (speed + direction = 24) | `W_Spd_January_Mean` .. + `W_Dir_January_Mean` .. | m/s + degree |
+| Relative Humidity | `RH_January_Mean` .. `RH_December_Mean` | % |
+| Dew Point | `Td_January_Mean` .. `Td_December_Mean` | °C |
+| Solar Radiation | `Sol_January_Mean` .. `Sol_December_Mean` | kWh/m2/day |
+| UV Index | `UV_January_Mean` .. `UV_December_Mean` | index |
+| Cloud Cover | `Cld_January_Mean` .. `Cld_December_Mean` | % |
+| Evapotranspiration | `ET_January_Total` .. `ET_December_Total` | mm/month |
+
+ملاحظات: اتجاه الرياح `W_Dir_*` بمتوسط دائري متجهي (sin/cos + atan2). كل راسترات `Month/` لعنصر واحد تشترك في مدى لوني موحد (min/max عام). الـAlias في القاعدة الرئيسية يساوي اسم الحقل نفسه.
+
 
 ## إحصائيات المنظومة المعمارية
 * **إجمالي الطبقات الموديلية المستقلة:** 18 طبقة معالم (`Feature Classes`) ومجلد راستر موحد بنسبة 1:1.

@@ -461,6 +461,15 @@ COLOR_RAMPS = {
 
 SHP_FIELD_MAP = {
     "T_Month_Mean": "T_MonMean",
+    "T_Seasonal_Range": "T_SeaRng",
+    "PSL_Seasonal_Range": "PSL_SeaRng",
+    "PS_Seasonal_Range": "PS_SeaRng",
+    "W_Spd_Seasonal_Range": "WSp_SeaRng",
+    "RH_Seasonal_Range": "RH_SeaRng",
+    "Td_Seasonal_Range": "Td_SeaRng",
+    "Sol_Seasonal_Range": "Sol_SeaRng",
+    "UV_Seasonal_Range": "UV_SeaRng",
+    "Cld_Seasonal_Range": "Cld_SeaRng",
     "PSL_Month_Mean": "PSL_MonMea",
     "PS_Month_Mean": "PS_MonMean",
     "W_Spd_Month_Mean": "WSp_MonMea",
@@ -594,6 +603,7 @@ MODULE_INDICATOR_FIELDS = {
         ("T_Summer_Mean", "Summer Mean Air Temperature"),
         ("T_Autumn_Mean", "Autumn Mean Air Temperature"),
         ("T_Annual_Range", "Annual Temperature Range"),
+        ("T_Seasonal_Range", "Seasonal Temperature Range"),
         ("T_Max_Summer_Month_Mean", "Maximum Summer Monthly Mean Temperature"),
         ("T_Min_Winter_Month_Mean", "Minimum Winter Monthly Mean Temperature"),
         ("T_Annual_Max_Mean", "Annual Mean Maximum Temperature"),
@@ -617,6 +627,7 @@ MODULE_INDICATOR_FIELDS = {
         ("RH_Summer_Mean", "Summer Mean Relative Humidity"),
         ("RH_Autumn_Mean", "Autumn Mean Relative Humidity"),
         ("RH_Annual_Range", "Annual Relative Humidity Range"),
+        ("RH_Seasonal_Range", "Seasonal Relative Humidity Range"),
     ],
     "Dew Point": [
         ("Td_Annual_Mean", "Annual Mean Dew Point Temperature"),
@@ -626,6 +637,7 @@ MODULE_INDICATOR_FIELDS = {
         ("Td_Summer_Mean", "Summer Mean Dew Point Temperature"),
         ("Td_Autumn_Mean", "Autumn Mean Dew Point Temperature"),
         ("Td_Annual_Range", "Annual Dew Point Range"),
+        ("Td_Seasonal_Range", "Seasonal Dew Point Range"),
     ],
     "Wind": [
         ("W_Spd_Annual_Mean", "Annual Mean Wind Speed"),
@@ -637,6 +649,7 @@ MODULE_INDICATOR_FIELDS = {
         ("W_Spd_Annual_Max_Month", "Maximum Monthly Mean Wind Speed"),
         ("W_Spd_Annual_Min_Month", "Minimum Monthly Mean Wind Speed"),
         ("W_Spd_Annual_Range", "Annual Wind Speed Range"),
+        ("W_Spd_Seasonal_Range", "Seasonal Wind Speed Range"),
         ("W_Dir_Annual_Mean", "Annual Prevailing Wind Direction"),
         ("W_Dir_Month_Mean", "Mean Monthly Wind Direction"),
         ("W_Dir_Winter_Mean", "Winter Prevailing Wind Direction"),
@@ -653,6 +666,7 @@ MODULE_INDICATOR_FIELDS = {
         ("Sol_Summer_Mean", "Summer Mean Daily Solar Radiation"),
         ("Sol_Autumn_Mean", "Autumn Mean Daily Solar Radiation"),
         ("Sol_Annual_Range", "Annual Solar Radiation Range"),
+        ("Sol_Seasonal_Range", "Seasonal Solar Radiation Range"),
     ],
     "Surface Pressure": [
         ("PS_Annual_Mean", "Annual Mean Surface Pressure"),
@@ -662,6 +676,7 @@ MODULE_INDICATOR_FIELDS = {
         ("PS_Summer_Mean", "Summer Mean Surface Pressure"),
         ("PS_Autumn_Mean", "Autumn Mean Surface Pressure"),
         ("PS_Annual_Range", "Annual Surface Pressure Range"),
+        ("PS_Seasonal_Range", "Seasonal Surface Pressure Range"),
     ],
     "Sea Level Pressure": [
         ("PSL_Annual_Mean", "Annual Mean Sea Level Pressure"),
@@ -671,6 +686,7 @@ MODULE_INDICATOR_FIELDS = {
         ("PSL_Summer_Mean", "Summer Mean Sea Level Pressure"),
         ("PSL_Autumn_Mean", "Autumn Mean Sea Level Pressure"),
         ("PSL_Annual_Range", "Annual Sea Level Pressure Range"),
+        ("PSL_Seasonal_Range", "Seasonal Sea Level Pressure Range"),
     ],
     "Cloud Cover": [
         ("Cld_Annual_Mean", "Annual Mean Cloud Cover"),
@@ -680,6 +696,7 @@ MODULE_INDICATOR_FIELDS = {
         ("Cld_Summer_Mean", "Summer Mean Cloud Cover"),
         ("Cld_Autumn_Mean", "Autumn Mean Cloud Cover"),
         ("Cld_Annual_Range", "Annual Cloud Cover Range"),
+        ("Cld_Seasonal_Range", "Seasonal Cloud Cover Range"),
     ],
     "UV Index": [
         ("UV_Annual_Mean", "Annual Mean UV Index"),
@@ -689,6 +706,7 @@ MODULE_INDICATOR_FIELDS = {
         ("UV_Summer_Mean", "Summer Mean UV Index"),
         ("UV_Autumn_Mean", "Autumn Mean UV Index"),
         ("UV_Annual_Range", "Annual UV Index Range"),
+        ("UV_Seasonal_Range", "Seasonal UV Index Range"),
     ],
     "Heat Index": [
         ("HI_Annual_Mean", "Annual Mean Heat Index"),
@@ -756,6 +774,82 @@ MODULE_INDICATOR_FIELDS["Trends & Baseline Anomalies"] = MODULE_INDICATOR_FIELDS
 MODULE_INDICATOR_FIELDS["Climate_Models"] = [
     item for mod_key in DERIVED_MODULES_ALL for item in MODULE_INDICATOR_FIELDS.get(mod_key, [])
 ]
+
+# ---------------------------------------------------------------------------
+# Monthly climatology (12-month means) support — offline parity with the
+# online PowerClimateAtlasGenerator tool.
+# ---------------------------------------------------------------------------
+MONTH_NAMES_EN = ["January", "February", "March", "April", "May", "June",
+                  "July", "August", "September", "October", "November", "December"]
+MONTH_ABBR3 = {"January": "Jan", "February": "Feb", "March": "Mar", "April": "Apr",
+               "May": "May", "June": "Jun", "July": "Jul", "August": "Aug",
+               "September": "Sep", "October": "Oct", "November": "Nov", "December": "Dec"}
+
+
+def is_monthly_field(fname):
+    """True for 12-month climatology fields (any calendar month name inside
+    the field name). Their rasters go into the Month/ subfolder with one
+    unified color stretch per element."""
+    if not fname:
+        return False
+    for _mn in MONTH_NAMES_EN:
+        if _mn in fname:
+            return True
+    return False
+
+
+def monthly_group_key(module, field):
+    """Grouping key for the unified monthly stretch (Wind speed/dir separate)."""
+    if module == "Wind":
+        return (module, "Spd" if field.startswith("W_Spd") else "Dir")
+    return (module, "")
+
+
+# Monthly indicator entries: (field prefix, label base). Wind carries both
+# speed and prevailing-direction surfaces (24 rasters when enabled).
+_MONTHLY_LABEL_BASE = {
+    "Temperature": ("T", "Mean Air Temperature"),
+    "Precipitation": ("R", "Mean Precipitation"),
+    "Relative Humidity": ("RH", "Mean Relative Humidity"),
+    "Dew Point": ("Td", "Mean Dew Point Temperature"),
+    "Solar Radiation": ("Sol", "Mean Daily Solar Radiation"),
+    "Surface Pressure": ("PS", "Mean Surface Pressure"),
+    "Sea Level Pressure": ("PSL", "Mean Sea Level Pressure"),
+    "Cloud Cover": ("Cld", "Mean Cloud Cover"),
+    "UV Index": ("UV", "Mean UV Index"),
+}
+for _mod, (_pfx, _base) in _MONTHLY_LABEL_BASE.items():
+    _lst = MODULE_INDICATOR_FIELDS.get(_mod)
+    if _lst is None:
+        continue
+    _have = set(f for f, _l in _lst)
+    for _mn in MONTH_NAMES_EN:
+        _fn = "%s_%s_Mean" % (_pfx, _mn)
+        if _fn not in _have:
+            _lst.append((_fn, "%s %s" % (_mn, _base)))
+            _have.add(_fn)
+_wind_lst = MODULE_INDICATOR_FIELDS.get("Wind")
+if _wind_lst is not None:
+    _have_w = set(f for f, _l in _wind_lst)
+    for _mn in MONTH_NAMES_EN:
+        for _fn, _lb in (("W_Spd_%s_Mean" % _mn, "%s Mean Wind Speed" % _mn),
+                         ("W_Dir_%s_Mean" % _mn, "%s Prevailing Wind Direction" % _mn)):
+            if _fn not in _have_w:
+                _wind_lst.append((_fn, _lb))
+                _have_w.add(_fn)
+
+# Shapefile short names (<=10 chars) for the monthly fields.
+for _mod, (_pfx, _base) in _MONTHLY_LABEL_BASE.items():
+    for _mn in MONTH_NAMES_EN:
+        _fn = "%s_%s_Mean" % (_pfx, _mn)
+        if _fn not in SHP_FIELD_MAP:
+            SHP_FIELD_MAP[_fn] = ("%s_%sMn" % (_pfx, MONTH_ABBR3[_mn]))[:10]
+for _mn in MONTH_NAMES_EN:
+    for _fn, _sh in (("W_Spd_%s_Mean" % _mn, "WSp_%sMn" % MONTH_ABBR3[_mn]),
+                     ("W_Dir_%s_Mean" % _mn, "WDr_%sMn" % MONTH_ABBR3[_mn])):
+        if _fn not in SHP_FIELD_MAP:
+            SHP_FIELD_MAP[_fn] = _sh[:10]
+REV_SHP_MAP = dict((v, k) for k, v in SHP_FIELD_MAP.items())
 
 def get_units_mapping(unit_sys=None, unit_temp=None, unit_precip=None, unit_press=None, unit_wind=None):
     t_unit = u"°F" if (unit_temp and "Fahrenheit" in unit_temp) else u"°C"
@@ -1385,6 +1479,24 @@ class RasterDataClimateAtlasGenerator(object):
             "Cartesian product of selected Climate Modules and selected Temporal Scope."
         )
 
+        p_monthly_rasters = arcpy.Parameter(
+            displayName="Generate Monthly Climatology Rasters (Jan–Dec) / توليد راستر مناخي مستقل لكل شهر من أشهر السنة",
+            name="Generate_Monthly_Rasters",
+            datatype="GPBoolean",
+            parameterType="Optional",
+            direction="Input"
+        )
+        p_monthly_rasters.value = False
+        p_monthly_rasters.category = "Time Window"
+        p_monthly_rasters.description = (
+            "GENERATE 12 INDIVIDUAL MONTHLY RASTERS (Jan-Dec). When checked, interpolates independent "
+            "climatological surface rasters for all 12 calendar months into a dedicated 'Month' subfolder "
+            "for each selected element (same interpolation method, cell size and clip mask). Requires a "
+            "multi-year period (>= 2 years). OFFLINE: monthly fields are read directly from the input point "
+            "layers (no re-download); absent fields are skipped. Wind produces 24 surfaces "
+            "(12 speed W_Spd_* + 12 direction W_Dir_*) when present."
+        )
+
         p_aggs = arcpy.Parameter(
             displayName="Included Temporal Aggregations",
             name="Included_Aggregations",
@@ -1906,6 +2018,19 @@ class RasterDataClimateAtlasGenerator(object):
         if wind_cell_size <= 0.0:
             wind_cell_size = 25000.0
         export_indiv_shp = bool(_get_val("Export_Individual_Shapefiles", False))
+        _want_monthly = bool(_get_val("Generate_Monthly_Rasters", False))
+        try:
+            _span_yrs = int(end_yr) - int(start_yr) + 1
+        except Exception:
+            _span_yrs = 1
+        # Offline note: monthly rasters interpolate the 12 monthly fields
+        # straight from the input point layers (no re-download). Fields absent
+        # from the inputs are skipped automatically.
+        monthly_enabled = bool(_want_monthly) and _span_yrs >= 2
+        if _want_monthly and not monthly_enabled:
+            warn("Monthly climatology rasters skipped: the period spans %d year(s); at least 2 years are required." % _span_yrs)
+        elif monthly_enabled:
+            msg("Monthly climatology rasters: ENABLED (12 Month/ surfaces per element, unified stretch).")
         out_root = _get_text("Output_Workspace")
         out_sr = _get_val("Output_Spatial_Reference")
 
@@ -2154,7 +2279,7 @@ class RasterDataClimateAtlasGenerator(object):
                             mi, mod, len(ordered_modules), pts_fc, ind_fields, t_scope_set,
                             out_root, vec_dir, export_indiv_shp, in_clip_layer, interp_method,
                             eff_cell_size, target_sr, gdb_path, eff_wind_size, generated_rasters,
-                            msg, warn
+                            msg, warn, monthly_enabled=monthly_enabled
                         )
                     else:
                         msg(">>> [BATCH DATA COMMITTED] Module [%d/%d] %s: Master point layer committed to GDB. <<<" % (mi + 1, len(ordered_modules), mod))
@@ -3124,9 +3249,9 @@ class RasterDataClimateAtlasGenerator(object):
     # Helper: Single Module Outputs Processing (Vectors & Rasters)
     # -----------------------------------------------------------------------
     def _process_single_module_outputs(self, mi, mod, total_mods, pts_fc, raw_ind_fields, t_scope_set,
-                                      out_root, vec_dir, export_indiv_shp, in_clip_layer, interp_method,
-                                      eff_cell_size, target_sr, gdb_path, eff_wind_size, generated_rasters,
-                                      msg, warn):
+                                       out_root, vec_dir, export_indiv_shp, in_clip_layer, interp_method,
+                                       eff_cell_size, target_sr, gdb_path, eff_wind_size, generated_rasters,
+                                       msg, warn, monthly_enabled=False):
         """Processes exports, raster interpolation, and wind vectors for a single module filtered by temporal_scope."""
         pt_count = int(arcpy.GetCount_management(pts_fc).getOutput(0))
         msg("\nProcessing Module [%d/%d]: %s (%d points)" % (mi + 1, total_mods, mod, pt_count))
@@ -3137,10 +3262,48 @@ class RasterDataClimateAtlasGenerator(object):
 
         # Filter indicators by Temporal Scope
         active_ind_fields = [fld for fld in raw_ind_fields if get_field_temporal_scope(fld[0]) in t_scope_set]
+        # Monthly climatology surfaces only when the monthly option is enabled
+        # (multi-year span, >= 2 years).
+        active_ind_fields = [fld for fld in active_ind_fields
+                             if (monthly_enabled or not is_monthly_field(fld[0]))]
         if not active_ind_fields:
             warn("  ! No indicators for %s match the selected Temporal Scope (%s); skipping." % (
                 mod, ", ".join(sorted(t_scope_set))))
             return
+
+        # Unified monthly stretch: global min/max of the 12 monthly fields, so
+        # all Month/ rasters of this element share one color range.
+        monthly_minmax = {}
+        if monthly_enabled:
+            _mfields = [f for f, _l in active_ind_fields if is_monthly_field(f)]
+            _existing = set(f.name for f in arcpy.ListFields(pts_fc))
+            _mfields = [f for f in _mfields if f in _existing]
+            if _mfields:
+                try:
+                    with arcpy.da.SearchCursor(pts_fc, _mfields) as _cur:
+                        for _row in _cur:
+                            for _f, _v in zip(_mfields, _row):
+                                if _v is None or is_missing(_v):
+                                    continue
+                                try:
+                                    _fv = float(_v)
+                                except Exception:
+                                    continue
+                                _grp = monthly_group_key(mod, _f)
+                                _mm = monthly_minmax.get(_grp)
+                                if _mm is None:
+                                    monthly_minmax[_grp] = [_fv, _fv]
+                                else:
+                                    if _fv < _mm[0]:
+                                        _mm[0] = _fv
+                                    if _fv > _mm[1]:
+                                        _mm[1] = _fv
+                    for _grp, (_gmin, _gmax) in monthly_minmax.items():
+                        _glabel = _grp[0] + ("/" + _grp[1] if _grp[1] else "")
+                        msg("  Monthly unified stretch [%s]: global %.4g .. %.4g over 12 months." % (_glabel, _gmin, _gmax))
+                except Exception as _ex:
+                    warn("  Monthly unified stretch scan failed: %s" % _ex)
+                    monthly_minmax = {}
 
         # Export Vector files (Shapefile, CSV, Excel)
         self._export_vectors(pts_fc, mod, vec_dir, active_ind_fields, export_indiv_shp, msg)
@@ -3164,7 +3327,17 @@ class RasterDataClimateAtlasGenerator(object):
 
             t_fld_start = time.time()
             msg("  -> Interpolating: %s (%s)..." % (fld_name, interp_method))
-            out_tif = os.path.join(mod_dir, "%s.tif" % fld_name)
+            # Monthly climatology rasters live in a dedicated Month/ subfolder
+            # (Wind keeps its Speed/Direction split above it).
+            if mod == "Wind":
+                _sub = "Speed" if fld_name.startswith("W_Spd") else "Direction"
+                _base = os.path.join(mod_dir, _sub)
+            else:
+                _base = mod_dir
+            if is_monthly_field(fld_name):
+                _base = os.path.join(_base, "Month")
+            makedirs_ok(_base)
+            out_tif = os.path.join(_base, "%s.tif" % fld_name)
             success = self._interpolate_and_clip(
                 pts_fc, fld_name, in_clip_layer, interp_method,
                 eff_cell_size, out_tif, target_sr, msg, warn
@@ -3173,7 +3346,12 @@ class RasterDataClimateAtlasGenerator(object):
                 t_fld_dur = time.time() - t_fld_start
                 msg("     [OK] Saved GeoTIFF: %s (in %.1f seconds)" % (os.path.basename(out_tif), t_fld_dur))
                 generated_rasters.append((fld_name, out_tif, mod))
-                self._create_layer_file(out_tif, mod, fld_name, fld_label, msg)
+                _urange = None
+                if is_monthly_field(fld_name):
+                    _grp = monthly_group_key(mod, fld_name)
+                    if _grp in monthly_minmax:
+                        _urange = list(monthly_minmax[_grp])
+                self._create_layer_file(out_tif, mod, fld_name, fld_label, msg, unified_range=_urange)
 
         if mod == "Wind":
             self._build_wind_vectors(
@@ -3410,6 +3588,7 @@ class RasterDataClimateAtlasGenerator(object):
 
         periods = [
             ("Annual", "W_Spd_Annual_Mean", "W_Dir_Annual_Mean"),
+            ("Month", "W_Spd_Month_Mean", "W_Dir_Month_Mean"),
             ("Winter", "W_Spd_Winter_Mean", "W_Dir_Winter_Mean"),
             ("Spring", "W_Spd_Spring_Mean", "W_Dir_Spring_Mean"),
             ("Summer", "W_Spd_Summer_Mean", "W_Dir_Summer_Mean"),
@@ -3537,7 +3716,7 @@ class RasterDataClimateAtlasGenerator(object):
     # -----------------------------------------------------------------------
     # Helper: Generate .lyr file with embedded color ramp
     # -----------------------------------------------------------------------
-    def _create_layer_file(self, tif_path, module, fld_name, fld_label, msg):
+    def _create_layer_file(self, tif_path, module, fld_name, fld_label, msg, unified_range=None):
         is_pro = not PY27
         lyr_ext = ".lyrx" if is_pro else ".lyr"
         lyr_path = tif_path.replace(".tif", lyr_ext)
@@ -3552,6 +3731,10 @@ class RasterDataClimateAtlasGenerator(object):
             "source": "NASA POWER / Earthdata / Giovanni / ERA5 Gridded Data",
             "created": _dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
+        if unified_range:
+            # Global monthly min/max for this element: apply as a single
+            # stretched symbology (same min/max on all 12 Month/ layers).
+            sidecar["unified_monthly_range"] = {"min": unified_range[0], "max": unified_range[1]}
         with open_utf8(json_path, "w") as fh:
             fh.write(json.dumps(sidecar, indent=2, ensure_ascii=False))
 

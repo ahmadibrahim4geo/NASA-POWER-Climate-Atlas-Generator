@@ -21,8 +21,9 @@ The Climate Atlas Generator produces multi-tiered geospatial deliverables to sup
 - **Primary Feature Class**: `Climate_Atlas_Points` (and modular element feature classes: `01_Temperature`, `02_Precipitation`, etc.)
 - **Geometry Type**: Point (`esriGeometryPoint`)
 - **Spatial Reference**: GCS_WGS_1984 (EPSG:4326) or user-specified Projected Coordinate System.
-- **Precision**: Double (`esriFieldTypeDouble`, 8-byte IEEE 754 floating point) for all 258 climate indicators.
-- **Field Alias Preservation**: All fields carry full bilingual aliases (e.g. `T_Annual_Mean` alias: `المتوسط السنوي لدرجة الحرارة`, `T_Month_Mean` alias: `المتوسط الشهري لدرجة الحرارة`).
+- **Precision**: Double (`esriFieldTypeDouble`, 8-byte IEEE 754 floating point) for all climate indicators.
+- **Field Alias Policy**: In the main GDB every field's alias equals the field name itself (English, e.g. alias of `T_Annual_Mean` is `T_Annual_Mean`), so offline reuse and joins never break. Arabic descriptive aliases live only in the companion `<base>_AR.gdb` copy.
+- **Rasters are NEVER stored inside the GDB**: all `.tif` surfaces are written to the dedicated element folders on disk (see §4). The GDB holds point feature classes, wind-vector and isobar contour feature classes only.
 
 ---
 
@@ -114,6 +115,15 @@ Output_Rasters/
 - **Compression**: LZW lossless compression.
 - **NoData Sentinel**: `-3.4028234663852886e+38` (IEEE 754 32-bit float minimum) or ESRI Grid NoData.
 - **Pyramid Layers**: Bilinear interpolation resampling for continuous variables; Nearest Neighbor for integer counts (`Dry_Months_Count`).
+
+### 4.1 Monthly Climatology Subfolder (`Month/`)
+When the **Generate Monthly Climatology Rasters (Jan–Dec)** option is enabled (default OFF, requires a multi-year period of ≥ 2 years), each element receives 12 independent monthly surfaces (Wind: 24 — 12 speed `W_Spd_*` + 12 direction `W_Dir_*`) inside a dedicated subfolder so they never mix with annual/seasonal rasters:
+```text
+01_Temperature/Month/   (T_January_Mean.tif ... T_December_Mean.tif)
+05_Wind/Speed/Month/    (W_Spd_January_Mean.tif ... W_Spd_December_Mean.tif)
+05_Wind/Direction/Month/(W_Dir_January_Mean.tif ... W_Dir_December_Mean.tif)
+```
+All 12 rasters of one element share a single unified color stretch (global min/max over the 12 months) for true visual month-to-month comparison. Wind direction uses circular U/V (sin/cos + atan2) interpolation, never linear degrees.
 
 ---
 

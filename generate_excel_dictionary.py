@@ -185,6 +185,15 @@ FIELDS_DATA = [
         "map_title": u"خريطة المدى الحراري السنوي لدرجات الحرارة (°C)"
     },
     {
+        "short_name": "T_SeaRng",
+        "full_name": "T_Seasonal_Range",
+        "module_code": "01_Temperature",
+        "module_name": "01_Temperature (درجات الحرارة)",
+        "desc_ar": u"المدى الفصلي لدرجة الحرارة (الفارق بين أدفأ فصول السنة وأبردها).",
+        "unit": u"°C",
+        "map_title": u"خريطة المدى الفصلي لدرجة الحرارة (°C)"
+    },
+    {
         "short_name": "T_MaxSumMo",
         "full_name": "T_Max_Summer_Month_Mean",
         "module_code": "01_Temperature",
@@ -439,6 +448,15 @@ FIELDS_DATA = [
         "desc_ar": u"المدى السنوي لدرجة حرارة نقطة الندى (الفارق بين أعلى وأدنى متوسط شهري لنقطة الندى).",
         "unit": u"°C",
         "map_title": u"خريطة المدى السنوي لدرجة حرارة نقطة الندى (°C)"
+    },
+    {
+        "short_name": "Td_SeaRng",
+        "full_name": "Td_Seasonal_Range",
+        "module_code": "07_Dew_Point",
+        "module_name": "07_Dew_Point (نقطة الندى)",
+        "desc_ar": u"المدى الفصلي لنقطة الندى (الفارق بين أعلى وأدنى فصول السنة).",
+        "unit": u"°C",
+        "map_title": u"خريطة المدى الفصلي لنقطة الندى (°C)"
     },
     {
         "short_name": "Td_JanMean",
@@ -796,6 +814,15 @@ FIELDS_DATA = [
         "map_title": u"خريطة المدى السنوي لضغط مستوى سطح البحر (hPa)"
     },
     {
+        "short_name": "PSL_SeaRng",
+        "full_name": "PSL_Seasonal_Range",
+        "module_code": "03_Sea_Level_Pressure",
+        "module_name": "03_Sea_Level_Pressure (ضغط مستوى البحر)",
+        "desc_ar": u"المدى الفصلي لضغط مستوى البحر (الفارق بين أعلى وأدنى فصول السنة ضغطاً).",
+        "unit": u"hPa",
+        "map_title": u"خريطة المدى الفصلي لضغط مستوى البحر (hPa)"
+    },
+    {
         "short_name": "PSL_JanMn",
         "full_name": "PSL_January_Mean",
         "module_code": "03_Sea_Level_Pressure",
@@ -967,6 +994,15 @@ FIELDS_DATA = [
         "desc_ar": u"المدى البارومتري السنوي للضغط السطحي (الفارق بين أعلى وأدنى متوسط شهري للضغط السطحي).",
         "unit": u"hPa / mbar",
         "map_title": u"خريطة المدى السنوي للضغط الجوي السطحي (hPa)"
+    },
+    {
+        "short_name": "PS_SeaRng",
+        "full_name": "PS_Seasonal_Range",
+        "module_code": "04_Surface_Pressure",
+        "module_name": "04_Surface_Pressure (الضغط السطحي)",
+        "desc_ar": u"المدى الفصلي للضغط السطحي (الفارق بين فصول السنة).",
+        "unit": u"hPa",
+        "map_title": u"خريطة المدى الفصلي للضغط السطحي (hPa)"
     },
     {
         "short_name": "PS_JanMean",
@@ -1158,6 +1194,15 @@ FIELDS_DATA = [
         "desc_ar": u"المدى السنوي لسرعة الرياح (الفارق بين أشد شهور السنة رياحاً وأهدأها سرعة).",
         "unit": u"م/ث (m/s)",
         "map_title": u"خريطة المدى السنوي لسرعة الرياح (م/ث)"
+    },
+    {
+        "short_name": "WSp_SeaRng",
+        "full_name": "W_Spd_Seasonal_Range",
+        "module_code": "05_Wind",
+        "module_name": "05_Wind (الرياح)",
+        "desc_ar": u"المدى الفصلي لسرعة الرياح (الفارق بين أشد فصول السنة ريحاً وأهدأها).",
+        "unit": u"م/ث (m/s)",
+        "map_title": u"خريطة المدى الفصلي لسرعة الرياح (م/ث)"
     },
     {
         "short_name": "WDr_AnMean",
@@ -1495,6 +1540,15 @@ FIELDS_DATA = [
         "map_title": u"خريطة المدى السنوي للرطوبة النسبية (%)"
     },
     {
+        "short_name": "RH_SeaRng",
+        "full_name": "RH_Seasonal_Range",
+        "module_code": "06_Relative_Humidity",
+        "module_name": "06_Relative_Humidity (الرطوبة النسبية)",
+        "desc_ar": u"المدى الفصلي للرطوبة النسبية (الفارق بين أكثر فصول السنة رطوبة وأجفها).",
+        "unit": u"%",
+        "map_title": u"خريطة المدى الفصلي للرطوبة النسبية (%)"
+    },
+    {
         "short_name": "RH_JanMean",
         "full_name": "RH_January_Mean",
         "module_code": "06_Relative_Humidity",
@@ -1677,6 +1731,15 @@ FIELDS_DATA = [
         "map_title": u"خريطة المدى السنوي للإشعاع الشمسي (kWh/m²/day)"
     },
     {
+        "short_name": "Sol_SeaRng",
+        "full_name": "Sol_Seasonal_Range",
+        "module_code": "08_Solar_Radiation",
+        "module_name": "08_Solar_Radiation (الإشعاع الشمسي)",
+        "desc_ar": u"المدى الفصلي للإشعاع الشمسي اليومي (الفارق بين فصول السنة).",
+        "unit": u"kWh/m²/day",
+        "map_title": u"خريطة المدى الفصلي للإشعاع الشمسي (kWh/m²/day)"
+    },
+    {
         "short_name": "Sol_JanMn",
         "full_name": "Sol_January_Mean",
         "module_code": "08_Solar_Radiation",
@@ -1850,6 +1913,15 @@ FIELDS_DATA = [
         "map_title": u"خريطة المدى السنوي لمؤشر الأشعة فوق البنفسجية"
     },
     {
+        "short_name": "UV_SeaRng",
+        "full_name": "UV_Seasonal_Range",
+        "module_code": "09_UV_Index",
+        "module_name": "09_UV_Index (الأشعة فوق البنفسجية)",
+        "desc_ar": u"المدى الفصلي لمؤشر الأشعة فوق البنفسجية (الفارق بين فصول السنة).",
+        "unit": u"مؤشر (Index)",
+        "map_title": u"خريطة المدى الفصلي لمؤشر الأشعة فوق البنفسجية"
+    },
+    {
         "short_name": "UV_JanMean",
         "full_name": "UV_January_Mean",
         "module_code": "09_UV_Index",
@@ -2021,6 +2093,15 @@ FIELDS_DATA = [
         "desc_ar": u"المدى السنوي لتغطية السحب (الفارق بين أكثر شهور السنة غيوماً وأكثرها صفاءً).",
         "unit": u"%",
         "map_title": u"خريطة المدى السنوي لنسبة الغطاء السحابي (%)"
+    },
+    {
+        "short_name": "Cld_SeaRng",
+        "full_name": "Cld_Seasonal_Range",
+        "module_code": "10_Cloud_Cover",
+        "module_name": "10_Cloud_Cover (الغطاء السحابي)",
+        "desc_ar": u"المدى الفصلي للغطاء السحابي (الفارق بين أعلى فصول السنة غيوماً وأصفاها).",
+        "unit": u"%",
+        "map_title": u"خريطة المدى الفصلي للغطاء السحابي (%)"
     },
     {
         "short_name": "Cld_JanMn",

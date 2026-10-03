@@ -52,3 +52,14 @@ Operating in air-gapped secure facilities, remote field laptops without internet
 4. Select target **Modules to Interpolate** (e.g. `All`, `Temperature`, or `Precipitation`).
 5. Choose **Interpolation Method** and **Cell Size**.
 6. Click **Execute**. All 103 rasters are generated entirely locally from the existing attribute table in under 5 minutes.
+
+---
+
+## 4. Workflow 4: Monthly Climatology Rasters (Jan–Dec)
+
+Both tools expose **Generate Monthly Climatology Rasters (Jan–Dec) / توليد راستر مناخي مستقل لكل شهر** (`GPBoolean`, default OFF) right after the Temporal Scope parameter:
+1. Select a **multi-year period (≥ 2 years)** — single years are skipped with a warning because a one-year "climatology" is meaningless.
+2. Check the monthly option and execute. Each element gains a `Month/` subfolder with 12 rasters (Wind: 24) plus unified-stretch metadata; point tables and Excel workbooks gain the 12 `*_January_Mean … *_December_Mean` fields and a `Month` sheet.
+3. **Online tool** computes the 12 fields from the downloaded time series during the run.
+4. **Offline tool** reads the 12 fields straight from the input point layers (no download); absent fields are skipped.
+5. **Backfill without re-downloading**: `scripts/build_monthly_tables.py` (pure Python, anywhere) derives the 12 fields from `Egypt_Monthly_Raw_1996_2025.json` into `Monthly_Climatology/*.csv` and appends them to the `.xls` tables; `scripts/build_monthly_backfill_arcmap.py` (inside ArcMap) injects them into the GDB (alias = field name) and interpolates the `Month/` rasters, `Wind_Vector_Month` and the PSL/PS month isobars.
