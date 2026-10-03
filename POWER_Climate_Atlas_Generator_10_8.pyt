@@ -2917,7 +2917,6 @@ def compute_point_fields(monthly, years, modules, temporal, daily_raw=None,
         clim_vals = [v for v in clim_m.values() if v is not None]
         res["R_Annual_Mean"] = agg["Annual_Mean"]
         res["R_Month_Mean"] = (sum(clim_vals) / len(clim_vals)) if clim_vals else None
-        res["R_Annual_Total"] = res["R_Annual_Mean"]  # backward compatibility alias
         res["R_Annual_Range"] = (max(clim_vals) - min(clim_vals)) if len(clim_vals) >= 2 else None
         s_vals = [agg["Winter"], agg["Spring"], agg["Summer"], agg["Autumn"]]
         valid_s = [v for v in s_vals if v is not None]
@@ -2926,10 +2925,6 @@ def compute_point_fields(monthly, years, modules, temporal, daily_raw=None,
         res["R_Spring_Mean"] = agg["Spring"]
         res["R_Summer_Mean"] = agg["Summer"]
         res["R_Autumn_Mean"] = agg["Autumn"]
-        res["R_Winter_Total"] = res["R_Winter_Mean"]  # backward compatibility alias
-        res["R_Spring_Total"] = res["R_Spring_Mean"]  # backward compatibility alias
-        res["R_Summer_Total"] = res["R_Summer_Mean"]  # backward compatibility alias
-        res["R_Autumn_Total"] = res["R_Autumn_Mean"]  # backward compatibility alias
         _months_en = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
         for m_idx, m_name in enumerate(_months_en, 1):
             res["R_%s_Mean" % m_name] = round(clim_m.get(m_idx), 2) if clim_m.get(m_idx) is not None else 0.0
