@@ -5,6 +5,7 @@ ArcGIS Desktop Python Toolbox (.pyt) — Python 2.7 compatible.
 
 Developed by: Ahmad Ibrahim (@ahmadibrahim4geo)
 إعداد وتطوير: أحمد إبراهيم
+Email / البريد الإلكتروني: ahmadibrahim.geo@gmail.com
 
 Data source: NASA POWER API (https://power.larc.nasa.gov/)
              & Open-Meteo Climate API (https://open-meteo.com/)
@@ -1501,10 +1502,10 @@ FIELD_DEFS = [
     ("R_Month_Mean", "Mean Monthly Precipitation", u"المتوسط الشهري لتساقط الأمطار", "PRECTOTCORR", "Precipitation", "Annual", "Mean", "mm", u"متوسط الإجماليات الشهرية", "Mean of climatological monthly totals", "Mean of 12 climatological monthly totals (= Annual Mean / 12)"),
     ("R_Annual_Range", "Annual Precipitation Range", u"المدى السنوي للأمطار", "PRECTOTCORR", "Precipitation", "Annual", "Range", "mm", u"أعلى متوسط شهري للأمطار ناقص أدنى متوسط شهري", "Highest monthly precipitation minus lowest monthly precipitation", "max(clim monthly) - min(clim monthly)"),
     ("R_Seasonal_Range", "Seasonal Precipitation Range", u"المدى الفصلي للأمطار", "PRECTOTCORR", "Precipitation", "Annual", "Range", "mm", u"أعلى تراكم فصلي للأمطار ناقص أدنى تراكم فصلي", "Highest seasonal precipitation total minus lowest seasonal precipitation total", "max(seasonal totals) - min(seasonal totals)"),
-    ("R_Winter_Total", "Winter Total Precipitation", u"إجمالي أمطار فصل الشتاء", "PRECTOTCORR", "Precipitation", "Winter", "Sum", "mm", u"مجموع أمطار أشهر الشتاء", "Mean winter total across years", "Mean of per-year Dec+Jan+Feb totals"),
-    ("R_Spring_Total", "Spring Total Precipitation", u"إجمالي أمطار فصل الربيع", "PRECTOTCORR", "Precipitation", "Spring", "Sum", "mm", u"مجموع أمطار أشهر الربيع", "Mean spring total across years", "Mean of per-year Mar+Apr+May totals"),
-    ("R_Summer_Total", "Summer Total Precipitation", u"إجمالي أمطار فصل الصيف", "PRECTOTCORR", "Precipitation", "Summer", "Sum", "mm", u"مجموع أمطار أشهر الصيف", "Mean summer total across years", "Mean of per-year Jun+Jul+Aug totals"),
-    ("R_Autumn_Total", "Autumn Total Precipitation", u"إجمالي أمطار فصل الخريف", "PRECTOTCORR", "Precipitation", "Autumn", "Sum", "mm", u"مجموع أمطار أشهر الخريف", "Mean autumn total across years", "Mean of per-year Sep+Oct+Nov totals"),
+    ("R_Winter_Mean", "Winter Mean Precipitation", u"متوسط هطول الأمطار خلال فصل الشتاء", "PRECTOTCORR", "Precipitation", "Winter", "Mean", "mm/season", u"متوسط هطول الأمطار خلال فصل الشتاء (مم/فصل)", "Mean winter precipitation across years", "Mean of per-year Dec+Jan+Feb totals"),
+    ("R_Spring_Mean", "Spring Mean Precipitation", u"متوسط هطول الأمطار خلال فصل الربيع", "PRECTOTCORR", "Precipitation", "Spring", "Mean", "mm/season", u"متوسط هطول الأمطار خلال فصل الربيع (مم/فصل)", "Mean spring precipitation across years", "Mean of per-year Mar+Apr+May totals"),
+    ("R_Summer_Mean", "Summer Mean Precipitation", u"متوسط هطول الأمطار خلال فصل الصيف", "PRECTOTCORR", "Precipitation", "Summer", "Mean", "mm/season", u"متوسط هطول الأمطار خلال فصل الصيف (مم/فصل)", "Mean summer precipitation across years", "Mean of per-year Jun+Jul+Aug totals"),
+    ("R_Autumn_Mean", "Autumn Mean Precipitation", u"متوسط هطول الأمطار خلال فصل الخريف", "PRECTOTCORR", "Precipitation", "Autumn", "Mean", "mm/season", u"متوسط هطول الأمطار خلال فصل الخريف (مم/فصل)", "Mean autumn precipitation across years", "Mean of per-year Sep+Oct+Nov totals"),
     ("PSL_Annual_Mean", "Annual Mean Sea Level Pressure", u"المتوسط السنوي لضغط مستوى سطح البحر", "SLP", "Sea Level Pressure", "Annual", "Mean", "mbar/hPa", u"متوسط الضغط المصحح إلى مستوى سطح البحر", "Mean sea-level pressure", "Mean of valid values; kPa*10 if needed"),
     ("PSL_Winter_Mean", "Winter Mean Sea Level Pressure", u"متوسط ضغط مستوى سطح البحر في الشتاء", "SLP", "Sea Level Pressure", "Winter", "Mean", "mbar/hPa", u"متوسط الشتاء", "Winter mean", "Mean of months 12,1,2"),
     ("PSL_Spring_Mean", "Spring Mean Sea Level Pressure", u"متوسط ضغط مستوى سطح البحر في الربيع", "SLP", "Sea Level Pressure", "Spring", "Mean", "mbar/hPa", u"متوسط الربيع", "Spring mean", "Mean of months 3,4,5"),
@@ -1662,10 +1663,14 @@ SHP_FIELD_MAP = {
     "R_Annual_Range": "R_AnnRng",
     "R_Annual_Total": "R_AnnTot",
     "R_Month_Mean": "R_MonMean",
+    "R_Autumn_Mean": "R_AutMean",
     "R_Autumn_Total": "R_AutTot",
     "R_Seasonal_Range": "R_SeaRng",
+    "R_Spring_Mean": "R_SprMean",
     "R_Spring_Total": "R_SprTot",
+    "R_Summer_Mean": "R_SumMean",
     "R_Summer_Total": "R_SumTot",
+    "R_Winter_Mean": "R_WinMean",
     "R_Winter_Total": "R_WinTot",
     "Sol_Annual_Mean": "Sol_AnMean",
     "Sol_Annual_Range": "Sol_AnRng",
@@ -2242,8 +2247,8 @@ REQUIRED_COLUMNS = [
     "T_Annual_Range", "T_Max_Summer_Month_Mean", "T_Min_Winter_Month_Mean",
     "T_Annual_Max_Mean", "T_Annual_Min_Mean", "HI_Annual_Mean", "HI_Summer_Mean", "HI_Winter_Mean", "HI_Annual_Range", "WBGT_Summer_Mean",
     "Td_Annual_Mean", "Td_Winter_Mean", "Td_Spring_Mean", "Td_Summer_Mean", "Td_Autumn_Mean", "Td_Annual_Range",
-    "R_Annual_Mean", "R_Month_Mean", "R_Annual_Range", "R_Seasonal_Range", "R_Winter_Total", "R_Spring_Total",
-    "R_Summer_Total", "R_Autumn_Total",
+    "R_Annual_Mean", "R_Month_Mean", "R_Annual_Range", "R_Seasonal_Range", "R_Winter_Mean", "R_Spring_Mean",
+    "R_Summer_Mean", "R_Autumn_Mean",
     "PSL_Annual_Mean", "PSL_Winter_Mean", "PSL_Spring_Mean", "PSL_Summer_Mean", "PSL_Autumn_Mean", "PSL_Annual_Range",
     "PS_Annual_Mean", "PS_Winter_Mean", "PS_Spring_Mean", "PS_Summer_Mean", "PS_Autumn_Mean", "PS_Annual_Range",
     "W_Spd_Annual_Mean", "W_Spd_Winter_Mean", "W_Spd_Spring_Mean", "W_Spd_Summer_Mean", "W_Spd_Autumn_Mean",
@@ -2552,10 +2557,14 @@ def compute_point_fields(monthly, years, modules, temporal, daily_raw=None,
         s_vals = [agg["Winter"], agg["Spring"], agg["Summer"], agg["Autumn"]]
         valid_s = [v for v in s_vals if v is not None]
         res["R_Seasonal_Range"] = (max(valid_s) - min(valid_s)) if len(valid_s) >= 2 else None
-        res["R_Winter_Total"] = agg["Winter"]
-        res["R_Spring_Total"] = agg["Spring"]
-        res["R_Summer_Total"] = agg["Summer"]
-        res["R_Autumn_Total"] = agg["Autumn"]
+        res["R_Winter_Mean"] = agg["Winter"]
+        res["R_Spring_Mean"] = agg["Spring"]
+        res["R_Summer_Mean"] = agg["Summer"]
+        res["R_Autumn_Mean"] = agg["Autumn"]
+        res["R_Winter_Total"] = res["R_Winter_Mean"]  # backward compatibility alias
+        res["R_Spring_Total"] = res["R_Spring_Mean"]  # backward compatibility alias
+        res["R_Summer_Total"] = res["R_Summer_Mean"]  # backward compatibility alias
+        res["R_Autumn_Total"] = res["R_Autumn_Mean"]  # backward compatibility alias
     has_drought_mod = any(m in modules for m in [
         "De Martonne Aridity", "Evapotranspiration", "Hargreaves PET", "UNEP Aridity", "Water Deficit", "Dry Months",
         "Drought & Aridity", "Climate_Models"
@@ -7006,14 +7015,20 @@ class PowerClimateAtlasGenerator(object):
                 "Source", "Notes"]
         p1_xls = os.path.join(vec_dir, "Metadata_Dictionary.xls")
         write_excel_file(p1_xls, cols, [[r[c] for c in cols] for r in rows], sheet_name="Metadata", rtl=False)
-        msg("Dictionary Excel: %s (%d fields)" % (p1_xls, len(rows)))
+        p1_csv = os.path.join(vec_dir, "Metadata_Dictionary.csv")
+        write_csv(p1_csv, cols, [[r[c] for c in cols] for r in rows])
+        msg("Dictionary Excel & CSV: %s (%d fields)" % (p1_xls, len(rows)))
 
         ar_cols = ["Field_Name", "Name_AR", "Unit", "Description_AR", "Module", "Period"]
         p2_xls = os.path.join(vec_dir, "Field_Dictionary_Arabic.xls")
         write_excel_file(p2_xls, ar_cols,
                          [[r["Field_Name"], r["Name_AR"], r["Unit"],
                            r["Description_AR"], r["Module"], r["Period"]] for r in rows], sheet_name="Arabic_Dictionary", rtl=True)
-        msg("Dictionary Excel (RTL): %s" % p2_xls)
+        p2_csv = os.path.join(vec_dir, "Field_Dictionary_Arabic.csv")
+        write_csv(p2_csv, ar_cols,
+                  [[r["Field_Name"], r["Name_AR"], r["Unit"],
+                    r["Description_AR"], r["Module"], r["Period"]] for r in rows])
+        msg("Dictionary Excel & CSV (RTL): %s" % p2_xls)
 
     def _run_qa(self, element_fcs, paths, modules, registry, results, msg, warn, wanted_fields_by_module=None):
         checks = []

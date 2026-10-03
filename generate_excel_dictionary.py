@@ -353,40 +353,40 @@ FIELDS_DATA = [
         "map_title": u"خريطة المدى الفصلي لتساقط الأمطار (ملم)"
     },
     {
-        "short_name": "R_WinTot",
-        "full_name": "R_Winter_Total",
+        "short_name": "R_WinMean",
+        "full_name": "R_Winter_Mean",
         "module_code": "02_Precipitation",
         "module_name": "02_Precipitation (الأمطار)",
-        "desc_ar": u"المجموع التراكمي لأمطار فصل الشتاء الأرصادي (شهور ديسمبر، يناير، فبراير - DJF).",
-        "unit": u"ملم (mm)",
-        "map_title": u"خريطة مجموع تساقط الأمطار خلال فصل الشتاء (ملم)"
+        "desc_ar": u"متوسط هطول الأمطار خلال فصل الشتاء (شهور ديسمبر، يناير، فبراير - DJF).",
+        "unit": u"مم/فصل (mm/season)",
+        "map_title": u"خريطة متوسط هطول الأمطار خلال فصل الشتاء (مم/فصل)"
     },
     {
-        "short_name": "R_SprTot",
-        "full_name": "R_Spring_Total",
+        "short_name": "R_SprMean",
+        "full_name": "R_Spring_Mean",
         "module_code": "02_Precipitation",
         "module_name": "02_Precipitation (الأمطار)",
-        "desc_ar": u"المجموع التراكمي لأمطار فصل الربيع الأرصادي (شهور مارس، أبريل، مايو - MAM).",
-        "unit": u"ملم (mm)",
-        "map_title": u"خريطة مجموع تساقط الأمطار خلال فصل الربيع (ملم)"
+        "desc_ar": u"متوسط هطول الأمطار خلال فصل الربيع (شهور مارس، أبريل، مايو - MAM).",
+        "unit": u"مم/فصل (mm/season)",
+        "map_title": u"خريطة متوسط هطول الأمطار خلال فصل الربيع (مم/فصل)"
     },
     {
-        "short_name": "R_SumTot",
-        "full_name": "R_Summer_Total",
+        "short_name": "R_SumMean",
+        "full_name": "R_Summer_Mean",
         "module_code": "02_Precipitation",
         "module_name": "02_Precipitation (الأمطار)",
-        "desc_ar": u"المجموع التراكمي لأمطار فصل الصيف الأرصادي (شهور يونيو، يوليو، أغسطس - JJA).",
-        "unit": u"ملم (mm)",
-        "map_title": u"خريطة مجموع تساقط الأمطار خلال فصل الصيف (ملم)"
+        "desc_ar": u"متوسط هطول الأمطار خلال فصل الصيف (شهور يونيو، يوليو، أغسطس - JJA).",
+        "unit": u"مم/فصل (mm/season)",
+        "map_title": u"خريطة متوسط هطول الأمطار خلال فصل الصيف (مم/فصل)"
     },
     {
-        "short_name": "R_AutTot",
-        "full_name": "R_Autumn_Total",
+        "short_name": "R_AutMean",
+        "full_name": "R_Autumn_Mean",
         "module_code": "02_Precipitation",
         "module_name": "02_Precipitation (الأمطار)",
-        "desc_ar": u"المجموع التراكمي لأمطار فصل الخريف الأرصادي (شهور سبتمبر، أكتوبر، نوفمبر - SON).",
-        "unit": u"ملم (mm)",
-        "map_title": u"خريطة مجموع تساقط الأمطار خلال فصل الخريف (ملم)"
+        "desc_ar": u"متوسط هطول الأمطار خلال فصل الخريف (شهور سبتمبر، أكتوبر، نوفمبر - SON).",
+        "unit": u"مم/فصل (mm/season)",
+        "map_title": u"خريطة متوسط هطول الأمطار خلال فصل الخريف (مم/فصل)"
     },
 
     # --- 6. ضغط مستوى سطح البحر (03_Sea_Level_Pressure) ---

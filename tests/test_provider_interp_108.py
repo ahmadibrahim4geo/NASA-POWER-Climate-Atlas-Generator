@@ -79,10 +79,10 @@ check("om daily_raw precip", draw["PRECTOTCORR"] == {(2025, 1, 1): 2.0, (2025, 1
 mtot = {(2025, 1): 62.0, (2025, 2): 56.0, (2025, 12): 62.0}
 pf = mod.compute_point_fields({"PRECTOTCORR": mtot}, [2025], ["Precipitation"],
                               "Monthly", precip_totals=True)
-check("om winter total direct", abs(pf["R_Winter_Total"] - 180.0) < 1e-9, pf["R_Winter_Total"])
+check("om winter mean direct", abs(pf["R_Winter_Mean"] - 180.0) < 1e-9, pf["R_Winter_Mean"])
 pf2 = mod.compute_point_fields({"PRECTOTCORR": {(2025, 1): 2.0}}, [2025],
                                ["Precipitation"], "Monthly", precip_totals=False)
-check("nasa rate still x-days", pf2["R_Winter_Total"] is not None and abs(
+check("nasa rate still x-days", pf2["R_Winter_Mean"] is not None and abs(
     mod.monthly_precip_total_from_rate(2.0, 2025, 1) - 62.0) < 1e-9)
 
 # ---------------- 4. provider-aware dictionaries (no arcpy needed) ----------------

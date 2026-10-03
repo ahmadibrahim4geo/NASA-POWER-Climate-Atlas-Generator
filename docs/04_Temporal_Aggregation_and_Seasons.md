@@ -71,13 +71,16 @@ In the Climate Atlas Generator schema, precipitation outputs are strictly standa
    - **Physical Scale**: In northern Egypt with $R_{Annual\_Mean} = 224.0	ext{ mm}$, $R_{Month\_Mean} = 224.0 / 12 = \mathbf{18.67	ext{ mm/month}}$.
    - **Legacy Mapping**: In early prototype versions, this field was labeled `R_Annual_Mean`. It was renamed to `R_Month_Mean` to reflect its true mathematical nature as a **monthly rate**.
 
-3. **Seasonal Precipitation Totals (`R_WinTot`, `R_SprTot`, `R_SumTot`, `R_AutTot`)**:
-   - Seasonal accumulated depth in millimeters:
-     $$R_{Winter\_Total} = \overline{P}_{Dec} + \overline{P}_{Jan} + \overline{P}_{Feb}$$
-     $$R_{Spring\_Total} = \overline{P}_{Mar} + \overline{P}_{Apr} + \overline{P}_{May}$$
-     $$R_{Summer\_Total} = \overline{P}_{Jun} + \overline{P}_{Jul} + \overline{P}_{Aug}$$
-     $$R_{Autumn\_Total} = \overline{P}_{Sep} + \overline{P}_{Oct} + \overline{P}_{Nov}$$
-   - Note: In Mediterranean climates, $R_{Summer\_Total} pprox 0	ext{ mm}$, while $R_{Winter\_Total}$ represents 60–70% of the entire annual accumulation.
+3. **Seasonal Mean Precipitation (`R_WinMean`, `R_SprMean`, `R_SumMean`, `R_AutMean`)**:
+   - Seasonal depth in millimeters per season ($	ext{mm/season}$):
+     $$R_{Winter\_Mean} = rac{1}{N_{years}} \sum_{y=1}^{N_{years}} (P_{y,Dec} + P_{y,Jan} + P_{y,Feb}) = \overline{P}_{Dec} + \overline{P}_{Jan} + \overline{P}_{Feb}$$
+     $$R_{Spring\_Mean} = rac{1}{N_{years}} \sum_{y=1}^{N_{years}} (P_{y,Mar} + P_{y,Apr} + P_{y,May}) = \overline{P}_{Mar} + \overline{P}_{Apr} + \overline{P}_{May}$$
+     $$R_{Summer\_Mean} = rac{1}{N_{years}} \sum_{y=1}^{N_{years}} (P_{y,Jun} + P_{y,Jul} + P_{y,Aug}) = \overline{P}_{Jun} + \overline{P}_{Jul} + \overline{P}_{Aug}$$
+     $$R_{Autumn\_Mean} = rac{1}{N_{years}} \sum_{y=1}^{N_{years}} (P_{y,Sep} + P_{y,Oct} + P_{y,Nov}) = \overline{P}_{Sep} + \overline{P}_{Oct} + \overline{P}_{Nov}$$
+   - **Units**: $	ext{mm/season}$ ($	ext{مم/فصل}$).
+   - **Calculation Concept**: Multi-year average of seasonal accumulated depth. Since it represents a climatological normal over $N_{years}$, the indicator is named `R_*_Mean`.
+   - **Legacy Mapping**: Formerly named `R_Winter_Total` (`R_WinTot`), `R_Spring_Total` (`R_SprTot`), `R_Summer_Total` (`R_SumTot`), `R_Autumn_Total` (`R_AutTot`).
+   - Note: In Mediterranean climates, $R_{Summer\_Mean} pprox 0	ext{ mm/season}$, while $R_{Winter\_Mean}$ represents 60–70% of the entire annual accumulation.
 
 ---
 

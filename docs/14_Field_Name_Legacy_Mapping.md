@@ -37,10 +37,10 @@ The script `migrate_legacy_database.py` allows existing user databases and raste
 | `R_Annual_Mean` | **`R_Month_Mean`** | `R_MonMean` | المتوسط الشهري لتساقط الأمطار | Monthly rate ($R_{Annual\_Mean} / 12$) (mm/month) | **Renamed & Standardized** |
 | `R_Annual_Range` | `R_Annual_Range` | `R_AnnRng` | المدى السنوي لتساقط الأمطار | Max month minus Min month (mm) | Unchanged |
 | `R_Season_Range` | `R_Season_Range` | `R_SeaRng` | المدى الفصلي لتساقط الأمطار | Max season minus Min season (mm) | Unchanged |
-| `R_Winter_Total` | `R_Winter_Total` | `R_WinTot` | مجموع أمطار فصل الشتاء | DJF accumulated rainfall (mm) | Unchanged |
-| `R_Spring_Total` | `R_Spring_Total` | `R_SprTot` | مجموع أمطار فصل الربيع | MAM accumulated rainfall (mm) | Unchanged |
-| `R_Summer_Total` | `R_Summer_Total` | `R_SumTot` | مجموع أمطار فصل الصيف | JJA accumulated rainfall (mm) | Unchanged |
-| `R_Autumn_Total` | `R_Autumn_Total` | `R_AutTot` | مجموع أمطار فصل الخريف | SON accumulated rainfall (mm) | Unchanged |
+| `R_Winter_Total` | **`R_Winter_Mean`** | `R_WinMean` | متوسط هطول الأمطار خلال فصل الشتاء | Multi-year mean of seasonal accumulation (mm/season) | **Renamed & Standardized** |
+| `R_Spring_Total` | **`R_Spring_Mean`** | `R_SprMean` | متوسط هطول الأمطار خلال فصل الربيع | Multi-year mean of seasonal accumulation (mm/season) | **Renamed & Standardized** |
+| `R_Summer_Total` | **`R_Summer_Mean`** | `R_SumMean` | متوسط هطول الأمطار خلال فصل الصيف | Multi-year mean of seasonal accumulation (mm/season) | **Renamed & Standardized** |
+| `R_Autumn_Total` | **`R_Autumn_Mean`** | `R_AutMean` | متوسط هطول الأمطار خلال فصل الخريف | Multi-year mean of seasonal accumulation (mm/season) | **Renamed & Standardized** |
 | `PET_Hargreaves` | `PET_Hargreaves_Annual` | `PET_HarAnn` | البخر-نتح المرجعي السنوي | Annual total Hargreaves PET (mm/year) | Clarified |
 | `De_Martonne_Index`| `DM_Aridity_Annual` | `DM_AridAnn` | مؤشر دومارتون للجفاف | Annual De Martonne index ($P/(T+10)$) | Standardized |
 | `UNEP_Index` | `UNEP_Aridity_Annual` | `UNEP_Arid` | مؤشر الجفاف الدولي (UNEP) | UNEP aridity ratio ($P / PET$) | Standardized |

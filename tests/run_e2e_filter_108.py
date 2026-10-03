@@ -105,8 +105,8 @@ try:
     p_fc = os.path.join(gdb_expected, "Precipitation")
     p_fields = [f.name for f in arcpy.ListFields(p_fc)]
     log("Precipitation FC fields: %s" % p_fields)
-    assert "R_Summer_Total" in p_fields, "R_Summer_Total missing"
-    assert "R_Winter_Total" not in p_fields, "R_Winter_Total should have been filtered out!"
+    assert "R_Summer_Mean" in p_fields, "R_Summer_Mean missing"
+    assert "R_Winter_Mean" not in p_fields, "R_Winter_Mean should have been filtered out!"
 
     # Verify Rasters generated directly inside each element folder: exactly 4 rasters
     t_rasters = os.listdir(os.path.join(OUT, "01_Temperature"))

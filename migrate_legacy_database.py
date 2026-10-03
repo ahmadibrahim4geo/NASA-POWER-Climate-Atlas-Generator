@@ -180,10 +180,10 @@ MODULES_INFO = [
         "fields": [
             ("R_Annual_Mean", "Annual Mean Precipitation"),
             ("R_Month_Mean", "Mean Monthly Precipitation"),
-            ("R_Winter_Total", "Winter Total Precipitation"),
-            ("R_Spring_Total", "Spring Total Precipitation"),
-            ("R_Summer_Total", "Summer Total Precipitation"),
-            ("R_Autumn_Total", "Autumn Total Precipitation"),
+            ("R_Winter_Mean", "Winter Mean Precipitation"),
+            ("R_Spring_Mean", "Spring Mean Precipitation"),
+            ("R_Summer_Mean", "Summer Mean Precipitation"),
+            ("R_Autumn_Mean", "Autumn Mean Precipitation"),
         ]
     },
     {
@@ -400,9 +400,13 @@ SHP_FIELD_MAP = {
     "R_Annual_Mean": "R_AnnMean",
     "R_Annual_Total": "R_AnnTot",
     "R_Month_Mean": "R_MonMean",
+    "R_Autumn_Mean": "R_AutMean",
     "R_Autumn_Total": "R_AutTot",
+    "R_Spring_Mean": "R_SprMean",
     "R_Spring_Total": "R_SprTot",
+    "R_Summer_Mean": "R_SumMean",
     "R_Summer_Total": "R_SumTot",
+    "R_Winter_Mean": "R_WinMean",
     "R_Winter_Total": "R_WinTot",
     "Sol_Annual_Mean": "Sol_AnMean",
     "Sol_Annual_Range": "Sol_AnRng",

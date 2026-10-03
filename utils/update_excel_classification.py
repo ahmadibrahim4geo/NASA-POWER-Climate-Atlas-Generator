@@ -76,15 +76,20 @@ SPECIAL_RULES = {
     "T_Autumn_Mean": (2.0, [19.0, 21.0, 23.0, 25.0, 27.0, 29.5]),
     # Annual temperature range: 8 to 20.5 -> step 2.5
     "T_Annual_Range": (2.5, [8.0, 10.5, 13.0, 15.5, 18.0, 20.5]),
-    # Annual precipitation total: 0 to 250 with step 50
+    # Annual precipitation mean: 0 to 250 with step 50
+    "R_Annual_Mean": (50.0, [0.0, 50.0, 100.0, 150.0, 200.0, 250.0]),
     "R_Annual_Total": (50.0, [0.0, 50.0, 100.0, 150.0, 200.0, 250.0]),
-    # Winter precipitation total: 0 to 150 with step 30
+    # Winter precipitation mean: 0 to 150 with step 30
+    "R_Winter_Mean": (30.0, [0.0, 30.0, 60.0, 90.0, 120.0, 150.0]),
     "R_Winter_Total": (30.0, [0.0, 30.0, 60.0, 90.0, 120.0, 150.0]),
-    # Spring precipitation total: 0 to 45 with step 9 (or 0 to 50 step 10)
+    # Spring precipitation mean: 0 to 45 with step 9 (or 0 to 50 step 10)
+    "R_Spring_Mean": (10.0, [0.0, 10.0, 20.0, 30.0, 40.0, 50.0]),
     "R_Spring_Total": (10.0, [0.0, 10.0, 20.0, 30.0, 40.0, 50.0]),
-    # Autumn precipitation total: 0 to 50 with step 10
+    # Autumn precipitation mean: 0 to 50 with step 10
+    "R_Autumn_Mean": (10.0, [0.0, 10.0, 20.0, 30.0, 40.0, 50.0]),
     "R_Autumn_Total": (10.0, [0.0, 10.0, 20.0, 30.0, 40.0, 50.0]),
-    # Summer precipitation total: 0 to 4 with step 0.8
+    # Summer precipitation mean: 0 to 4 with step 0.8
+    "R_Summer_Mean": (0.8, [0.0, 0.8, 1.6, 2.4, 3.2, 4.0]),
     "R_Summer_Total": (0.8, [0.0, 0.8, 1.6, 2.4, 3.2, 4.0]),
     # Annual solar total: 1800 to 2550 with step 150
     "Sol_Annual_Total": (150.0, [1800.0, 1950.0, 2100.0, 2250.0, 2400.0, 2550.0]),

@@ -59,13 +59,13 @@ check("Winter Dew Point contains Td_Winter_Mean", "Td_Winter_Mean" in win_dp_nam
 # Winter only for Precipitation
 c_win_p = mod.get_candidate_fields(["Precipitation"], ["Seasonal Summaries"], ["Winter (DJF)"])
 win_p_names = [c[0] for c in c_win_p]
-check("Winter precip only has R_Winter_Total", win_p_names == ["R_Winter_Total"], win_p_names)
+check("Winter precip only has R_Winter_Mean", win_p_names == ["R_Winter_Mean"], win_p_names)
 
 # Annual only for Precipitation
 c_ann_p = mod.get_candidate_fields(["Precipitation"], ["Annual Summaries"], [])
 ann_p_names = [c[0] for c in c_ann_p]
-check("Annual precip has R_Annual_Total and R_Annual_Mean",
-      "R_Annual_Total" in ann_p_names and "R_Annual_Mean" in ann_p_names, ann_p_names)
+check("Annual precip has R_Annual_Mean and R_Month_Mean",
+      "R_Annual_Mean" in ann_p_names and "R_Month_Mean" in ann_p_names, ann_p_names)
 
 print("=== 2. Field Resolution Engine (resolve_filtered_fields) ===")
 # Mode: Full Suite
@@ -91,14 +91,14 @@ check("Seasons filter: Temperature has summer fields",
 check("Seasons filter: Dew Point has summer dew point",
       res_sum["Dew Point"] == ["Td_Summer_Mean"],
       res_sum["Dew Point"])
-check("Seasons filter: Precipitation has summer total",
-      res_sum["Precipitation"] == ["R_Summer_Total"],
+check("Seasons filter: Precipitation has summer mean",
+      res_sum["Precipitation"] == ["R_Summer_Mean"],
       res_sum["Precipitation"])
 
 # Mode: Custom Field Checklist
 custom_selection = [
     "T_Summer_Mean - Summer Mean Air Temperature",
-    "R_Winter_Total - Winter Total Precipitation"
+    "R_Winter_Mean - Winter Mean Precipitation"
 ]
 res_custom = mod.resolve_filtered_fields(
     ["Temperature", "Precipitation"],
@@ -107,8 +107,8 @@ res_custom = mod.resolve_filtered_fields(
 )
 check("Custom Checklist: Temperature has T_Summer_Mean only",
       res_custom["Temperature"] == ["T_Summer_Mean"], res_custom["Temperature"])
-check("Custom Checklist: Precipitation has R_Winter_Total only",
-      res_custom["Precipitation"] == ["R_Winter_Total"], res_custom["Precipitation"])
+check("Custom Checklist: Precipitation has R_Winter_Mean only",
+      res_custom["Precipitation"] == ["R_Winter_Mean"], res_custom["Precipitation"])
 
 print("=== 3. Toolbox Parameters & Dynamic GUI Synchronization ===")
 try:
@@ -202,7 +202,7 @@ tool.updateMessages(ps)
 check("Empty custom selection sets error", pdict["Selected_Fields"].hasError())
 
 # Reset
-pdict["Selected_Fields"].value = "R_Winter_Total - Winter Total Precipitation"
+pdict["Selected_Fields"].value = "R_Winter_Mean - Winter Mean Precipitation"
 tool.updateMessages(ps)
 check("Valid selection clears error", not pdict["Selected_Fields"].hasError())
 

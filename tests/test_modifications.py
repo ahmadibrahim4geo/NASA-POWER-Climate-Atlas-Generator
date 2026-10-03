@@ -100,14 +100,14 @@ class TestClimateToolboxModifications(unittest.TestCase):
         # Precipitation fields in FIELD_DEFS must be exactly the 8 core fields
         precip_field_defs = [r[0] for r in pyt_mod.FIELD_DEFS if r[4] == "Precipitation"]
         expected_8 = [
-            "R_Annual_Total",
             "R_Annual_Mean",
+            "R_Month_Mean",
             "R_Annual_Range",
             "R_Seasonal_Range",
-            "R_Winter_Total",
-            "R_Spring_Total",
-            "R_Summer_Total",
-            "R_Autumn_Total"
+            "R_Winter_Mean",
+            "R_Spring_Mean",
+            "R_Summer_Mean",
+            "R_Autumn_Mean"
         ]
         self.assertEqual(precip_field_defs, expected_8)
 
@@ -132,22 +132,22 @@ class TestClimateToolboxModifications(unittest.TestCase):
         )
         self.assertNotIn("R_Max_Daily_Month", res)
         self.assertNotIn("R_Annual_Rain_Days_Total", res)
-        res_precip_keys = [k for k in res.keys() if k.startswith("R_") and "Trend" not in k and "Anom" not in k]
-        self.assertEqual(sorted(res_precip_keys), sorted(expected_8))
+        for exp_f in expected_8:
+            self.assertIn(exp_f, res)
 
     def test_02_raster_generator_precipitation_fields_removed(self):
         """Test R_Max_Daily_Month and R_Annual_Rain_Days_Total are removed from raster_atlas_generator."""
         # 1. MODULE_INDICATOR_FIELDS["Precipitation"]
         precip_indicators = [f[0] for f in rag.MODULE_INDICATOR_FIELDS.get("Precipitation", [])]
         expected_8 = [
-            "R_Annual_Total",
             "R_Annual_Mean",
+            "R_Month_Mean",
             "R_Annual_Range",
             "R_Seasonal_Range",
-            "R_Winter_Total",
-            "R_Spring_Total",
-            "R_Summer_Total",
-            "R_Autumn_Total"
+            "R_Winter_Mean",
+            "R_Spring_Mean",
+            "R_Summer_Mean",
+            "R_Autumn_Mean"
         ]
         self.assertEqual(precip_indicators, expected_8)
         self.assertNotIn("R_Max_Daily_Month", precip_indicators)

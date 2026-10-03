@@ -61,7 +61,7 @@ class TestExcelAndArabicExport(unittest.TestCase):
         master_xls = os.path.join(self.test_dir, "Climate_Atlas_Master_Workbook.xls")
         sheets = [
             ("Temperature", [u"ID", u"T_Annual_Mean", u"T_Summer_Mean"], [[1, 21.5, 28.2], [2, 20.1, 26.5]], False),
-            ("Precipitation", [u"ID", u"R_Annual_Total", u"R_Winter_Total"], [[1, 25.4, 18.2], [2, 185.0, 120.0]], False),
+            ("Precipitation", [u"ID", u"R_Annual_Mean", u"R_Winter_Mean"], [[1, 25.4, 18.2], [2, 185.0, 120.0]], False),
             ("Drought", [u"ID", u"DM_Aridity", u"UNEP_Aridity"], [[1, 1.73, 0.042], [2, 4.25, 0.12]], False),
         ]
         ok = pyt_mod.write_master_excel_workbook(master_xls, sheets)

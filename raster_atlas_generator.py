@@ -6,6 +6,10 @@ and NASA Giovanni across Layer 1 (Download Extent AOI), converts cells to 32-bit
 Float points with full seasonal and annual indicators in Project_Data.gdb, performs
 high-precision spatial interpolation, and clips final rasters using Layer 2 (Study Area Mask).
 Also supports full Offline Mode using pre-calculated multi-layer point shapefiles/feature classes.
+
+Developed by: Ahmad Ibrahim (@ahmadibrahim4geo)
+إعداد وتطوير: أحمد إبراهيم
+Email / البريد الإلكتروني: ahmadibrahim.geo@gmail.com
 """
 
 import os
@@ -492,10 +496,14 @@ SHP_FIELD_MAP = {
     "R_Annual_Range": "R_AnnRng",
     "R_Annual_Total": "R_AnnTot",
     "R_Month_Mean": "R_MonMean",
+    "R_Autumn_Mean": "R_AutMean",
     "R_Autumn_Total": "R_AutTot",
     "R_Seasonal_Range": "R_SeaRng",
+    "R_Spring_Mean": "R_SprMean",
     "R_Spring_Total": "R_SprTot",
+    "R_Summer_Mean": "R_SumMean",
     "R_Summer_Total": "R_SumTot",
+    "R_Winter_Mean": "R_WinMean",
     "R_Winter_Total": "R_WinTot",
     "Sol_Annual_Mean": "Sol_AnMean",
     "Sol_Annual_Range": "Sol_AnRng",
@@ -583,10 +591,10 @@ MODULE_INDICATOR_FIELDS = {
         ("R_Month_Mean", "Mean Monthly Precipitation"),
         ("R_Annual_Range", "Annual Precipitation Range"),
         ("R_Seasonal_Range", "Seasonal Precipitation Range"),
-        ("R_Winter_Total", "Winter Total Precipitation"),
-        ("R_Spring_Total", "Spring Total Precipitation"),
-        ("R_Summer_Total", "Summer Total Precipitation"),
-        ("R_Autumn_Total", "Autumn Total Precipitation"),
+        ("R_Winter_Mean", "Winter Mean Precipitation"),
+        ("R_Spring_Mean", "Spring Mean Precipitation"),
+        ("R_Summer_Mean", "Summer Mean Precipitation"),
+        ("R_Autumn_Mean", "Autumn Mean Precipitation"),
     ],
     "Relative Humidity": [
         ("RH_Annual_Mean", "Annual Mean Relative Humidity"),
@@ -3550,10 +3558,10 @@ class RasterDataClimateAtlasGenerator(object):
             ["Precipitation", "R_Month_Mean", "Mean Monthly Precipitation", "mm/month", "Gridded Reanalysis"],
             ["Precipitation", "R_Annual_Range", "Annual Precipitation Range", "mm", "Gridded Reanalysis"],
             ["Precipitation", "R_Seasonal_Range", "Seasonal Precipitation Range", "mm", "Gridded Reanalysis"],
-            ["Precipitation", "R_Winter_Total", "Winter (DJF) Precipitation Total", "mm", "Gridded Reanalysis"],
-            ["Precipitation", "R_Spring_Total", "Spring (MAM) Precipitation Total", "mm", "Gridded Reanalysis"],
-            ["Precipitation", "R_Summer_Total", "Summer (JJA) Precipitation Total", "mm", "Gridded Reanalysis"],
-            ["Precipitation", "R_Autumn_Total", "Autumn (SON) Precipitation Total", "mm", "Gridded Reanalysis"],
+            ["Precipitation", "R_Winter_Mean", "Winter (DJF) Mean Precipitation", "mm/season", "Gridded Reanalysis"],
+            ["Precipitation", "R_Spring_Mean", "Spring (MAM) Mean Precipitation", "mm/season", "Gridded Reanalysis"],
+            ["Precipitation", "R_Summer_Mean", "Summer (JJA) Mean Precipitation", "mm/season", "Gridded Reanalysis"],
+            ["Precipitation", "R_Autumn_Mean", "Autumn (SON) Mean Precipitation", "mm/season", "Gridded Reanalysis"],
             ["Relative Humidity", "RH_Annual_Mean", "Annual Mean 2m Relative Humidity", "%", "Gridded Reanalysis"],
             ["Relative Humidity", "RH_Winter_Mean", "Winter (DJF) Mean Relative Humidity", "%", "Gridded Reanalysis"],
             ["Relative Humidity", "RH_Spring_Mean", "Spring (MAM) Mean Relative Humidity", "%", "Gridded Reanalysis"],
@@ -3665,6 +3673,10 @@ class RasterDataClimateAtlasGenerator(object):
             [u"درجة الحرارة", u"T_Winter_Mean", u"متوسط درجة الحرارة لفصل الشتاء", u"مئوية", u"بيانات شبكية"],
             [u"الأمطار", u"R_Annual_Mean", u"المتوسط السنوي لتساقط الأمطار", u"ملم/سنة", u"بيانات شبكية"],
             [u"الأمطار", u"R_Month_Mean", u"المتوسط الشهري لتساقط الأمطار", u"ملم/شهر", u"بيانات شبكية"],
+            [u"الأمطار", u"R_Winter_Mean", u"متوسط هطول الأمطار خلال فصل الشتاء", u"مم/فصل", u"بيانات شبكية"],
+            [u"الأمطار", u"R_Spring_Mean", u"متوسط هطول الأمطار خلال فصل الربيع", u"مم/فصل", u"بيانات شبكية"],
+            [u"الأمطار", u"R_Summer_Mean", u"متوسط هطول الأمطار خلال فصل الصيف", u"مم/فصل", u"بيانات شبكية"],
+            [u"الأمطار", u"R_Autumn_Mean", u"متوسط هطول الأمطار خلال فصل الخريف", u"مم/فصل", u"بيانات شبكية"],
             [u"الرطوبة النسبية", u"RH_Annual_Mean", u"المتوسط السنوي للرطوبة النسبية", u"%", u"بيانات شبكية"],
             [u"نقطة الندى", u"Td_Annual_Mean", u"المتوسط السنوي لدرجة حرارة نقطة الندى", u"مئوية", u"بيانات شبكية"],
             [u"الرياح", u"W_Spd_Annual_Mean", u"المتوسط السنوي لسرعة الرياح", u"م/ث", u"بيانات شبكية"],

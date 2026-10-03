@@ -2,6 +2,10 @@
 ## NASA POWER & Open-Meteo Climate Atlas Generator
 ### Comprehensive Scientific, Mathematical, and Technical Reference Manual
 
+**Author:** Ahmad Ibrahim (أحمد إبراهيم)  
+**Email:** ahmadibrahim.geo@gmail.com  
+**Last Updated:** October 2026  
+
 ---
 
 ## 1. Executive Summary & Purpose

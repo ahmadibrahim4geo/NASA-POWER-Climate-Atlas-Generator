@@ -28,14 +28,14 @@ Assume a 30-year climatological normal (1991–2020) for a grid cell in the Cair
    $$R_{Annual\_Mean} = \sum_{m=1}^{12} \overline{P}_m = 5.2 + 4.8 + 3.5 + 1.2 + 0.5 + 0.0 + 0.0 + 0.0 + 0.1 + 1.4 + 3.8 + 5.9 = \mathbf{26.40	ext{ mm/year}}$$
 2. **Monthly Mean Precipitation (`R_Month_Mean`)**:
    $$R_{Month\_Mean} = rac{R_{Annual\_Mean}}{12} = rac{26.40}{12} = \mathbf{2.20	ext{ mm/month}}$$
-3. **Seasonal Totals**:
-   - **Winter (`R_WinTot`)**: $\overline{P}_{12} + \overline{P}_1 + \overline{P}_2 = 5.9 + 5.2 + 4.8 = \mathbf{15.90	ext{ mm}}$
-   - **Spring (`R_SprTot`)**: $\overline{P}_3 + \overline{P}_4 + \overline{P}_5 = 3.5 + 1.2 + 0.5 = \mathbf{5.20	ext{ mm}}$
-   - **Summer (`R_SumTot`)**: $\overline{P}_6 + \overline{P}_7 + \overline{P}_8 = 0.0 + 0.0 + 0.0 = \mathbf{0.00	ext{ mm}}$
-   - **Autumn (`R_AutTot`)**: $\overline{P}_9 + \overline{P}_{10} + \overline{P}_{11} = 0.1 + 1.4 + 3.8 = \mathbf{5.30	ext{ mm}}$
+3. **Seasonal Means**:
+   - **Winter (`R_WinMean`)**: $\overline{P}_{12} + \overline{P}_1 + \overline{P}_2 = 5.9 + 5.2 + 4.8 = \mathbf{15.90	ext{ mm/season}}$
+   - **Spring (`R_SprMean`)**: $\overline{P}_3 + \overline{P}_4 + \overline{P}_5 = 3.5 + 1.2 + 0.5 = \mathbf{5.20	ext{ mm/season}}$
+   - **Summer (`R_SumMean`)**: $\overline{P}_6 + \overline{P}_7 + \overline{P}_8 = 0.0 + 0.0 + 0.0 = \mathbf{0.00	ext{ mm/season}}$
+   - **Autumn (`R_AutMean`)**: $\overline{P}_9 + \overline{P}_{10} + \overline{P}_{11} = 0.1 + 1.4 + 3.8 = \mathbf{5.30	ext{ mm/season}}$
 4. **Ranges**:
-   - **Annual Monthly Range (`R_AnnRng`)**: $\max(\overline{P}_m) - \min(\overline{P}_m) = 5.9 - 0.0 = \mathbf{5.90	ext{ mm}}$
-   - **Seasonal Range (`R_SeaRng`)**: $\max(R_{season}) - \min(R_{season}) = 15.90 - 0.00 = \mathbf{15.90	ext{ mm}}$
+   - **Annual Monthly Range (`R_AnnRng`)**: $\max(\overline{P}_m) - \min(\overline{P}_m) = 5.9 - 0.0 = \mathbf{5.90	ext{ mm/month}}$
+   - **Seasonal Range (`R_SeaRng`)**: $\max(R_{season}) - \min(R_{season}) = 15.90 - 0.00 = \mathbf{15.90	ext{ mm/season}}$
 
 ---
 

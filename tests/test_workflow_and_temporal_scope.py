@@ -135,8 +135,12 @@ class TestTemporalScopeAndWorkflow(unittest.TestCase):
             ("T_Summer_Mean", "Summer"),
             ("T_Autumn_Mean", "Autumn"),
             ("T_Annual_Range", "Annual"),
-            ("R_Annual_Total", "Annual"),
             ("R_Annual_Mean", "Annual"),
+            ("R_Month_Mean", "Annual"),
+            ("R_Winter_Mean", "Winter"),
+            ("R_Spring_Mean", "Spring"),
+            ("R_Summer_Mean", "Summer"),
+            ("R_Autumn_Mean", "Autumn"),
             ("R_Winter_Total", "Winter"),
             ("R_Spring_Total", "Spring"),
             ("R_Summer_Total", "Summer"),
@@ -188,10 +192,10 @@ class TestTemporalScopeAndWorkflow(unittest.TestCase):
         self.assertNotIn("T_Winter_Mean", fields_annual["Temperature"])
         self.assertNotIn("T_Summer_Mean", fields_annual["Temperature"])
 
-        self.assertIn("R_Annual_Total", fields_annual["Precipitation"])
         self.assertIn("R_Annual_Mean", fields_annual["Precipitation"])
-        self.assertNotIn("R_Winter_Total", fields_annual["Precipitation"])
-        self.assertNotIn("R_Summer_Total", fields_annual["Precipitation"])
+        self.assertIn("R_Month_Mean", fields_annual["Precipitation"])
+        self.assertNotIn("R_Winter_Mean", fields_annual["Precipitation"])
+        self.assertNotIn("R_Summer_Mean", fields_annual["Precipitation"])
 
         # Case 2: Summer Only
         fields_summer = pyt_mod.resolve_filtered_fields(

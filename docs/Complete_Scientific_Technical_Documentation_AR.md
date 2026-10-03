@@ -2,6 +2,10 @@
 ## NASA POWER & Open-Meteo Climate Atlas Generator
 ### المرجع الأكاديمي والتقني التنفيذي الكامل لجميع المؤشرات والمعادلات ومصادر البيانات والطبقات (115 حقل مناخي وإداري)
 
+**إعداد الباحث:** أحمد إبراهيم (Ahmad Ibrahim)  
+**البريد الإلكتروني:** ahmadibrahim.geo@gmail.com  
+**تاريخ التحديث:** أكتوبر 2026  
+
 ---
 
 ## 1. نظرة عامة ورؤية المشروع العلمية
@@ -59,6 +63,20 @@
      $$R_{Month\_Mean} = \frac{R_{Annual\_Mean}}{12} = \frac{1}{12} \sum_{m=1}^{12} \overline{P}_m$$
    - **التفسير الفيزيائي**: يمثل **المعدل الشهري لماء المطر** الناتج عن قسمة المتوسط السنوي الكلي على 12 شهراً. في محطة يبلغ متوسطها السنوي 224 ملم، يكون المتوسط الشهري الناتج هو $224 / 12 = \mathbf{18.67\text{ mm/month}}$.
    - **التطور التاريخي**: كان يسمى سابقاً باسم `R_Annual_Mean`، وتم تعديل تسميته إلى `R_Month_Mean` ليعبر بدقة عن كونه معدلاً شهرياً وليس مجموعاً سنوياً.
+
+3. **متوسطات هطول الأمطار الفصلية (Seasonal Mean Precipitation)**:
+   - **الوحدة**: مم/فصل (mm/season).
+   - **المعادلة الرياضية الحسابية**:
+     $$R_{Winter\_Mean} = \frac{1}{N_{years}} \sum_{y=1}^{N_{years}} \left(P_{y, 12} + P_{y, 1} + P_{y, 2}\right)$$
+     $$R_{Spring\_Mean} = \frac{1}{N_{years}} \sum_{y=1}^{N_{years}} \left(P_{y, 3} + P_{y, 4} + P_{y, 5}\right)$$
+     $$R_{Summer\_Mean} = \frac{1}{N_{years}} \sum_{y=1}^{N_{years}} \left(P_{y, 6} + P_{y, 7} + P_{y, 8}\right)$$
+     $$R_{Autumn\_Mean} = \frac{1}{N_{years}} \sum_{y=1}^{N_{years}} \left(P_{y, 9} + P_{y, 10} + P_{y, 11}\right)$$
+   - **المعنى الفيزيائي والحسابي**: تمثل هذه الحقول **متوسط مجموع هطول الأمطار خلال الفصل** عبر جميع السنوات الكاملة لفترة الدراسة. استخدام كلمة `Mean` بدلاً من `Total` يعكس بدقة أن القيمة هي متوسط سنوي للأمطار الفصلية وليست مجموع أمطار الـ 30 عاماً مجتمعة.
+   - **المسميات المعتمدة رسمياً**:
+     * `R_Winter_Mean` (متوسط هطول الأمطار خلال فصل الشتاء)
+     * `R_Spring_Mean` (متوسط هطول الأمطار خلال فصل الربيع)
+     * `R_Summer_Mean` (متوسط هطول الأمطار خلال فصل الصيف)
+     * `R_Autumn_Mean` (متوسط هطول الأمطار خلال فصل الخريف)
 
 ---
 
@@ -1005,12 +1023,12 @@ $$\overline{\theta} = \text{atan2}(-\overline{u}, -\overline{v}) \pmod{360^\circ
 | **10** | **المتغير الأصلي** | `PRECTOTCORR` |
 | **11** | **نوع البيانات الداخلة** | Daily precipitation flux (mm/day) or monthly sums (mm) |
 | **12** | **التحويل الأولي** | NASA POWER rate (mm/day) multiplied by calendar days in month (monthly_precip_total_from_rate). Open-Meteo provides monthly sums. |
-| **13** | **المعادلة الرياضية** | $$$$ |
-| **14** | **خطوات الحساب** |  |
+| **13** | **المعادلة الرياضية** | $$R_{Annual\_Range} = \max(\overline{P}_1, \dots, \overline{P}_{12}) - \min(\overline{P}_1, \dots, \overline{P}_{12})$$ |
+| **14** | **خطوات الحساب** | 1. Find wettest climatological month total. 2. Find driest climatological month total. 3. Compute difference. |
 | **15** | **معالجة القيم الناقصة** | Requires >=75% valid data points per period (safe_sum with min_frac=0.75). Sentinels -999.0 excluded. |
-| **16** | **مثال رقمي يدوي** |  |
-| **17** | **التفسير العلمي** |  |
-| **18** | **التحذيرات ومحددات الاستخدام** |  |
+| **16** | **مثال رقمي يدوي** | Wettest month (Dec) = 50.0 mm, Driest month (Jul) = 0.0 mm -> Range = 50.0 - 0.0 = 50.0 mm. |
+| **17** | **التفسير العلمي** | Measures monthly rainfall seasonality and intra-annual precipitation contrast. |
+| **18** | **التحذيرات ومحددات الاستخدام** | In arid zones where the driest month is 0 mm, the range equals the wettest month total. |
 | **19** | **مرجع التنفيذ بالكود** | `POWER_Climate_Atlas_Generator_10_8.pyt: monthly_precip_total_from_rate (line 749), seasonal_totals_from_monthly_totals (line 721), safe_sum (line 642); raster_atlas_generator.py: lines 1925-1980` |
 
 ---
@@ -1031,116 +1049,116 @@ $$\overline{\theta} = \text{atan2}(-\overline{u}, -\overline{v}) \pmod{360^\circ
 | **10** | **المتغير الأصلي** | `PRECTOTCORR` |
 | **11** | **نوع البيانات الداخلة** | Daily precipitation flux (mm/day) or monthly sums (mm) |
 | **12** | **التحويل الأولي** | NASA POWER rate (mm/day) multiplied by calendar days in month (monthly_precip_total_from_rate). Open-Meteo provides monthly sums. |
-| **13** | **المعادلة الرياضية** | $$$$ |
-| **14** | **خطوات الحساب** |  |
+| **13** | **المعادلة الرياضية** | $$R_{Season\_Range} = \max(R_{Win}, R_{Spr}, R_{Sum}, R_{Aut}) - \min(R_{Win}, R_{Spr}, R_{Sum}, R_{Aut})$$ |
+| **14** | **خطوات الحساب** | 1. Compute seasonal precipitation totals for DJF, MAM, JJA, SON. 2. Compute Max_Season - Min_Season. |
 | **15** | **معالجة القيم الناقصة** | Requires >=75% valid data points per period (safe_sum with min_frac=0.75). Sentinels -999.0 excluded. |
-| **16** | **مثال رقمي يدوي** |  |
-| **17** | **التفسير العلمي** |  |
-| **18** | **التحذيرات ومحددات الاستخدام** |  |
+| **16** | **مثال رقمي يدوي** | Win=130 mm, Spr=45 mm, Sum=0 mm, Aut=49 mm -> Season Range = 130 - 0 = 130.0 mm. |
+| **17** | **التفسير العلمي** | Quantifies seasonal regime contrast (e.g. Mediterranean winter concentration vs summer drought). |
+| **18** | **التحذيرات ومحددات الاستخدام** | Calculated on 3-month seasonal sums, not individual months. |
 | **19** | **مرجع التنفيذ بالكود** | `POWER_Climate_Atlas_Generator_10_8.pyt: monthly_precip_total_from_rate (line 749), seasonal_totals_from_monthly_totals (line 721), safe_sum (line 642); raster_atlas_generator.py: lines 1925-1980` |
 
 ---
 
-### 038. `R_Winter_Total` (إجمالي أمطار فصل الشتاء / Winter Total Precipitation)
+### 038. `R_Winter_Mean` (متوسط هطول الأمطار خلال فصل الشتاء / Winter Mean Precipitation)
 
 | بند المواصفة | البعد العلمي والفني | القيمة التنفيذية المعتمدة بالكود |
 |:---:|:---|:---|
-| **1** | **اسم الحقل الفعلي** | **قاعدة البيانات/الراستر**: `R_Winter_Total` &nbsp;\|&nbsp; **شيب فايل (10 حروف)**: `R_WinTot` |
-| **2** | **الاسم بالإنجليزية** | Winter Total Precipitation |
-| **3** | **الاسم بالعربية** | إجمالي أمطار فصل الشتاء |
+| **1** | **اسم الحقل الفعلي** | **قاعدة البيانات/الراستر**: `R_Winter_Mean` &nbsp;\|&nbsp; **شيب فايل (10 حروف)**: `R_WinMean` |
+| **2** | **الاسم بالإنجليزية** | Winter Mean Precipitation |
+| **3** | **الاسم بالعربية** | متوسط هطول الأمطار خلال فصل الشتاء |
 | **4** | **الطبقة والموديول** | `02_Precipitation` (02_Precipitation (الأمطار)) |
 | **5** | **مجلد الراستر الناتج** | `02_Precipitation` |
-| **6** | **نوع المؤشر** | Sum |
+| **6** | **نوع المؤشر** | Mean |
 | **7** | **الفترة الزمنية** | Winter |
-| **8** | **الوحدة الفيزيائية** | `ملم (mm)` |
+| **8** | **الوحدة الفيزيائية** | `مم/فصل (mm/season)` |
 | **9** | **مصدر البيانات** | NASA POWER MERRA-2 (PRECTOTCORR) / Open-Meteo ERA5 (precipitation_sum) |
 | **10** | **المتغير الأصلي** | `PRECTOTCORR` |
 | **11** | **نوع البيانات الداخلة** | Daily precipitation flux (mm/day) or monthly sums (mm) |
 | **12** | **التحويل الأولي** | NASA POWER rate (mm/day) multiplied by calendar days in month (monthly_precip_total_from_rate). Open-Meteo provides monthly sums. |
-| **13** | **المعادلة الرياضية** | $$$$ |
-| **14** | **خطوات الحساب** |  |
+| **13** | **المعادلة الرياضية** | $$R_{Winter\_Mean} = \frac{1}{N_{years}} \sum_{y=1}^{N_{years}} (P_{y,Dec} + P_{y,Jan} + P_{y,Feb})$$ |
+| **14** | **خطوات الحساب** | 1. For each complete year y, calculate winter seasonal total: P_Dec + P_Jan + P_Feb. 2. Average the seasonal totals across all complete study years. |
 | **15** | **معالجة القيم الناقصة** | Requires >=75% valid data points per period (safe_sum with min_frac=0.75). Sentinels -999.0 excluded. |
-| **16** | **مثال رقمي يدوي** |  |
-| **17** | **التفسير العلمي** |  |
-| **18** | **التحذيرات ومحددات الاستخدام** |  |
+| **16** | **مثال رقمي يدوي** | Dec=50.0, Jan=45.0, Feb=35.0 mm -> Winter Seasonal Total = 130.0 mm. Multi-year Mean = 130.0 mm/season. |
+| **17** | **التفسير العلمي** | Mean precipitation depth falling during meteorological winter (DJF), primary recharge season in Mediterranean climates. |
+| **18** | **التحذيرات ومحددات الاستخدام** | CRITICAL: Named 'R_Winter_Mean' because it is the multi-year AVERAGE of winter seasonal accumulations. Unit is mm/season (مم/فصل). In legacy versions it was labeled 'R_Winter_Total'. |
 | **19** | **مرجع التنفيذ بالكود** | `POWER_Climate_Atlas_Generator_10_8.pyt: monthly_precip_total_from_rate (line 749), seasonal_totals_from_monthly_totals (line 721), safe_sum (line 642); raster_atlas_generator.py: lines 1925-1980` |
 
 ---
 
-### 039. `R_Spring_Total` (إجمالي أمطار فصل الربيع / Spring Total Precipitation)
+### 039. `R_Spring_Mean` (متوسط هطول الأمطار خلال فصل الربيع / Spring Mean Precipitation)
 
 | بند المواصفة | البعد العلمي والفني | القيمة التنفيذية المعتمدة بالكود |
 |:---:|:---|:---|
-| **1** | **اسم الحقل الفعلي** | **قاعدة البيانات/الراستر**: `R_Spring_Total` &nbsp;\|&nbsp; **شيب فايل (10 حروف)**: `R_SprTot` |
-| **2** | **الاسم بالإنجليزية** | Spring Total Precipitation |
-| **3** | **الاسم بالعربية** | إجمالي أمطار فصل الربيع |
+| **1** | **اسم الحقل الفعلي** | **قاعدة البيانات/الراستر**: `R_Spring_Mean` &nbsp;\|&nbsp; **شيب فايل (10 حروف)**: `R_SprMean` |
+| **2** | **الاسم بالإنجليزية** | Spring Mean Precipitation |
+| **3** | **الاسم بالعربية** | متوسط هطول الأمطار خلال فصل الربيع |
 | **4** | **الطبقة والموديول** | `02_Precipitation` (02_Precipitation (الأمطار)) |
 | **5** | **مجلد الراستر الناتج** | `02_Precipitation` |
-| **6** | **نوع المؤشر** | Sum |
+| **6** | **نوع المؤشر** | Mean |
 | **7** | **الفترة الزمنية** | Spring |
-| **8** | **الوحدة الفيزيائية** | `ملم (mm)` |
+| **8** | **الوحدة الفيزيائية** | `مم/فصل (mm/season)` |
 | **9** | **مصدر البيانات** | NASA POWER MERRA-2 (PRECTOTCORR) / Open-Meteo ERA5 (precipitation_sum) |
 | **10** | **المتغير الأصلي** | `PRECTOTCORR` |
 | **11** | **نوع البيانات الداخلة** | Daily precipitation flux (mm/day) or monthly sums (mm) |
 | **12** | **التحويل الأولي** | NASA POWER rate (mm/day) multiplied by calendar days in month (monthly_precip_total_from_rate). Open-Meteo provides monthly sums. |
-| **13** | **المعادلة الرياضية** | $$$$ |
-| **14** | **خطوات الحساب** |  |
+| **13** | **المعادلة الرياضية** | $$R_{Spring\_Mean} = \frac{1}{N_{years}} \sum_{y=1}^{N_{years}} (P_{y,Mar} + P_{y,Apr} + P_{y,May})$$ |
+| **14** | **خطوات الحساب** | 1. For each complete year y, calculate spring seasonal total: P_Mar + P_Apr + P_May. 2. Average the seasonal totals across all complete study years. |
 | **15** | **معالجة القيم الناقصة** | Requires >=75% valid data points per period (safe_sum with min_frac=0.75). Sentinels -999.0 excluded. |
-| **16** | **مثال رقمي يدوي** |  |
-| **17** | **التفسير العلمي** |  |
-| **18** | **التحذيرات ومحددات الاستخدام** |  |
+| **16** | **مثال رقمي يدوي** | Mar=25.0, Apr=15.0, May=5.0 mm -> Spring Seasonal Total = 45.0 mm. Multi-year Mean = 45.0 mm/season. |
+| **17** | **التفسير العلمي** | Mean precipitation depth falling during meteorological spring (MAM). |
+| **18** | **التحذيرات ومحددات الاستخدام** | Convective spring storm events may exhibit high spatial heterogeneity. Unit is mm/season (مم/فصل). |
 | **19** | **مرجع التنفيذ بالكود** | `POWER_Climate_Atlas_Generator_10_8.pyt: monthly_precip_total_from_rate (line 749), seasonal_totals_from_monthly_totals (line 721), safe_sum (line 642); raster_atlas_generator.py: lines 1925-1980` |
 
 ---
 
-### 040. `R_Summer_Total` (إجمالي أمطار فصل الصيف / Summer Total Precipitation)
+### 040. `R_Summer_Mean` (متوسط هطول الأمطار خلال فصل الصيف / Summer Mean Precipitation)
 
 | بند المواصفة | البعد العلمي والفني | القيمة التنفيذية المعتمدة بالكود |
 |:---:|:---|:---|
-| **1** | **اسم الحقل الفعلي** | **قاعدة البيانات/الراستر**: `R_Summer_Total` &nbsp;\|&nbsp; **شيب فايل (10 حروف)**: `R_SumTot` |
-| **2** | **الاسم بالإنجليزية** | Summer Total Precipitation |
-| **3** | **الاسم بالعربية** | إجمالي أمطار فصل الصيف |
+| **1** | **اسم الحقل الفعلي** | **قاعدة البيانات/الراستر**: `R_Summer_Mean` &nbsp;\|&nbsp; **شيب فايل (10 حروف)**: `R_SumMean` |
+| **2** | **الاسم بالإنجليزية** | Summer Mean Precipitation |
+| **3** | **الاسم بالعربية** | متوسط هطول الأمطار خلال فصل الصيف |
 | **4** | **الطبقة والموديول** | `02_Precipitation` (02_Precipitation (الأمطار)) |
 | **5** | **مجلد الراستر الناتج** | `02_Precipitation` |
-| **6** | **نوع المؤشر** | Sum |
+| **6** | **نوع المؤشر** | Mean |
 | **7** | **الفترة الزمنية** | Summer |
-| **8** | **الوحدة الفيزيائية** | `ملم (mm)` |
+| **8** | **الوحدة الفيزيائية** | `مم/فصل (mm/season)` |
 | **9** | **مصدر البيانات** | NASA POWER MERRA-2 (PRECTOTCORR) / Open-Meteo ERA5 (precipitation_sum) |
 | **10** | **المتغير الأصلي** | `PRECTOTCORR` |
 | **11** | **نوع البيانات الداخلة** | Daily precipitation flux (mm/day) or monthly sums (mm) |
 | **12** | **التحويل الأولي** | NASA POWER rate (mm/day) multiplied by calendar days in month (monthly_precip_total_from_rate). Open-Meteo provides monthly sums. |
-| **13** | **المعادلة الرياضية** | $$$$ |
-| **14** | **خطوات الحساب** |  |
+| **13** | **المعادلة الرياضية** | $$R_{Summer\_Mean} = \frac{1}{N_{years}} \sum_{y=1}^{N_{years}} (P_{y,Jun} + P_{y,Jul} + P_{y,Aug})$$ |
+| **14** | **خطوات الحساب** | 1. For each complete year y, calculate summer seasonal total: P_Jun + P_Jul + P_Aug. 2. Average the seasonal totals across all complete study years. |
 | **15** | **معالجة القيم الناقصة** | Requires >=75% valid data points per period (safe_sum with min_frac=0.75). Sentinels -999.0 excluded. |
-| **16** | **مثال رقمي يدوي** |  |
-| **17** | **التفسير العلمي** |  |
-| **18** | **التحذيرات ومحددات الاستخدام** |  |
+| **16** | **مثال رقمي يدوي** | Jun=0.0, Jul=0.0, Aug=0.0 mm -> Summer Seasonal Total = 0.0 mm. Multi-year Mean = 0.0 mm/season. |
+| **17** | **التفسير العلمي** | Mean precipitation depth falling during meteorological summer (JJA), often near 0 in arid/Mediterranean domains. |
+| **18** | **التحذيرات ومحددات الاستخدام** | In arid Mediterranean regions, summer mean is typically 0.0 mm/season. Unit is mm/season (مم/فصل). |
 | **19** | **مرجع التنفيذ بالكود** | `POWER_Climate_Atlas_Generator_10_8.pyt: monthly_precip_total_from_rate (line 749), seasonal_totals_from_monthly_totals (line 721), safe_sum (line 642); raster_atlas_generator.py: lines 1925-1980` |
 
 ---
 
-### 041. `R_Autumn_Total` (إجمالي أمطار فصل الخريف / Autumn Total Precipitation)
+### 041. `R_Autumn_Mean` (متوسط هطول الأمطار خلال فصل الخريف / Autumn Mean Precipitation)
 
 | بند المواصفة | البعد العلمي والفني | القيمة التنفيذية المعتمدة بالكود |
 |:---:|:---|:---|
-| **1** | **اسم الحقل الفعلي** | **قاعدة البيانات/الراستر**: `R_Autumn_Total` &nbsp;\|&nbsp; **شيب فايل (10 حروف)**: `R_AutTot` |
-| **2** | **الاسم بالإنجليزية** | Autumn Total Precipitation |
-| **3** | **الاسم بالعربية** | إجمالي أمطار فصل الخريف |
+| **1** | **اسم الحقل الفعلي** | **قاعدة البيانات/الراستر**: `R_Autumn_Mean` &nbsp;\|&nbsp; **شيب فايل (10 حروف)**: `R_AutMean` |
+| **2** | **الاسم بالإنجليزية** | Autumn Mean Precipitation |
+| **3** | **الاسم بالعربية** | متوسط هطول الأمطار خلال فصل الخريف |
 | **4** | **الطبقة والموديول** | `02_Precipitation` (02_Precipitation (الأمطار)) |
 | **5** | **مجلد الراستر الناتج** | `02_Precipitation` |
-| **6** | **نوع المؤشر** | Sum |
+| **6** | **نوع المؤشر** | Mean |
 | **7** | **الفترة الزمنية** | Autumn |
-| **8** | **الوحدة الفيزيائية** | `ملم (mm)` |
+| **8** | **الوحدة الفيزيائية** | `مم/فصل (mm/season)` |
 | **9** | **مصدر البيانات** | NASA POWER MERRA-2 (PRECTOTCORR) / Open-Meteo ERA5 (precipitation_sum) |
 | **10** | **المتغير الأصلي** | `PRECTOTCORR` |
 | **11** | **نوع البيانات الداخلة** | Daily precipitation flux (mm/day) or monthly sums (mm) |
 | **12** | **التحويل الأولي** | NASA POWER rate (mm/day) multiplied by calendar days in month (monthly_precip_total_from_rate). Open-Meteo provides monthly sums. |
-| **13** | **المعادلة الرياضية** | $$$$ |
-| **14** | **خطوات الحساب** |  |
+| **13** | **المعادلة الرياضية** | $$R_{Autumn\_Mean} = \frac{1}{N_{years}} \sum_{y=1}^{N_{years}} (P_{y,Sep} + P_{y,Oct} + P_{y,Nov})$$ |
+| **14** | **خطوات الحساب** | 1. For each complete year y, calculate autumn seasonal total: P_Sep + P_Oct + P_Nov. 2. Average the seasonal totals across all complete study years. |
 | **15** | **معالجة القيم الناقصة** | Requires >=75% valid data points per period (safe_sum with min_frac=0.75). Sentinels -999.0 excluded. |
-| **16** | **مثال رقمي يدوي** |  |
-| **17** | **التفسير العلمي** |  |
-| **18** | **التحذيرات ومحددات الاستخدام** |  |
+| **16** | **مثال رقمي يدوي** | Sep=2.0, Oct=12.0, Nov=35.0 mm -> Autumn Seasonal Total = 49.0 mm. Multi-year Mean = 49.0 mm/season. |
+| **17** | **التفسير العلمي** | Mean precipitation depth falling during meteorological autumn (SON), early season recharge. |
+| **18** | **التحذيرات ومحددات الاستخدام** | Autumn convective storms can trigger flash flooding in arid wadis. Unit is mm/season (مم/فصل). |
 | **19** | **مرجع التنفيذ بالكود** | `POWER_Climate_Atlas_Generator_10_8.pyt: monthly_precip_total_from_rate (line 749), seasonal_totals_from_monthly_totals (line 721), safe_sum (line 642); raster_atlas_generator.py: lines 1925-1980` |
 
 ---

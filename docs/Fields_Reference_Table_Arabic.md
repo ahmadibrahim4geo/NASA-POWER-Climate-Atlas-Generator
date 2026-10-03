@@ -3,6 +3,7 @@
 
 [![Developer](https://img.shields.io/badge/Developer-Ahmad%20Ibrahim-1F4E79.svg?style=for-the-badge&logo=github)](https://github.com/ahmadibrahim4geo)
 [![Repository](https://img.shields.io/badge/Repository-NASA--POWER--Climate--Atlas--Generator-blue.svg)](https://github.com/ahmadibrahim4geo/NASA-POWER-Climate-Atlas-Generator)
+[![Email](https://img.shields.io/badge/Email-ahmadibrahim.geo%40gmail.com-red.svg)](mailto:ahmadibrahim.geo@gmail.com)
 [![Excel Reference](https://img.shields.io/badge/Excel%20Dictionary-Fields__AR__EN__Units.xlsx-green.svg)](../Fields_AR_EN_Units.xlsx)
 
 ---

@@ -4,6 +4,7 @@
 
 [![Developer](https://img.shields.io/badge/Developer-Ahmad%20Ibrahim-1F4E79.svg?style=for-the-badge&logo=github)](https://github.com/ahmadibrahim4geo)
 [![المطور](https://img.shields.io/badge/المطور-أحمد%20إبراهيم-2E75B6.svg?style=for-the-badge)](https://github.com/ahmadibrahim4geo)
+[![Email](https://img.shields.io/badge/Email-ahmadibrahim.geo%40gmail.com-red.svg)](mailto:ahmadibrahim.geo@gmail.com)
 [![ArcGIS Version](https://img.shields.io/badge/Esri-ArcGIS%20Pro%203.x%20%7C%20ArcMap%2010.8-0079c1.svg)](https://www.esri.com/)
 [![Repository](https://img.shields.io/badge/Repository-NASA--POWER--Climate--Atlas--Generator-blue.svg)](https://github.com/ahmadibrahim4geo/NASA-POWER-Climate-Atlas-Generator)
 
