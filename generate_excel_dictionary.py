@@ -330,9 +330,9 @@ FIELDS_DATA = [
         "full_name": "R_Month_Mean",
         "module_code": "02_Precipitation",
         "module_name": "02_Precipitation (الأمطار)",
-        "desc_ar": u"المعدل الشهري لتساقط الأمطار (المتوسط السنوي مقسوماً على 12 شهراً).",
+        "desc_ar": u"المتوسط الشهري لتساقط الأمطار (المتوسط السنوي مقسوماً على 12 شهراً).",
         "unit": u"ملم (mm)",
-        "map_title": u"خريطة المعدل الشهري لتساقط الأمطار (ملم)"
+        "map_title": u"خريطة المتوسط الشهري لتساقط الأمطار (ملم)"
     },
     {
         "short_name": "R_AnnRng",
