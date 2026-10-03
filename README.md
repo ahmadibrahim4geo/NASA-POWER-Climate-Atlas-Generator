@@ -67,26 +67,27 @@
 
 تتكون المنظومة من **18 عنصراً وموديولاً مناخياً وبيومناخياً مستقلاً**:
 
-| رقم | اسم العنصر في واجهة الأداة | اسم طبقة المعالم (Feature Class) | اسم مجلد الراستر (Raster Folder) | عدد المؤشرات | الوحدة الفيزيائية |
-|:---:|---|---|---|:---:|:---:|
-| **01** | `Temperature` | `01_Temperature` | `01_Temperature` | 10 | °C |
-| **02** | `Precipitation` | `02_Precipitation` | `02_Precipitation` | 8 | mm |
-| **03** | `Sea Level Pressure` | `03_Sea_Level_Pressure` | `03_Sea_Level_Pressure` | 6 | hPa / mbar |
-| **04** | `Surface Pressure` | `04_Surface_Pressure` | `04_Surface_Pressure` | 6 | hPa / mbar |
-| **05** | `Wind` | `05_Wind` | `05_Wind` | 13 | m/s, degrees (°) |
-| **06** | `Relative Humidity` | `06_Relative_Humidity` | `06_Relative_Humidity` | 6 | % |
-| **07** | `Dew Point` | `07_Dew_Point` | `07_Dew_Point` | 6 | °C |
-| **08** | `Solar Radiation` | `08_Solar_Radiation` | `08_Solar_Radiation` | 7 | kWh/m²/day, kWh/m²/year |
-| **09** | `UV Index` | `09_UV_Index` | `09_UV_Index` | 6 | مؤشر (0–15+) |
-| **10** | `Cloud Cover` | `10_Cloud_Cover` | `10_Cloud_Cover` | 6 | % |
-| **11** | `Heat Index` | `11_Heat_Index` | `11_Heat_Index` | 5 | °C |
-| **12** | `Wind Chill` | `12_Wind_Chill` | `12_Wind_Chill` | 2 | °C |
-| **13** | `De Martonne Aridity` | `13_De_Martonne_Aridity` | `13_De_Martonne_Aridity` | 1 | مؤشر لا بُعدي |
-| **14** | `Evapotranspiration` | `14_Evapotranspiration` | `14_Evapotranspiration` | 8 | mm/year, mm/month, mm |
-| **15** | `UNEP Aridity` | `15_UNEP_Aridity` | `15_UNEP_Aridity` | 1 | نسبة |
-| **16** | `Water Deficit` | `16_Water_Deficit` | `16_Water_Deficit` | 1 | mm/year |
-| **17** | `Dry Months` | `17_Dry_Months` | `17_Dry_Months` | 1 | شهور (0–12) |
-| **18** | `Trends & Baseline Anomalies` | `18_Trends_And_Anomalies` | `18_Trends_And_Anomalies` | 9 | °C/decade, mm/decade, % |
+| رقم | اسم العنصر في واجهة الأداة | اسم طبقة المعالم (Feature Class) | اسم مجلد الراستر (Raster Folder) | عدد المؤشرات | تفصيل المؤشرات (سنوي/فصلي + شهري) | الوحدة الفيزيائية |
+|:---:|---|---|---|:---:|---|:---:|
+| **01** | `Temperature` | `01_Temperature` | `01_Temperature` | **22** | 10 سنوي وفصلي + 12 شهري مناخي | °C |
+| **02** | `Precipitation` | `02_Precipitation` | `02_Precipitation` | **20** | 8 سنوي وفصلي + 12 شهري تراكمي | mm, mm/month |
+| **03** | `Sea Level Pressure` | `03_Sea_Level_Pressure` | `03_Sea_Level_Pressure` | **18** | 6 سنوي وفصلي + 12 شهري مناخي | hPa / mbar |
+| **04** | `Surface Pressure` | `04_Surface_Pressure` | `04_Surface_Pressure` | **18** | 6 سنوي وفصلي + 12 شهري مناخي | hPa / mbar |
+| **05** | `Wind` | `05_Wind` | `05_Wind` | **37** | 13 سنوي وفصلي + 24 شهري (سرعة + اتجاه) | m/s, degrees (°) |
+| **06** | `Relative Humidity` | `06_Relative_Humidity` | `06_Relative_Humidity` | **18** | 6 سنوي وفصلي + 12 شهري مناخي | % |
+| **07** | `Dew Point` | `07_Dew_Point` | `07_Dew_Point` | **18** | 6 سنوي وفصلي + 12 شهري مناخي | °C |
+| **08** | `Solar Radiation` | `08_Solar_Radiation` | `08_Solar_Radiation` | **19** | 7 سنوي وفصلي + 12 شهري مناخي | kWh/m²/day |
+| **09** | `UV Index` | `09_UV_Index` | `09_UV_Index` | **18** | 6 سنوي وفصلي + 12 شهري مناخي | مؤشر (0–16+) |
+| **10** | `Cloud Cover` | `10_Cloud_Cover` | `10_Cloud_Cover` | **18** | 6 سنوي وفصلي + 12 شهري مناخي | % |
+| **11** | `Heat Index` | `11_Heat_Index` | `11_Heat_Index` | **5** | 5 مؤشرات سنوية وفصلية ومجمعة | °C |
+| **12** | `Wind Chill` | `12_Wind_Chill` | `12_Wind_Chill` | **2** | مؤشران شتويان للبرودة الريحية | °C |
+| **13** | `De Martonne Aridity` | `13_De_Martonne_Aridity` | `13_De_Martonne_Aridity` | **1** | مؤشر جفاف سنوي لدي مارتون | مؤشر لا بُعدي |
+| **14** | `Evapotranspiration` | `14_Evapotranspiration` | `14_Evapotranspiration` | **21** | 9 سنوي وفصلي + 12 شهري FAO-56 | mm, mm/month |
+| **15** | `UNEP Aridity` | `15_UNEP_Aridity` | `15_UNEP_Aridity` | **1** | مؤشر قحولة سنوي لبرنامج الأمم المتحدة | نسبة |
+| **16** | `Water Deficit` | `16_Water_Deficit` | `16_Water_Deficit` | **1** | عجز وموازنة مائية سنوية | mm/year |
+| **17** | `Dry Months` | `17_Dry_Months` | `17_Dry_Months` | **1** | عدد شهور الجفاف البيولوجي | شهور (0–12) |
+| **18** | `Trends & Baseline Anomalies` | `18_Trends_And_Anomalies` | `18_Trends_And_Anomalies` | **9** | اتجاهات وشذوذ خط الأساس 1991–2020 | °C/decade, mm/decade, % |
+| **الإجمالي** | **18 عنصراً وموديولاً** | **18 Feature Class** | **18 مجلد راستر** | **247** | **103 مؤشراً سنوياً وفصلياً + 144 متوسطاً شهرياً** | — |
 
 ---
 
@@ -118,6 +119,27 @@
 
 ##### 3. تعزيز مؤشرات الأمطار (Precipitation):
 * إضافة المدى السنوي `R_Annual_Range` والمدى الفصلي `R_Seasonal_Range` لمراقبة التفاوت الفصلي والشهري في الهطول مع إزالة الحقول القديمة غير المتوافقة مع نمط الشهر.
+
+##### 4. المتوسطات المناخية الشهرية المعيارية (12 شهراً لكل عنصر) وهيكلية الإكسيل المزدوجة:
+* **توسعة شاملة لقواعد البيانات**: تم دعم حساب وتخزين **144 مؤشراً شهرياً مناخياً** يغطي الشهور الـ 12 (يناير – ديسمبر) عبر العناصر المناخية الـ 11 الرئيسية:
+  - **الحرارة**: متوسط درجة حرارة الهواء لكل شهر (`T_January_Mean` .. `T_December_Mean`) (°C).
+  - **الأمطار**: متوسط مجموع الأمطار التراكمي لكل شهر عبر السنوات (`R_January_Mean` .. `R_December_Mean`) (ملم/شهر).
+  - **ضغط مستوى سطح البحر**: متوسط الضغط المصحح لمستوى البحر (`PSL_January_Mean` .. `PSL_December_Mean`) (hPa).
+  - **الضغط السطحي الفعلي**: متوسط الضغط عند منسوب المحطة (`PS_January_Mean` .. `PS_December_Mean`) (hPa).
+  - **سرعة الرياح**: متوسط سرعة الرياح على ارتفاع 10 م (`W_Spd_January_Mean` .. `W_Spd_December_Mean`) (م/ث).
+  - **اتجاه الرياح السائد**: الاتجاه السائد الدائري المتجهي (`W_Dir_January_Mean` .. `W_Dir_December_Mean`) باستخدام خوارزمية المتجهات الدائرية `atan2(mean_sin, mean_cos)`.
+  - **الرطوبة النسبية**: متوسط الرطوبة عند 2 م (`RH_January_Mean` .. `RH_December_Mean`) (%).
+  - **نقطة الندى**: متوسط درجة حرارة نقطة الندى (`Td_January_Mean` .. `Td_December_Mean`) (°C).
+  - **الإشعاع الشمسي**: المعدل اليومي للإشعاع الساقط على السطح الأفقي (`Sol_January_Mean` .. `Sol_December_Mean`) (kWh/m²/day).
+  - **مؤشر UV**: متوسط مؤشر الأشعة فوق البنفسجية القصوى (`UV_January_Mean` .. `UV_December_Mean`) وفق معيار منظمة الصحة العالمية.
+  - **الغطاء السحابي**: متوسط نسبة الغطاء السحابي (`Cld_January_Mean` .. `Cld_December_Mean`) (%).
+  - **البخر والنتح (ET)**: مجموع البخر والنتح الكامن لكل شهر وفق صيغة FAO-56 Hargreaves-Samani (`ET_January_Total` .. `ET_December_Total`) (ملم/شهر).
+* **هيكلة مصنفات الإكسيل المهنية المزدوجة (Dual-Sheet Workbooks)**:
+  - تحتوي كافة ملفات الإكسيل الخاصة بالعناصر المناخية (`00_Tables_And_Reports\*.xls`) على صفحتين مستقلتين:
+    1. **صفحة `Data`**: تضم المؤشرات السنوية والفصلية والمدى والمتغيرات المشتقة.
+    2. **صفحة `Month`**: تضم المؤشرات الشهرية الـ 12 المكتملة عبر كافة محطات ونقاط الرصد.
+* **حفظ الأرشيف الخام الزمني المكتمل**: يتم حفظ وتحديث السلسلة الزمنية الشهرية الكاملة لـ 30 عاماً (1996–2025) لكل المتغيرات في ملف JSON محلي دائم (`Egypt_Monthly_Raw_1996_2025.json`) لتسريع المعالجة وإتاحة التحليلات المتقدمة بدون الحاجة لإعادة التحميل.
+* **ضبط التوليد الكارتوجرافي للراستر**: تلتزم المنظومة بتوليد أسطح الراستر للاستيفاء المكاني للمؤشرات السنوية والفصلية والبيومناخية المعتمدة، مع الاحتفاظ التام بكافة البيانات الشهرية داخل قواعد البيانات الجغرافية وجداول الإكسيل المهيكلة.
 
 ---
 

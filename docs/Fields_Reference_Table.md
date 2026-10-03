@@ -266,8 +266,9 @@ $$ET_o = 0.0023 \cdot R_a \cdot (T_{mean} + 17.8) \cdot \sqrt{T_{max} - T_{min}}
 
 ---
 
-## إحصائيات المنظومة المعمارية
-* **إجمالي الطبقات الموديلية المستقلة:** 18 طبقة معالم (`Feature Classes`) ومجلد راستر موحد.
-* **إجمالي المؤشرات المناخية المتخصصة:** 96 مؤشراً فيزيائياً ومناخياً وبيئياً (+ 1 حقل رديف `PET_Hargreaves_Annual`).
-* **إجمالي أعمدة المخطط القياسي الكامل:** 115 حقلاً مع الحقول الإدارية والإحداثيات والمقاييس.
-* **توافقية التصدير:** تدعم التصدير الكامل لقواعد البيانات الجغرافية (`.gdb`)، وملفات الشيب فايل (`.shp` بأطوال حقول $\le 10$ أحرف فريدة)، وجداول الإكسيل المنسقة (`.xlsx` و `.xls`).
+## Architectural System Statistics
+* **Total Independent Modular Layers:** 18 Feature Classes and 18 1:1 matching Raster Folders.
+* **Total Specialized Scientific Indicators:** 247 Climate & Bioclimatic Indicators (103 annual, seasonal, and derived + 144 climatological monthly indicators across all 12 calendar months).
+* **Total Schema Columns:** 259 Total Defined Fields (including 12 administrative, geodetic, and run tracking fields).
+* **Dual-Sheet Excel Workbooks:** Every element Excel workbook contains `Data` (Annual/Seasonal) and `Month` (12-month profile) sheets.
+* **Export Interoperability:** Full export support for File Geodatabase (`.gdb`), Shapefiles (`.shp` with collision-free $\le 10$-character abbreviations via `SHP_FIELD_MAP`), and formatted Excel workbooks (`.xlsx` and `.xls`).

@@ -1270,7 +1270,7 @@ def compute_temperature_fields(m_tmean, m_tmax, m_tmin, m_rh=None, m_td=None):
     clim_rh = climat_monthly_means(m_rh or {})
     _ts = compute_thermal_stress_fields(clim, clim_rh)
     s_td = seasonal_means_from_monthly(m_td or {})
-    return {
+    out = {
         "T_Annual_Mean": s_mean["Annual"],
         "T_Winter_Mean": s_mean["Winter"],
         "T_Spring_Mean": s_mean["Spring"],
@@ -1290,6 +1290,10 @@ def compute_temperature_fields(m_tmean, m_tmax, m_tmin, m_rh=None, m_td=None):
         "Td_Summer_Mean": s_td["Summer"],
         "Td_Winter_Mean": s_td["Winter"],
     }
+    _months_en = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+    for m_idx, m_name in enumerate(_months_en, 1):
+        out["T_%s_Mean" % m_name] = round(clim.get(m_idx), 2) if clim.get(m_idx) is not None else None
+    return out
 
 
 def compute_wind_fields(m_spd, m_dir):
@@ -1314,6 +1318,11 @@ def compute_wind_fields(m_spd, m_dir):
         out["W_Dir_" + _suffix[season] + "_Mean"] = circular_mean_deg(vals)
     allv = [v for v in m_dir.values() if not is_missing(v)]
     out["W_Dir_Annual_Mean"] = circular_mean_deg(allv)
+    _months_en = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+    for m_idx, m_name in enumerate(_months_en, 1):
+        out["W_Spd_%s_Mean" % m_name] = round(clim_spd.get(m_idx), 2) if clim_spd.get(m_idx) is not None else None
+        m_vals = [v for ym, v in m_dir.items() if ym[1] == m_idx and not is_missing(v)]
+        out["W_Dir_%s_Mean" % m_name] = circular_mean_deg(m_vals)
     return out
 
 
@@ -1337,7 +1346,7 @@ def compute_solar_fields(m_sol_mj, years):
         if ok:
             per_year.append(tot)
     total = sum(per_year) / len(per_year) if per_year else None
-    return {
+    out = {
         "Sol_Annual_Mean": s["Annual"],
         "Sol_Annual_Total": total,
         "Sol_Winter_Mean": s["Winter"],
@@ -1346,6 +1355,11 @@ def compute_solar_fields(m_sol_mj, years):
         "Sol_Autumn_Mean": s["Autumn"],
         "Sol_Annual_Range": monthly_range(daily_kwh),
     }
+    _months_en = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+    for m_idx, m_name in enumerate(_months_en, 1):
+        m_vals = [v for ym, v in daily_kwh.items() if ym[1] == m_idx and v is not None]
+        out["Sol_%s_Mean" % m_name] = round(sum(m_vals) / len(m_vals), 2) if m_vals else None
+    return out
 
 
 def extraterrestrial_radiation_ra(lat_deg, month):
@@ -1462,7 +1476,7 @@ def compute_drought_fields(m_tmean, m_tmax, m_tmin, m_precip, lat=0.0):
     unep_aridity = (p_annual / pet_annual) if pet_annual > 0.01 else 0.0
     water_deficit = p_annual - pet_annual
 
-    return {
+    out_d = {
         "DM_Aridity_Annual": round(dm_aridity, 2) if dm_aridity is not None else None,
         "ET_Annual_Total": round(pet_annual, 1),
         "ET_Annual_Mean": round(pet_mean, 1),
@@ -1477,6 +1491,10 @@ def compute_drought_fields(m_tmean, m_tmax, m_tmin, m_precip, lat=0.0):
         "Water_Deficit_Annual": round(water_deficit, 1),
         "Dry_Months_Count": int(dry_count),
     }
+    _months_en = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+    for m_idx, m_name in enumerate(_months_en, 1):
+        out_d["ET_%s_Total" % m_name] = round(monthly_pet[m_idx - 1], 1) if (monthly_pet and len(monthly_pet) >= m_idx) else None
+    return out_d
 
 
 # ---------------------------------------------------------------------------
@@ -1586,6 +1604,151 @@ FIELD_DEFS = [
     ("R_Anom_Annual_Pct", "Annual Precipitation Anomaly Percent vs 1991-2020", u"شذوذ الأمطار السنوي بالنسبة المئوية", "PRECTOTCORR", "Trends & Anomalies", "Annual", "Anomaly", "%", u"الشذوذ السنوي نسبة مئوية (None إذا كان الأساس <5 مم)", "Relative anomaly in percent; None when baseline <5 mm", "(Recent - baseline) / baseline * 100"),
     ("R_Anom_Winter", "Winter Precipitation Anomaly vs 1991-2020", u"شذوذ أمطار الشتاء عن معيار 1991-2020", "PRECTOTCORR", "Trends & Anomalies", "Winter", "Anomaly", "mm", u"فرق إجمالي الشتاء الحديث عن المعيار (تراجع الساحلي)", "Recent winter total minus baseline winter total", "Recent DJF total - baseline DJF total"),
     ("R_Anom_Winter_Pct", "Winter Precipitation Anomaly Percent vs 1991-2020", u"شذوذ أمطار الشتاء بالنسبة المئوية", "PRECTOTCORR", "Trends & Anomalies", "Winter", "Anomaly", "%", u"الشذوذ الشتوي نسبة مئوية (None إذا كان الأساس <5 مم)", "Relative winter anomaly in percent; None when baseline <5 mm", "(Recent - baseline) / baseline * 100"),
+    # --- Climatological Monthly Fields (12 Months per Element) ---
+    ("T_January_Mean", "January Mean Air Temperature", u"متوسط درجة الحرارة لشهر يناير", "T2M", "Temperature", "Monthly", "Mean", "C", u"متوسط درجة حرارة الهواء لشهر يناير خلال الفترة (2 م)", "Mean of monthly T2M for January across years", "Mean of January T2M values"),
+    ("T_February_Mean", "February Mean Air Temperature", u"متوسط درجة الحرارة لشهر فبراير", "T2M", "Temperature", "Monthly", "Mean", "C", u"متوسط درجة حرارة الهواء لشهر فبراير خلال الفترة (2 م)", "Mean of monthly T2M for February across years", "Mean of February T2M values"),
+    ("T_March_Mean", "March Mean Air Temperature", u"متوسط درجة الحرارة لشهر مارس", "T2M", "Temperature", "Monthly", "Mean", "C", u"متوسط درجة حرارة الهواء لشهر مارس خلال الفترة (2 م)", "Mean of monthly T2M for March across years", "Mean of March T2M values"),
+    ("T_April_Mean", "April Mean Air Temperature", u"متوسط درجة الحرارة لشهر أبريل", "T2M", "Temperature", "Monthly", "Mean", "C", u"متوسط درجة حرارة الهواء لشهر أبريل خلال الفترة (2 م)", "Mean of monthly T2M for April across years", "Mean of April T2M values"),
+    ("T_May_Mean", "May Mean Air Temperature", u"متوسط درجة الحرارة لشهر مايو", "T2M", "Temperature", "Monthly", "Mean", "C", u"متوسط درجة حرارة الهواء لشهر مايو خلال الفترة (2 م)", "Mean of monthly T2M for May across years", "Mean of May T2M values"),
+    ("T_June_Mean", "June Mean Air Temperature", u"متوسط درجة الحرارة لشهر يونيو", "T2M", "Temperature", "Monthly", "Mean", "C", u"متوسط درجة حرارة الهواء لشهر يونيو خلال الفترة (2 م)", "Mean of monthly T2M for June across years", "Mean of June T2M values"),
+    ("T_July_Mean", "July Mean Air Temperature", u"متوسط درجة الحرارة لشهر يوليو", "T2M", "Temperature", "Monthly", "Mean", "C", u"متوسط درجة حرارة الهواء لشهر يوليو خلال الفترة (2 م)", "Mean of monthly T2M for July across years", "Mean of July T2M values"),
+    ("T_August_Mean", "August Mean Air Temperature", u"متوسط درجة الحرارة لشهر أغسطس", "T2M", "Temperature", "Monthly", "Mean", "C", u"متوسط درجة حرارة الهواء لشهر أغسطس خلال الفترة (2 م)", "Mean of monthly T2M for August across years", "Mean of August T2M values"),
+    ("T_September_Mean", "September Mean Air Temperature", u"متوسط درجة الحرارة لشهر سبتمبر", "T2M", "Temperature", "Monthly", "Mean", "C", u"متوسط درجة حرارة الهواء لشهر سبتمبر خلال الفترة (2 م)", "Mean of monthly T2M for September across years", "Mean of September T2M values"),
+    ("T_October_Mean", "October Mean Air Temperature", u"متوسط درجة الحرارة لشهر أكتوبر", "T2M", "Temperature", "Monthly", "Mean", "C", u"متوسط درجة حرارة الهواء لشهر أكتوبر خلال الفترة (2 م)", "Mean of monthly T2M for October across years", "Mean of October T2M values"),
+    ("T_November_Mean", "November Mean Air Temperature", u"متوسط درجة الحرارة لشهر نوفمبر", "T2M", "Temperature", "Monthly", "Mean", "C", u"متوسط درجة حرارة الهواء لشهر نوفمبر خلال الفترة (2 م)", "Mean of monthly T2M for November across years", "Mean of November T2M values"),
+    ("T_December_Mean", "December Mean Air Temperature", u"متوسط درجة الحرارة لشهر ديسمبر", "T2M", "Temperature", "Monthly", "Mean", "C", u"متوسط درجة حرارة الهواء لشهر ديسمبر خلال الفترة (2 م)", "Mean of monthly T2M for December across years", "Mean of December T2M values"),
+    ("R_January_Mean", "January Mean Precipitation", u"متوسط تراكم أمطار شهر يناير", "PRECTOTCORR", "Precipitation", "Monthly", "Sum", "mm/month", u"متوسط تراكم كميات أمطار شهر يناير عبر السنوات (ملم/شهر)", "Mean of monthly precipitation totals for January", "Mean of per-year January totals (mm/month)"),
+    ("R_February_Mean", "February Mean Precipitation", u"متوسط تراكم أمطار شهر فبراير", "PRECTOTCORR", "Precipitation", "Monthly", "Sum", "mm/month", u"متوسط تراكم كميات أمطار شهر فبراير عبر السنوات (ملم/شهر)", "Mean of monthly precipitation totals for February", "Mean of per-year February totals (mm/month)"),
+    ("R_March_Mean", "March Mean Precipitation", u"متوسط تراكم أمطار شهر مارس", "PRECTOTCORR", "Precipitation", "Monthly", "Sum", "mm/month", u"متوسط تراكم كميات أمطار شهر مارس عبر السنوات (ملم/شهر)", "Mean of monthly precipitation totals for March", "Mean of per-year March totals (mm/month)"),
+    ("R_April_Mean", "April Mean Precipitation", u"متوسط تراكم أمطار شهر أبريل", "PRECTOTCORR", "Precipitation", "Monthly", "Sum", "mm/month", u"متوسط تراكم كميات أمطار شهر أبريل عبر السنوات (ملم/شهر)", "Mean of monthly precipitation totals for April", "Mean of per-year April totals (mm/month)"),
+    ("R_May_Mean", "May Mean Precipitation", u"متوسط تراكم أمطار شهر مايو", "PRECTOTCORR", "Precipitation", "Monthly", "Sum", "mm/month", u"متوسط تراكم كميات أمطار شهر مايو عبر السنوات (ملم/شهر)", "Mean of monthly precipitation totals for May", "Mean of per-year May totals (mm/month)"),
+    ("R_June_Mean", "June Mean Precipitation", u"متوسط تراكم أمطار شهر يونيو", "PRECTOTCORR", "Precipitation", "Monthly", "Sum", "mm/month", u"متوسط تراكم كميات أمطار شهر يونيو عبر السنوات (ملم/شهر)", "Mean of monthly precipitation totals for June", "Mean of per-year June totals (mm/month)"),
+    ("R_July_Mean", "July Mean Precipitation", u"متوسط تراكم أمطار شهر يوليو", "PRECTOTCORR", "Precipitation", "Monthly", "Sum", "mm/month", u"متوسط تراكم كميات أمطار شهر يوليو عبر السنوات (ملم/شهر)", "Mean of monthly precipitation totals for July", "Mean of per-year July totals (mm/month)"),
+    ("R_August_Mean", "August Mean Precipitation", u"متوسط تراكم أمطار شهر أغسطس", "PRECTOTCORR", "Precipitation", "Monthly", "Sum", "mm/month", u"متوسط تراكم كميات أمطار شهر أغسطس عبر السنوات (ملم/شهر)", "Mean of monthly precipitation totals for August", "Mean of per-year August totals (mm/month)"),
+    ("R_September_Mean", "September Mean Precipitation", u"متوسط تراكم أمطار شهر سبتمبر", "PRECTOTCORR", "Precipitation", "Monthly", "Sum", "mm/month", u"متوسط تراكم كميات أمطار شهر سبتمبر عبر السنوات (ملم/شهر)", "Mean of monthly precipitation totals for September", "Mean of per-year September totals (mm/month)"),
+    ("R_October_Mean", "October Mean Precipitation", u"متوسط تراكم أمطار شهر أكتوبر", "PRECTOTCORR", "Precipitation", "Monthly", "Sum", "mm/month", u"متوسط تراكم كميات أمطار شهر أكتوبر عبر السنوات (ملم/شهر)", "Mean of monthly precipitation totals for October", "Mean of per-year October totals (mm/month)"),
+    ("R_November_Mean", "November Mean Precipitation", u"متوسط تراكم أمطار شهر نوفمبر", "PRECTOTCORR", "Precipitation", "Monthly", "Sum", "mm/month", u"متوسط تراكم كميات أمطار شهر نوفمبر عبر السنوات (ملم/شهر)", "Mean of monthly precipitation totals for November", "Mean of per-year November totals (mm/month)"),
+    ("R_December_Mean", "December Mean Precipitation", u"متوسط تراكم أمطار شهر ديسمبر", "PRECTOTCORR", "Precipitation", "Monthly", "Sum", "mm/month", u"متوسط تراكم كميات أمطار شهر ديسمبر عبر السنوات (ملم/شهر)", "Mean of monthly precipitation totals for December", "Mean of per-year December totals (mm/month)"),
+    ("PSL_January_Mean", "January Mean Sea Level Pressure", u"متوسط ضغط مستوى البحر لشهر يناير", "SLP", "Sea Level Pressure", "Monthly", "Mean", "mbar/hPa", u"متوسط الضغط الجوي المصحح لمستوى سطح البحر لشهر يناير", "Mean sea-level pressure for January", "Mean of valid January SLP values"),
+    ("PSL_February_Mean", "February Mean Sea Level Pressure", u"متوسط ضغط مستوى البحر لشهر فبراير", "SLP", "Sea Level Pressure", "Monthly", "Mean", "mbar/hPa", u"متوسط الضغط الجوي المصحح لمستوى سطح البحر لشهر فبراير", "Mean sea-level pressure for February", "Mean of valid February SLP values"),
+    ("PSL_March_Mean", "March Mean Sea Level Pressure", u"متوسط ضغط مستوى البحر لشهر مارس", "SLP", "Sea Level Pressure", "Monthly", "Mean", "mbar/hPa", u"متوسط الضغط الجوي المصحح لمستوى سطح البحر لشهر مارس", "Mean sea-level pressure for March", "Mean of valid March SLP values"),
+    ("PSL_April_Mean", "April Mean Sea Level Pressure", u"متوسط ضغط مستوى البحر لشهر أبريل", "SLP", "Sea Level Pressure", "Monthly", "Mean", "mbar/hPa", u"متوسط الضغط الجوي المصحح لمستوى سطح البحر لشهر أبريل", "Mean sea-level pressure for April", "Mean of valid April SLP values"),
+    ("PSL_May_Mean", "May Mean Sea Level Pressure", u"متوسط ضغط مستوى البحر لشهر مايو", "SLP", "Sea Level Pressure", "Monthly", "Mean", "mbar/hPa", u"متوسط الضغط الجوي المصحح لمستوى سطح البحر لشهر مايو", "Mean sea-level pressure for May", "Mean of valid May SLP values"),
+    ("PSL_June_Mean", "June Mean Sea Level Pressure", u"متوسط ضغط مستوى البحر لشهر يونيو", "SLP", "Sea Level Pressure", "Monthly", "Mean", "mbar/hPa", u"متوسط الضغط الجوي المصحح لمستوى سطح البحر لشهر يونيو", "Mean sea-level pressure for June", "Mean of valid June SLP values"),
+    ("PSL_July_Mean", "July Mean Sea Level Pressure", u"متوسط ضغط مستوى البحر لشهر يوليو", "SLP", "Sea Level Pressure", "Monthly", "Mean", "mbar/hPa", u"متوسط الضغط الجوي المصحح لمستوى سطح البحر لشهر يوليو", "Mean sea-level pressure for July", "Mean of valid July SLP values"),
+    ("PSL_August_Mean", "August Mean Sea Level Pressure", u"متوسط ضغط مستوى البحر لشهر أغسطس", "SLP", "Sea Level Pressure", "Monthly", "Mean", "mbar/hPa", u"متوسط الضغط الجوي المصحح لمستوى سطح البحر لشهر أغسطس", "Mean sea-level pressure for August", "Mean of valid August SLP values"),
+    ("PSL_September_Mean", "September Mean Sea Level Pressure", u"متوسط ضغط مستوى البحر لشهر سبتمبر", "SLP", "Sea Level Pressure", "Monthly", "Mean", "mbar/hPa", u"متوسط الضغط الجوي المصحح لمستوى سطح البحر لشهر سبتمبر", "Mean sea-level pressure for September", "Mean of valid September SLP values"),
+    ("PSL_October_Mean", "October Mean Sea Level Pressure", u"متوسط ضغط مستوى البحر لشهر أكتوبر", "SLP", "Sea Level Pressure", "Monthly", "Mean", "mbar/hPa", u"متوسط الضغط الجوي المصحح لمستوى سطح البحر لشهر أكتوبر", "Mean sea-level pressure for October", "Mean of valid October SLP values"),
+    ("PSL_November_Mean", "November Mean Sea Level Pressure", u"متوسط ضغط مستوى البحر لشهر نوفمبر", "SLP", "Sea Level Pressure", "Monthly", "Mean", "mbar/hPa", u"متوسط الضغط الجوي المصحح لمستوى سطح البحر لشهر نوفمبر", "Mean sea-level pressure for November", "Mean of valid November SLP values"),
+    ("PSL_December_Mean", "December Mean Sea Level Pressure", u"متوسط ضغط مستوى البحر لشهر ديسمبر", "SLP", "Sea Level Pressure", "Monthly", "Mean", "mbar/hPa", u"متوسط الضغط الجوي المصحح لمستوى سطح البحر لشهر ديسمبر", "Mean sea-level pressure for December", "Mean of valid December SLP values"),
+    ("PS_January_Mean", "January Mean Surface Pressure", u"متوسط الضغط السطحي لشهر يناير", "PS", "Surface Pressure", "Monthly", "Mean", "mbar/hPa", u"متوسط الضغط الجوي عند السطح الفعلي لشهر يناير", "Mean surface pressure for January", "Mean of valid January PS values"),
+    ("PS_February_Mean", "February Mean Surface Pressure", u"متوسط الضغط السطحي لشهر فبراير", "PS", "Surface Pressure", "Monthly", "Mean", "mbar/hPa", u"متوسط الضغط الجوي عند السطح الفعلي لشهر فبراير", "Mean surface pressure for February", "Mean of valid February PS values"),
+    ("PS_March_Mean", "March Mean Surface Pressure", u"متوسط الضغط السطحي لشهر مارس", "PS", "Surface Pressure", "Monthly", "Mean", "mbar/hPa", u"متوسط الضغط الجوي عند السطح الفعلي لشهر مارس", "Mean surface pressure for March", "Mean of valid March PS values"),
+    ("PS_April_Mean", "April Mean Surface Pressure", u"متوسط الضغط السطحي لشهر أبريل", "PS", "Surface Pressure", "Monthly", "Mean", "mbar/hPa", u"متوسط الضغط الجوي عند السطح الفعلي لشهر أبريل", "Mean surface pressure for April", "Mean of valid April PS values"),
+    ("PS_May_Mean", "May Mean Surface Pressure", u"متوسط الضغط السطحي لشهر مايو", "PS", "Surface Pressure", "Monthly", "Mean", "mbar/hPa", u"متوسط الضغط الجوي عند السطح الفعلي لشهر مايو", "Mean surface pressure for May", "Mean of valid May PS values"),
+    ("PS_June_Mean", "June Mean Surface Pressure", u"متوسط الضغط السطحي لشهر يونيو", "PS", "Surface Pressure", "Monthly", "Mean", "mbar/hPa", u"متوسط الضغط الجوي عند السطح الفعلي لشهر يونيو", "Mean surface pressure for June", "Mean of valid June PS values"),
+    ("PS_July_Mean", "July Mean Surface Pressure", u"متوسط الضغط السطحي لشهر يوليو", "PS", "Surface Pressure", "Monthly", "Mean", "mbar/hPa", u"متوسط الضغط الجوي عند السطح الفعلي لشهر يوليو", "Mean surface pressure for July", "Mean of valid July PS values"),
+    ("PS_August_Mean", "August Mean Surface Pressure", u"متوسط الضغط السطحي لشهر أغسطس", "PS", "Surface Pressure", "Monthly", "Mean", "mbar/hPa", u"متوسط الضغط الجوي عند السطح الفعلي لشهر أغسطس", "Mean surface pressure for August", "Mean of valid August PS values"),
+    ("PS_September_Mean", "September Mean Surface Pressure", u"متوسط الضغط السطحي لشهر سبتمبر", "PS", "Surface Pressure", "Monthly", "Mean", "mbar/hPa", u"متوسط الضغط الجوي عند السطح الفعلي لشهر سبتمبر", "Mean surface pressure for September", "Mean of valid September PS values"),
+    ("PS_October_Mean", "October Mean Surface Pressure", u"متوسط الضغط السطحي لشهر أكتوبر", "PS", "Surface Pressure", "Monthly", "Mean", "mbar/hPa", u"متوسط الضغط الجوي عند السطح الفعلي لشهر أكتوبر", "Mean surface pressure for October", "Mean of valid October PS values"),
+    ("PS_November_Mean", "November Mean Surface Pressure", u"متوسط الضغط السطحي لشهر نوفمبر", "PS", "Surface Pressure", "Monthly", "Mean", "mbar/hPa", u"متوسط الضغط الجوي عند السطح الفعلي لشهر نوفمبر", "Mean surface pressure for November", "Mean of valid November PS values"),
+    ("PS_December_Mean", "December Mean Surface Pressure", u"متوسط الضغط السطحي لشهر ديسمبر", "PS", "Surface Pressure", "Monthly", "Mean", "mbar/hPa", u"متوسط الضغط الجوي عند السطح الفعلي لشهر ديسمبر", "Mean surface pressure for December", "Mean of valid December PS values"),
+    ("W_Spd_January_Mean", "January Mean Wind Speed", u"متوسط سرعة الرياح لشهر يناير", "WS10M", "Wind", "Monthly", "Mean", "m/s", u"متوسط سرعة الرياح على ارتفاع 10 أمتار لشهر يناير", "Mean 10-m wind speed for January", "Mean of valid January WS10M values"),
+    ("W_Spd_February_Mean", "February Mean Wind Speed", u"متوسط سرعة الرياح لشهر فبراير", "WS10M", "Wind", "Monthly", "Mean", "m/s", u"متوسط سرعة الرياح على ارتفاع 10 أمتار لشهر فبراير", "Mean 10-m wind speed for February", "Mean of valid February WS10M values"),
+    ("W_Spd_March_Mean", "March Mean Wind Speed", u"متوسط سرعة الرياح لشهر مارس", "WS10M", "Wind", "Monthly", "Mean", "m/s", u"متوسط سرعة الرياح على ارتفاع 10 أمتار لشهر مارس", "Mean 10-m wind speed for March", "Mean of valid March WS10M values"),
+    ("W_Spd_April_Mean", "April Mean Wind Speed", u"متوسط سرعة الرياح لشهر أبريل", "WS10M", "Wind", "Monthly", "Mean", "m/s", u"متوسط سرعة الرياح على ارتفاع 10 أمتار لشهر أبريل", "Mean 10-m wind speed for April", "Mean of valid April WS10M values"),
+    ("W_Spd_May_Mean", "May Mean Wind Speed", u"متوسط سرعة الرياح لشهر مايو", "WS10M", "Wind", "Monthly", "Mean", "m/s", u"متوسط سرعة الرياح على ارتفاع 10 أمتار لشهر مايو", "Mean 10-m wind speed for May", "Mean of valid May WS10M values"),
+    ("W_Spd_June_Mean", "June Mean Wind Speed", u"متوسط سرعة الرياح لشهر يونيو", "WS10M", "Wind", "Monthly", "Mean", "m/s", u"متوسط سرعة الرياح على ارتفاع 10 أمتار لشهر يونيو", "Mean 10-m wind speed for June", "Mean of valid June WS10M values"),
+    ("W_Spd_July_Mean", "July Mean Wind Speed", u"متوسط سرعة الرياح لشهر يوليو", "WS10M", "Wind", "Monthly", "Mean", "m/s", u"متوسط سرعة الرياح على ارتفاع 10 أمتار لشهر يوليو", "Mean 10-m wind speed for July", "Mean of valid July WS10M values"),
+    ("W_Spd_August_Mean", "August Mean Wind Speed", u"متوسط سرعة الرياح لشهر أغسطس", "WS10M", "Wind", "Monthly", "Mean", "m/s", u"متوسط سرعة الرياح على ارتفاع 10 أمتار لشهر أغسطس", "Mean 10-m wind speed for August", "Mean of valid August WS10M values"),
+    ("W_Spd_September_Mean", "September Mean Wind Speed", u"متوسط سرعة الرياح لشهر سبتمبر", "WS10M", "Wind", "Monthly", "Mean", "m/s", u"متوسط سرعة الرياح على ارتفاع 10 أمتار لشهر سبتمبر", "Mean 10-m wind speed for September", "Mean of valid September WS10M values"),
+    ("W_Spd_October_Mean", "October Mean Wind Speed", u"متوسط سرعة الرياح لشهر أكتوبر", "WS10M", "Wind", "Monthly", "Mean", "m/s", u"متوسط سرعة الرياح على ارتفاع 10 أمتار لشهر أكتوبر", "Mean 10-m wind speed for October", "Mean of valid October WS10M values"),
+    ("W_Spd_November_Mean", "November Mean Wind Speed", u"متوسط سرعة الرياح لشهر نوفمبر", "WS10M", "Wind", "Monthly", "Mean", "m/s", u"متوسط سرعة الرياح على ارتفاع 10 أمتار لشهر نوفمبر", "Mean 10-m wind speed for November", "Mean of valid November WS10M values"),
+    ("W_Spd_December_Mean", "December Mean Wind Speed", u"متوسط سرعة الرياح لشهر ديسمبر", "WS10M", "Wind", "Monthly", "Mean", "m/s", u"متوسط سرعة الرياح على ارتفاع 10 أمتار لشهر ديسمبر", "Mean 10-m wind speed for December", "Mean of valid December WS10M values"),
+    ("W_Dir_January_Mean", "January Prevailing Wind Direction", u"متوسط اتجاه الرياح السائد لشهر يناير", "WD10M", "Wind", "Monthly", "Circular Mean", "degree", u"متوسط دائري لاتجاهات الرياح لشهر يناير (متجهي)", "Vector-mean wind direction for January", "atan2(mean sin, mean cos) for January"),
+    ("W_Dir_February_Mean", "February Prevailing Wind Direction", u"متوسط اتجاه الرياح السائد لشهر فبراير", "WD10M", "Wind", "Monthly", "Circular Mean", "degree", u"متوسط دائري لاتجاهات الرياح لشهر فبراير (متجهي)", "Vector-mean wind direction for February", "atan2(mean sin, mean cos) for February"),
+    ("W_Dir_March_Mean", "March Prevailing Wind Direction", u"متوسط اتجاه الرياح السائد لشهر مارس", "WD10M", "Wind", "Monthly", "Circular Mean", "degree", u"متوسط دائري لاتجاهات الرياح لشهر مارس (متجهي)", "Vector-mean wind direction for March", "atan2(mean sin, mean cos) for March"),
+    ("W_Dir_April_Mean", "April Prevailing Wind Direction", u"متوسط اتجاه الرياح السائد لشهر أبريل", "WD10M", "Wind", "Monthly", "Circular Mean", "degree", u"متوسط دائري لاتجاهات الرياح لشهر أبريل (متجهي)", "Vector-mean wind direction for April", "atan2(mean sin, mean cos) for April"),
+    ("W_Dir_May_Mean", "May Prevailing Wind Direction", u"متوسط اتجاه الرياح السائد لشهر مايو", "WD10M", "Wind", "Monthly", "Circular Mean", "degree", u"متوسط دائري لاتجاهات الرياح لشهر مايو (متجهي)", "Vector-mean wind direction for May", "atan2(mean sin, mean cos) for May"),
+    ("W_Dir_June_Mean", "June Prevailing Wind Direction", u"متوسط اتجاه الرياح السائد لشهر يونيو", "WD10M", "Wind", "Monthly", "Circular Mean", "degree", u"متوسط دائري لاتجاهات الرياح لشهر يونيو (متجهي)", "Vector-mean wind direction for June", "atan2(mean sin, mean cos) for June"),
+    ("W_Dir_July_Mean", "July Prevailing Wind Direction", u"متوسط اتجاه الرياح السائد لشهر يوليو", "WD10M", "Wind", "Monthly", "Circular Mean", "degree", u"متوسط دائري لاتجاهات الرياح لشهر يوليو (متجهي)", "Vector-mean wind direction for July", "atan2(mean sin, mean cos) for July"),
+    ("W_Dir_August_Mean", "August Prevailing Wind Direction", u"متوسط اتجاه الرياح السائد لشهر أغسطس", "WD10M", "Wind", "Monthly", "Circular Mean", "degree", u"متوسط دائري لاتجاهات الرياح لشهر أغسطس (متجهي)", "Vector-mean wind direction for August", "atan2(mean sin, mean cos) for August"),
+    ("W_Dir_September_Mean", "September Prevailing Wind Direction", u"متوسط اتجاه الرياح السائد لشهر سبتمبر", "WD10M", "Wind", "Monthly", "Circular Mean", "degree", u"متوسط دائري لاتجاهات الرياح لشهر سبتمبر (متجهي)", "Vector-mean wind direction for September", "atan2(mean sin, mean cos) for September"),
+    ("W_Dir_October_Mean", "October Prevailing Wind Direction", u"متوسط اتجاه الرياح السائد لشهر أكتوبر", "WD10M", "Wind", "Monthly", "Circular Mean", "degree", u"متوسط دائري لاتجاهات الرياح لشهر أكتوبر (متجهي)", "Vector-mean wind direction for October", "atan2(mean sin, mean cos) for October"),
+    ("W_Dir_November_Mean", "November Prevailing Wind Direction", u"متوسط اتجاه الرياح السائد لشهر نوفمبر", "WD10M", "Wind", "Monthly", "Circular Mean", "degree", u"متوسط دائري لاتجاهات الرياح لشهر نوفمبر (متجهي)", "Vector-mean wind direction for November", "atan2(mean sin, mean cos) for November"),
+    ("W_Dir_December_Mean", "December Prevailing Wind Direction", u"متوسط اتجاه الرياح السائد لشهر ديسمبر", "WD10M", "Wind", "Monthly", "Circular Mean", "degree", u"متوسط دائري لاتجاهات الرياح لشهر ديسمبر (متجهي)", "Vector-mean wind direction for December", "atan2(mean sin, mean cos) for December"),
+    ("RH_January_Mean", "January Mean Relative Humidity", u"متوسط الرطوبة النسبية لشهر يناير", "RH2M", "Relative Humidity", "Monthly", "Mean", "%", u"متوسط الرطوبة النسبية على ارتفاع 2 متر لشهر يناير", "Mean 2-m relative humidity for January", "Mean of valid January RH2M values"),
+    ("RH_February_Mean", "February Mean Relative Humidity", u"متوسط الرطوبة النسبية لشهر فبراير", "RH2M", "Relative Humidity", "Monthly", "Mean", "%", u"متوسط الرطوبة النسبية على ارتفاع 2 متر لشهر فبراير", "Mean 2-m relative humidity for February", "Mean of valid February RH2M values"),
+    ("RH_March_Mean", "March Mean Relative Humidity", u"متوسط الرطوبة النسبية لشهر مارس", "RH2M", "Relative Humidity", "Monthly", "Mean", "%", u"متوسط الرطوبة النسبية على ارتفاع 2 متر لشهر مارس", "Mean 2-m relative humidity for March", "Mean of valid March RH2M values"),
+    ("RH_April_Mean", "April Mean Relative Humidity", u"متوسط الرطوبة النسبية لشهر أبريل", "RH2M", "Relative Humidity", "Monthly", "Mean", "%", u"متوسط الرطوبة النسبية على ارتفاع 2 متر لشهر أبريل", "Mean 2-m relative humidity for April", "Mean of valid April RH2M values"),
+    ("RH_May_Mean", "May Mean Relative Humidity", u"متوسط الرطوبة النسبية لشهر مايو", "RH2M", "Relative Humidity", "Monthly", "Mean", "%", u"متوسط الرطوبة النسبية على ارتفاع 2 متر لشهر مايو", "Mean 2-m relative humidity for May", "Mean of valid May RH2M values"),
+    ("RH_June_Mean", "June Mean Relative Humidity", u"متوسط الرطوبة النسبية لشهر يونيو", "RH2M", "Relative Humidity", "Monthly", "Mean", "%", u"متوسط الرطوبة النسبية على ارتفاع 2 متر لشهر يونيو", "Mean 2-m relative humidity for June", "Mean of valid June RH2M values"),
+    ("RH_July_Mean", "July Mean Relative Humidity", u"متوسط الرطوبة النسبية لشهر يوليو", "RH2M", "Relative Humidity", "Monthly", "Mean", "%", u"متوسط الرطوبة النسبية على ارتفاع 2 متر لشهر يوليو", "Mean 2-m relative humidity for July", "Mean of valid July RH2M values"),
+    ("RH_August_Mean", "August Mean Relative Humidity", u"متوسط الرطوبة النسبية لشهر أغسطس", "RH2M", "Relative Humidity", "Monthly", "Mean", "%", u"متوسط الرطوبة النسبية على ارتفاع 2 متر لشهر أغسطس", "Mean 2-m relative humidity for August", "Mean of valid August RH2M values"),
+    ("RH_September_Mean", "September Mean Relative Humidity", u"متوسط الرطوبة النسبية لشهر سبتمبر", "RH2M", "Relative Humidity", "Monthly", "Mean", "%", u"متوسط الرطوبة النسبية على ارتفاع 2 متر لشهر سبتمبر", "Mean 2-m relative humidity for September", "Mean of valid September RH2M values"),
+    ("RH_October_Mean", "October Mean Relative Humidity", u"متوسط الرطوبة النسبية لشهر أكتوبر", "RH2M", "Relative Humidity", "Monthly", "Mean", "%", u"متوسط الرطوبة النسبية على ارتفاع 2 متر لشهر أكتوبر", "Mean 2-m relative humidity for October", "Mean of valid October RH2M values"),
+    ("RH_November_Mean", "November Mean Relative Humidity", u"متوسط الرطوبة النسبية لشهر نوفمبر", "RH2M", "Relative Humidity", "Monthly", "Mean", "%", u"متوسط الرطوبة النسبية على ارتفاع 2 متر لشهر نوفمبر", "Mean 2-m relative humidity for November", "Mean of valid November RH2M values"),
+    ("RH_December_Mean", "December Mean Relative Humidity", u"متوسط الرطوبة النسبية لشهر ديسمبر", "RH2M", "Relative Humidity", "Monthly", "Mean", "%", u"متوسط الرطوبة النسبية على ارتفاع 2 متر لشهر ديسمبر", "Mean 2-m relative humidity for December", "Mean of valid December RH2M values"),
+    ("Td_January_Mean", "January Mean Dew Point Temperature", u"متوسط نقطة الندى لشهر يناير", "T2MDEW", "Dew Point", "Monthly", "Mean", "C", u"متوسط درجة حرارة نقطة الندى لشهر يناير", "Mean dew point temperature for January", "Mean of valid January T2MDEW values"),
+    ("Td_February_Mean", "February Mean Dew Point Temperature", u"متوسط نقطة الندى لشهر فبراير", "T2MDEW", "Dew Point", "Monthly", "Mean", "C", u"متوسط درجة حرارة نقطة الندى لشهر فبراير", "Mean dew point temperature for February", "Mean of valid February T2MDEW values"),
+    ("Td_March_Mean", "March Mean Dew Point Temperature", u"متوسط نقطة الندى لشهر مارس", "T2MDEW", "Dew Point", "Monthly", "Mean", "C", u"متوسط درجة حرارة نقطة الندى لشهر مارس", "Mean dew point temperature for March", "Mean of valid March T2MDEW values"),
+    ("Td_April_Mean", "April Mean Dew Point Temperature", u"متوسط نقطة الندى لشهر أبريل", "T2MDEW", "Dew Point", "Monthly", "Mean", "C", u"متوسط درجة حرارة نقطة الندى لشهر أبريل", "Mean dew point temperature for April", "Mean of valid April T2MDEW values"),
+    ("Td_May_Mean", "May Mean Dew Point Temperature", u"متوسط نقطة الندى لشهر مايو", "T2MDEW", "Dew Point", "Monthly", "Mean", "C", u"متوسط درجة حرارة نقطة الندى لشهر مايو", "Mean dew point temperature for May", "Mean of valid May T2MDEW values"),
+    ("Td_June_Mean", "June Mean Dew Point Temperature", u"متوسط نقطة الندى لشهر يونيو", "T2MDEW", "Dew Point", "Monthly", "Mean", "C", u"متوسط درجة حرارة نقطة الندى لشهر يونيو", "Mean dew point temperature for June", "Mean of valid June T2MDEW values"),
+    ("Td_July_Mean", "July Mean Dew Point Temperature", u"متوسط نقطة الندى لشهر يوليو", "T2MDEW", "Dew Point", "Monthly", "Mean", "C", u"متوسط درجة حرارة نقطة الندى لشهر يوليو", "Mean dew point temperature for July", "Mean of valid July T2MDEW values"),
+    ("Td_August_Mean", "August Mean Dew Point Temperature", u"متوسط نقطة الندى لشهر أغسطس", "T2MDEW", "Dew Point", "Monthly", "Mean", "C", u"متوسط درجة حرارة نقطة الندى لشهر أغسطس", "Mean dew point temperature for August", "Mean of valid August T2MDEW values"),
+    ("Td_September_Mean", "September Mean Dew Point Temperature", u"متوسط نقطة الندى لشهر سبتمبر", "T2MDEW", "Dew Point", "Monthly", "Mean", "C", u"متوسط درجة حرارة نقطة الندى لشهر سبتمبر", "Mean dew point temperature for September", "Mean of valid September T2MDEW values"),
+    ("Td_October_Mean", "October Mean Dew Point Temperature", u"متوسط نقطة الندى لشهر أكتوبر", "T2MDEW", "Dew Point", "Monthly", "Mean", "C", u"متوسط درجة حرارة نقطة الندى لشهر أكتوبر", "Mean dew point temperature for October", "Mean of valid October T2MDEW values"),
+    ("Td_November_Mean", "November Mean Dew Point Temperature", u"متوسط نقطة الندى لشهر نوفمبر", "T2MDEW", "Dew Point", "Monthly", "Mean", "C", u"متوسط درجة حرارة نقطة الندى لشهر نوفمبر", "Mean dew point temperature for November", "Mean of valid November T2MDEW values"),
+    ("Td_December_Mean", "December Mean Dew Point Temperature", u"متوسط نقطة الندى لشهر ديسمبر", "T2MDEW", "Dew Point", "Monthly", "Mean", "C", u"متوسط درجة حرارة نقطة الندى لشهر ديسمبر", "Mean dew point temperature for December", "Mean of valid December T2MDEW values"),
+    ("Sol_January_Mean", "January Mean Daily Solar Radiation", u"المتوسط اليومي للإشعاع الشمسي لشهر يناير", "ALLSKY_SFC_SW_DWN", "Solar Radiation", "Monthly", "Mean", "kWh/m2/day", u"معدل الإشعاع الشمسي اليومي لشهر يناير (كيلوواط.س/م2/يوم)", "Mean daily solar radiation for January", "Mean of January MJ/3.6 across years"),
+    ("Sol_February_Mean", "February Mean Daily Solar Radiation", u"المتوسط اليومي للإشعاع الشمسي لشهر فبراير", "ALLSKY_SFC_SW_DWN", "Solar Radiation", "Monthly", "Mean", "kWh/m2/day", u"معدل الإشعاع الشمسي اليومي لشهر فبراير (كيلوواط.س/م2/يوم)", "Mean daily solar radiation for February", "Mean of February MJ/3.6 across years"),
+    ("Sol_March_Mean", "March Mean Daily Solar Radiation", u"المتوسط اليومي للإشعاع الشمسي لشهر مارس", "ALLSKY_SFC_SW_DWN", "Solar Radiation", "Monthly", "Mean", "kWh/m2/day", u"معدل الإشعاع الشمسي اليومي لشهر مارس (كيلوواط.س/م2/يوم)", "Mean daily solar radiation for March", "Mean of March MJ/3.6 across years"),
+    ("Sol_April_Mean", "April Mean Daily Solar Radiation", u"المتوسط اليومي للإشعاع الشمسي لشهر أبريل", "ALLSKY_SFC_SW_DWN", "Solar Radiation", "Monthly", "Mean", "kWh/m2/day", u"معدل الإشعاع الشمسي اليومي لشهر أبريل (كيلوواط.س/م2/يوم)", "Mean daily solar radiation for April", "Mean of April MJ/3.6 across years"),
+    ("Sol_May_Mean", "May Mean Daily Solar Radiation", u"المتوسط اليومي للإشعاع الشمسي لشهر مايو", "ALLSKY_SFC_SW_DWN", "Solar Radiation", "Monthly", "Mean", "kWh/m2/day", u"معدل الإشعاع الشمسي اليومي لشهر مايو (كيلوواط.س/م2/يوم)", "Mean daily solar radiation for May", "Mean of May MJ/3.6 across years"),
+    ("Sol_June_Mean", "June Mean Daily Solar Radiation", u"المتوسط اليومي للإشعاع الشمسي لشهر يونيو", "ALLSKY_SFC_SW_DWN", "Solar Radiation", "Monthly", "Mean", "kWh/m2/day", u"معدل الإشعاع الشمسي اليومي لشهر يونيو (كيلوواط.س/م2/يوم)", "Mean daily solar radiation for June", "Mean of June MJ/3.6 across years"),
+    ("Sol_July_Mean", "July Mean Daily Solar Radiation", u"المتوسط اليومي للإشعاع الشمسي لشهر يوليو", "ALLSKY_SFC_SW_DWN", "Solar Radiation", "Monthly", "Mean", "kWh/m2/day", u"معدل الإشعاع الشمسي اليومي لشهر يوليو (كيلوواط.س/م2/يوم)", "Mean daily solar radiation for July", "Mean of July MJ/3.6 across years"),
+    ("Sol_August_Mean", "August Mean Daily Solar Radiation", u"المتوسط اليومي للإشعاع الشمسي لشهر أغسطس", "ALLSKY_SFC_SW_DWN", "Solar Radiation", "Monthly", "Mean", "kWh/m2/day", u"معدل الإشعاع الشمسي اليومي لشهر أغسطس (كيلوواط.س/م2/يوم)", "Mean daily solar radiation for August", "Mean of August MJ/3.6 across years"),
+    ("Sol_September_Mean", "September Mean Daily Solar Radiation", u"المتوسط اليومي للإشعاع الشمسي لشهر سبتمبر", "ALLSKY_SFC_SW_DWN", "Solar Radiation", "Monthly", "Mean", "kWh/m2/day", u"معدل الإشعاع الشمسي اليومي لشهر سبتمبر (كيلوواط.س/م2/يوم)", "Mean daily solar radiation for September", "Mean of September MJ/3.6 across years"),
+    ("Sol_October_Mean", "October Mean Daily Solar Radiation", u"المتوسط اليومي للإشعاع الشمسي لشهر أكتوبر", "ALLSKY_SFC_SW_DWN", "Solar Radiation", "Monthly", "Mean", "kWh/m2/day", u"معدل الإشعاع الشمسي اليومي لشهر أكتوبر (كيلوواط.س/م2/يوم)", "Mean daily solar radiation for October", "Mean of October MJ/3.6 across years"),
+    ("Sol_November_Mean", "November Mean Daily Solar Radiation", u"المتوسط اليومي للإشعاع الشمسي لشهر نوفمبر", "ALLSKY_SFC_SW_DWN", "Solar Radiation", "Monthly", "Mean", "kWh/m2/day", u"معدل الإشعاع الشمسي اليومي لشهر نوفمبر (كيلوواط.س/م2/يوم)", "Mean daily solar radiation for November", "Mean of November MJ/3.6 across years"),
+    ("Sol_December_Mean", "December Mean Daily Solar Radiation", u"المتوسط اليومي للإشعاع الشمسي لشهر ديسمبر", "ALLSKY_SFC_SW_DWN", "Solar Radiation", "Monthly", "Mean", "kWh/m2/day", u"معدل الإشعاع الشمسي اليومي لشهر ديسمبر (كيلوواط.س/م2/يوم)", "Mean daily solar radiation for December", "Mean of December MJ/3.6 across years"),
+    ("UV_January_Mean", "January Mean UV Index", u"متوسط مؤشر الأشعة فوق البنفسجية لشهر يناير", "ALLSKY_SFC_UV_INDEX", "UV Index", "Monthly", "Mean", "Index", u"متوسط مؤشر الأشعة فوق البنفسجية لشهر يناير", "Mean UV index for January", "Mean of valid January UV values"),
+    ("UV_February_Mean", "February Mean UV Index", u"متوسط مؤشر الأشعة فوق البنفسجية لشهر فبراير", "ALLSKY_SFC_UV_INDEX", "UV Index", "Monthly", "Mean", "Index", u"متوسط مؤشر الأشعة فوق البنفسجية لشهر فبراير", "Mean UV index for February", "Mean of valid February UV values"),
+    ("UV_March_Mean", "March Mean UV Index", u"متوسط مؤشر الأشعة فوق البنفسجية لشهر مارس", "ALLSKY_SFC_UV_INDEX", "UV Index", "Monthly", "Mean", "Index", u"متوسط مؤشر الأشعة فوق البنفسجية لشهر مارس", "Mean UV index for March", "Mean of valid March UV values"),
+    ("UV_April_Mean", "April Mean UV Index", u"متوسط مؤشر الأشعة فوق البنفسجية لشهر أبريل", "ALLSKY_SFC_UV_INDEX", "UV Index", "Monthly", "Mean", "Index", u"متوسط مؤشر الأشعة فوق البنفسجية لشهر أبريل", "Mean UV index for April", "Mean of valid April UV values"),
+    ("UV_May_Mean", "May Mean UV Index", u"متوسط مؤشر الأشعة فوق البنفسجية لشهر مايو", "ALLSKY_SFC_UV_INDEX", "UV Index", "Monthly", "Mean", "Index", u"متوسط مؤشر الأشعة فوق البنفسجية لشهر مايو", "Mean UV index for May", "Mean of valid May UV values"),
+    ("UV_June_Mean", "June Mean UV Index", u"متوسط مؤشر الأشعة فوق البنفسجية لشهر يونيو", "ALLSKY_SFC_UV_INDEX", "UV Index", "Monthly", "Mean", "Index", u"متوسط مؤشر الأشعة فوق البنفسجية لشهر يونيو", "Mean UV index for June", "Mean of valid June UV values"),
+    ("UV_July_Mean", "July Mean UV Index", u"متوسط مؤشر الأشعة فوق البنفسجية لشهر يوليو", "ALLSKY_SFC_UV_INDEX", "UV Index", "Monthly", "Mean", "Index", u"متوسط مؤشر الأشعة فوق البنفسجية لشهر يوليو", "Mean UV index for July", "Mean of valid July UV values"),
+    ("UV_August_Mean", "August Mean UV Index", u"متوسط مؤشر الأشعة فوق البنفسجية لشهر أغسطس", "ALLSKY_SFC_UV_INDEX", "UV Index", "Monthly", "Mean", "Index", u"متوسط مؤشر الأشعة فوق البنفسجية لشهر أغسطس", "Mean UV index for August", "Mean of valid August UV values"),
+    ("UV_September_Mean", "September Mean UV Index", u"متوسط مؤشر الأشعة فوق البنفسجية لشهر سبتمبر", "ALLSKY_SFC_UV_INDEX", "UV Index", "Monthly", "Mean", "Index", u"متوسط مؤشر الأشعة فوق البنفسجية لشهر سبتمبر", "Mean UV index for September", "Mean of valid September UV values"),
+    ("UV_October_Mean", "October Mean UV Index", u"متوسط مؤشر الأشعة فوق البنفسجية لشهر أكتوبر", "ALLSKY_SFC_UV_INDEX", "UV Index", "Monthly", "Mean", "Index", u"متوسط مؤشر الأشعة فوق البنفسجية لشهر أكتوبر", "Mean UV index for October", "Mean of valid October UV values"),
+    ("UV_November_Mean", "November Mean UV Index", u"متوسط مؤشر الأشعة فوق البنفسجية لشهر نوفمبر", "ALLSKY_SFC_UV_INDEX", "UV Index", "Monthly", "Mean", "Index", u"متوسط مؤشر الأشعة فوق البنفسجية لشهر نوفمبر", "Mean UV index for November", "Mean of valid November UV values"),
+    ("UV_December_Mean", "December Mean UV Index", u"متوسط مؤشر الأشعة فوق البنفسجية لشهر ديسمبر", "ALLSKY_SFC_UV_INDEX", "UV Index", "Monthly", "Mean", "Index", u"متوسط مؤشر الأشعة فوق البنفسجية لشهر ديسمبر", "Mean UV index for December", "Mean of valid December UV values"),
+    ("Cld_January_Mean", "January Mean Cloud Cover", u"متوسط الغطاء السحابي لشهر يناير", "CLOUD_AMT", "Cloud Cover", "Monthly", "Mean", "%", u"متوسط نسبة الغطاء السحابي لشهر يناير", "Mean cloud cover for January", "Mean of valid January CLOUD_AMT values"),
+    ("Cld_February_Mean", "February Mean Cloud Cover", u"متوسط الغطاء السحابي لشهر فبراير", "CLOUD_AMT", "Cloud Cover", "Monthly", "Mean", "%", u"متوسط نسبة الغطاء السحابي لشهر فبراير", "Mean cloud cover for February", "Mean of valid February CLOUD_AMT values"),
+    ("Cld_March_Mean", "March Mean Cloud Cover", u"متوسط الغطاء السحابي لشهر مارس", "CLOUD_AMT", "Cloud Cover", "Monthly", "Mean", "%", u"متوسط نسبة الغطاء السحابي لشهر مارس", "Mean cloud cover for March", "Mean of valid March CLOUD_AMT values"),
+    ("Cld_April_Mean", "April Mean Cloud Cover", u"متوسط الغطاء السحابي لشهر أبريل", "CLOUD_AMT", "Cloud Cover", "Monthly", "Mean", "%", u"متوسط نسبة الغطاء السحابي لشهر أبريل", "Mean cloud cover for April", "Mean of valid April CLOUD_AMT values"),
+    ("Cld_May_Mean", "May Mean Cloud Cover", u"متوسط الغطاء السحابي لشهر مايو", "CLOUD_AMT", "Cloud Cover", "Monthly", "Mean", "%", u"متوسط نسبة الغطاء السحابي لشهر مايو", "Mean cloud cover for May", "Mean of valid May CLOUD_AMT values"),
+    ("Cld_June_Mean", "June Mean Cloud Cover", u"متوسط الغطاء السحابي لشهر يونيو", "CLOUD_AMT", "Cloud Cover", "Monthly", "Mean", "%", u"متوسط نسبة الغطاء السحابي لشهر يونيو", "Mean cloud cover for June", "Mean of valid June CLOUD_AMT values"),
+    ("Cld_July_Mean", "July Mean Cloud Cover", u"متوسط الغطاء السحابي لشهر يوليو", "CLOUD_AMT", "Cloud Cover", "Monthly", "Mean", "%", u"متوسط نسبة الغطاء السحابي لشهر يوليو", "Mean cloud cover for July", "Mean of valid July CLOUD_AMT values"),
+    ("Cld_August_Mean", "August Mean Cloud Cover", u"متوسط الغطاء السحابي لشهر أغسطس", "CLOUD_AMT", "Cloud Cover", "Monthly", "Mean", "%", u"متوسط نسبة الغطاء السحابي لشهر أغسطس", "Mean cloud cover for August", "Mean of valid August CLOUD_AMT values"),
+    ("Cld_September_Mean", "September Mean Cloud Cover", u"متوسط الغطاء السحابي لشهر سبتمبر", "CLOUD_AMT", "Cloud Cover", "Monthly", "Mean", "%", u"متوسط نسبة الغطاء السحابي لشهر سبتمبر", "Mean cloud cover for September", "Mean of valid September CLOUD_AMT values"),
+    ("Cld_October_Mean", "October Mean Cloud Cover", u"متوسط الغطاء السحابي لشهر أكتوبر", "CLOUD_AMT", "Cloud Cover", "Monthly", "Mean", "%", u"متوسط نسبة الغطاء السحابي لشهر أكتوبر", "Mean cloud cover for October", "Mean of valid October CLOUD_AMT values"),
+    ("Cld_November_Mean", "November Mean Cloud Cover", u"متوسط الغطاء السحابي لشهر نوفمبر", "CLOUD_AMT", "Cloud Cover", "Monthly", "Mean", "%", u"متوسط نسبة الغطاء السحابي لشهر نوفمبر", "Mean cloud cover for November", "Mean of valid November CLOUD_AMT values"),
+    ("Cld_December_Mean", "December Mean Cloud Cover", u"متوسط الغطاء السحابي لشهر ديسمبر", "CLOUD_AMT", "Cloud Cover", "Monthly", "Mean", "%", u"متوسط نسبة الغطاء السحابي لشهر ديسمبر", "Mean cloud cover for December", "Mean of valid December CLOUD_AMT values"),
+    ("ET_January_Total", "January Total Evapotranspiration", u"مجموع البخر والنتح لشهر يناير", "T2M+T2M_MAX+T2M_MIN", "Evapotranspiration", "Monthly", "Sum", "mm/month", u"متوسط مجموع البخر والنتح لشهر يناير بطريقة هارجريفز-ساماني (ملم/شهر)", "Mean total potential evapotranspiration for January (FAO-56)", "Monthly FAO-56 Hargreaves ETo for January"),
+    ("ET_February_Total", "February Total Evapotranspiration", u"مجموع البخر والنتح لشهر فبراير", "T2M+T2M_MAX+T2M_MIN", "Evapotranspiration", "Monthly", "Sum", "mm/month", u"متوسط مجموع البخر والنتح لشهر فبراير بطريقة هارجريفز-ساماني (ملم/شهر)", "Mean total potential evapotranspiration for February (FAO-56)", "Monthly FAO-56 Hargreaves ETo for February"),
+    ("ET_March_Total", "March Total Evapotranspiration", u"مجموع البخر والنتح لشهر مارس", "T2M+T2M_MAX+T2M_MIN", "Evapotranspiration", "Monthly", "Sum", "mm/month", u"متوسط مجموع البخر والنتح لشهر مارس بطريقة هارجريفز-ساماني (ملم/شهر)", "Mean total potential evapotranspiration for March (FAO-56)", "Monthly FAO-56 Hargreaves ETo for March"),
+    ("ET_April_Total", "April Total Evapotranspiration", u"مجموع البخر والنتح لشهر أبريل", "T2M+T2M_MAX+T2M_MIN", "Evapotranspiration", "Monthly", "Sum", "mm/month", u"متوسط مجموع البخر والنتح لشهر أبريل بطريقة هارجريفز-ساماني (ملم/شهر)", "Mean total potential evapotranspiration for April (FAO-56)", "Monthly FAO-56 Hargreaves ETo for April"),
+    ("ET_May_Total", "May Total Evapotranspiration", u"مجموع البخر والنتح لشهر مايو", "T2M+T2M_MAX+T2M_MIN", "Evapotranspiration", "Monthly", "Sum", "mm/month", u"متوسط مجموع البخر والنتح لشهر مايو بطريقة هارجريفز-ساماني (ملم/شهر)", "Mean total potential evapotranspiration for May (FAO-56)", "Monthly FAO-56 Hargreaves ETo for May"),
+    ("ET_June_Total", "June Total Evapotranspiration", u"مجموع البخر والنتح لشهر يونيو", "T2M+T2M_MAX+T2M_MIN", "Evapotranspiration", "Monthly", "Sum", "mm/month", u"متوسط مجموع البخر والنتح لشهر يونيو بطريقة هارجريفز-ساماني (ملم/شهر)", "Mean total potential evapotranspiration for June (FAO-56)", "Monthly FAO-56 Hargreaves ETo for June"),
+    ("ET_July_Total", "July Total Evapotranspiration", u"مجموع البخر والنتح لشهر يوليو", "T2M+T2M_MAX+T2M_MIN", "Evapotranspiration", "Monthly", "Sum", "mm/month", u"متوسط مجموع البخر والنتح لشهر يوليو بطريقة هارجريفز-ساماني (ملم/شهر)", "Mean total potential evapotranspiration for July (FAO-56)", "Monthly FAO-56 Hargreaves ETo for July"),
+    ("ET_August_Total", "August Total Evapotranspiration", u"مجموع البخر والنتح لشهر أغسطس", "T2M+T2M_MAX+T2M_MIN", "Evapotranspiration", "Monthly", "Sum", "mm/month", u"متوسط مجموع البخر والنتح لشهر أغسطس بطريقة هارجريفز-ساماني (ملم/شهر)", "Mean total potential evapotranspiration for August (FAO-56)", "Monthly FAO-56 Hargreaves ETo for August"),
+    ("ET_September_Total", "September Total Evapotranspiration", u"مجموع البخر والنتح لشهر سبتمبر", "T2M+T2M_MAX+T2M_MIN", "Evapotranspiration", "Monthly", "Sum", "mm/month", u"متوسط مجموع البخر والنتح لشهر سبتمبر بطريقة هارجريفز-ساماني (ملم/شهر)", "Mean total potential evapotranspiration for September (FAO-56)", "Monthly FAO-56 Hargreaves ETo for September"),
+    ("ET_October_Total", "October Total Evapotranspiration", u"مجموع البخر والنتح لشهر أكتوبر", "T2M+T2M_MAX+T2M_MIN", "Evapotranspiration", "Monthly", "Sum", "mm/month", u"متوسط مجموع البخر والنتح لشهر أكتوبر بطريقة هارجريفز-ساماني (ملم/شهر)", "Mean total potential evapotranspiration for October (FAO-56)", "Monthly FAO-56 Hargreaves ETo for October"),
+    ("ET_November_Total", "November Total Evapotranspiration", u"مجموع البخر والنتح لشهر نوفمبر", "T2M+T2M_MAX+T2M_MIN", "Evapotranspiration", "Monthly", "Sum", "mm/month", u"متوسط مجموع البخر والنتح لشهر نوفمبر بطريقة هارجريفز-ساماني (ملم/شهر)", "Mean total potential evapotranspiration for November (FAO-56)", "Monthly FAO-56 Hargreaves ETo for November"),
+    ("ET_December_Total", "December Total Evapotranspiration", u"مجموع البخر والنتح لشهر ديسمبر", "T2M+T2M_MAX+T2M_MIN", "Evapotranspiration", "Monthly", "Sum", "mm/month", u"متوسط مجموع البخر والنتح لشهر ديسمبر بطريقة هارجريفز-ساماني (ملم/شهر)", "Mean total potential evapotranspiration for December (FAO-56)", "Monthly FAO-56 Hargreaves ETo for December"),
 ]
 
 FIELD_BY_NAME = dict((r[0], r) for r in FIELD_DEFS)
@@ -1736,6 +1899,151 @@ SHP_FIELD_MAP = {
     "R_Anom_Annual_Pct": "R_AnomPct",
     "R_Anom_Winter": "R_AnomWin",
     "R_Anom_Winter_Pct": "R_AnomWPct",
+    # --- Monthly Field Abbreviations ---
+    "Cld_April_Mean": "Cld_AprMn",
+    "Cld_August_Mean": "Cld_AugMn",
+    "Cld_December_Mean": "Cld_DecMn",
+    "Cld_February_Mean": "Cld_FebMn",
+    "Cld_January_Mean": "Cld_JanMn",
+    "Cld_July_Mean": "Cld_JulMn",
+    "Cld_June_Mean": "Cld_JunMn",
+    "Cld_March_Mean": "Cld_MarMn",
+    "Cld_May_Mean": "Cld_MayMn",
+    "Cld_November_Mean": "Cld_NovMn",
+    "Cld_October_Mean": "Cld_OctMn",
+    "Cld_September_Mean": "Cld_SepMn",
+    "ET_April_Total": "ET_AprTot",
+    "ET_August_Total": "ET_AugTot",
+    "ET_December_Total": "ET_DecTot",
+    "ET_February_Total": "ET_FebTot",
+    "ET_January_Total": "ET_JanTot",
+    "ET_July_Total": "ET_JulTot",
+    "ET_June_Total": "ET_JunTot",
+    "ET_March_Total": "ET_MarTot",
+    "ET_May_Total": "ET_MayTot",
+    "ET_November_Total": "ET_NovTot",
+    "ET_October_Total": "ET_OctTot",
+    "ET_September_Total": "ET_SepTot",
+    "PSL_April_Mean": "PSL_AprMn",
+    "PSL_August_Mean": "PSL_AugMn",
+    "PSL_December_Mean": "PSL_DecMn",
+    "PSL_February_Mean": "PSL_FebMn",
+    "PSL_January_Mean": "PSL_JanMn",
+    "PSL_July_Mean": "PSL_JulMn",
+    "PSL_June_Mean": "PSL_JunMn",
+    "PSL_March_Mean": "PSL_MarMn",
+    "PSL_May_Mean": "PSL_MayMn",
+    "PSL_November_Mean": "PSL_NovMn",
+    "PSL_October_Mean": "PSL_OctMn",
+    "PSL_September_Mean": "PSL_SepMn",
+    "PS_April_Mean": "PS_AprMean",
+    "PS_August_Mean": "PS_AugMean",
+    "PS_December_Mean": "PS_DecMean",
+    "PS_February_Mean": "PS_FebMean",
+    "PS_January_Mean": "PS_JanMean",
+    "PS_July_Mean": "PS_JulMean",
+    "PS_June_Mean": "PS_JunMean",
+    "PS_March_Mean": "PS_MarMean",
+    "PS_May_Mean": "PS_MayMean",
+    "PS_November_Mean": "PS_NovMean",
+    "PS_October_Mean": "PS_OctMean",
+    "PS_September_Mean": "PS_SepMean",
+    "RH_April_Mean": "RH_AprMean",
+    "RH_August_Mean": "RH_AugMean",
+    "RH_December_Mean": "RH_DecMean",
+    "RH_February_Mean": "RH_FebMean",
+    "RH_January_Mean": "RH_JanMean",
+    "RH_July_Mean": "RH_JulMean",
+    "RH_June_Mean": "RH_JunMean",
+    "RH_March_Mean": "RH_MarMean",
+    "RH_May_Mean": "RH_MayMean",
+    "RH_November_Mean": "RH_NovMean",
+    "RH_October_Mean": "RH_OctMean",
+    "RH_September_Mean": "RH_SepMean",
+    "R_April_Mean": "R_AprMean",
+    "R_August_Mean": "R_AugMean",
+    "R_December_Mean": "R_DecMean",
+    "R_February_Mean": "R_FebMean",
+    "R_January_Mean": "R_JanMean",
+    "R_July_Mean": "R_JulMean",
+    "R_June_Mean": "R_JunMean",
+    "R_March_Mean": "R_MarMean",
+    "R_May_Mean": "R_MayMean",
+    "R_November_Mean": "R_NovMean",
+    "R_October_Mean": "R_OctMean",
+    "R_September_Mean": "R_SepMean",
+    "Sol_April_Mean": "Sol_AprMn",
+    "Sol_August_Mean": "Sol_AugMn",
+    "Sol_December_Mean": "Sol_DecMn",
+    "Sol_February_Mean": "Sol_FebMn",
+    "Sol_January_Mean": "Sol_JanMn",
+    "Sol_July_Mean": "Sol_JulMn",
+    "Sol_June_Mean": "Sol_JunMn",
+    "Sol_March_Mean": "Sol_MarMn",
+    "Sol_May_Mean": "Sol_MayMn",
+    "Sol_November_Mean": "Sol_NovMn",
+    "Sol_October_Mean": "Sol_OctMn",
+    "Sol_September_Mean": "Sol_SepMn",
+    "T_April_Mean": "T_AprMean",
+    "T_August_Mean": "T_AugMean",
+    "T_December_Mean": "T_DecMean",
+    "T_February_Mean": "T_FebMean",
+    "T_January_Mean": "T_JanMean",
+    "T_July_Mean": "T_JulMean",
+    "T_June_Mean": "T_JunMean",
+    "T_March_Mean": "T_MarMean",
+    "T_May_Mean": "T_MayMean",
+    "T_November_Mean": "T_NovMean",
+    "T_October_Mean": "T_OctMean",
+    "T_September_Mean": "T_SepMean",
+    "Td_April_Mean": "Td_AprMean",
+    "Td_August_Mean": "Td_AugMean",
+    "Td_December_Mean": "Td_DecMean",
+    "Td_February_Mean": "Td_FebMean",
+    "Td_January_Mean": "Td_JanMean",
+    "Td_July_Mean": "Td_JulMean",
+    "Td_June_Mean": "Td_JunMean",
+    "Td_March_Mean": "Td_MarMean",
+    "Td_May_Mean": "Td_MayMean",
+    "Td_November_Mean": "Td_NovMean",
+    "Td_October_Mean": "Td_OctMean",
+    "Td_September_Mean": "Td_SepMean",
+    "UV_April_Mean": "UV_AprMean",
+    "UV_August_Mean": "UV_AugMean",
+    "UV_December_Mean": "UV_DecMean",
+    "UV_February_Mean": "UV_FebMean",
+    "UV_January_Mean": "UV_JanMean",
+    "UV_July_Mean": "UV_JulMean",
+    "UV_June_Mean": "UV_JunMean",
+    "UV_March_Mean": "UV_MarMean",
+    "UV_May_Mean": "UV_MayMean",
+    "UV_November_Mean": "UV_NovMean",
+    "UV_October_Mean": "UV_OctMean",
+    "UV_September_Mean": "UV_SepMean",
+    "W_Dir_April_Mean": "WDr_AprMn",
+    "W_Dir_August_Mean": "WDr_AugMn",
+    "W_Dir_December_Mean": "WDr_DecMn",
+    "W_Dir_February_Mean": "WDr_FebMn",
+    "W_Dir_January_Mean": "WDr_JanMn",
+    "W_Dir_July_Mean": "WDr_JulMn",
+    "W_Dir_June_Mean": "WDr_JunMn",
+    "W_Dir_March_Mean": "WDr_MarMn",
+    "W_Dir_May_Mean": "WDr_MayMn",
+    "W_Dir_November_Mean": "WDr_NovMn",
+    "W_Dir_October_Mean": "WDr_OctMn",
+    "W_Dir_September_Mean": "WDr_SepMn",
+    "W_Spd_April_Mean": "WSp_AprMn",
+    "W_Spd_August_Mean": "WSp_AugMn",
+    "W_Spd_December_Mean": "WSp_DecMn",
+    "W_Spd_February_Mean": "WSp_FebMn",
+    "W_Spd_January_Mean": "WSp_JanMn",
+    "W_Spd_July_Mean": "WSp_JulMn",
+    "W_Spd_June_Mean": "WSp_JunMn",
+    "W_Spd_March_Mean": "WSp_MarMn",
+    "W_Spd_May_Mean": "WSp_MayMn",
+    "W_Spd_November_Mean": "WSp_NovMn",
+    "W_Spd_October_Mean": "WSp_OctMn",
+    "W_Spd_September_Mean": "WSp_SepMn",
 }
 
 REV_SHP_MAP = dict((v, k) for k, v in SHP_FIELD_MAP.items())
@@ -2565,6 +2873,9 @@ def compute_point_fields(monthly, years, modules, temporal, daily_raw=None,
         res["R_Spring_Total"] = res["R_Spring_Mean"]  # backward compatibility alias
         res["R_Summer_Total"] = res["R_Summer_Mean"]  # backward compatibility alias
         res["R_Autumn_Total"] = res["R_Autumn_Mean"]  # backward compatibility alias
+        _months_en = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+        for m_idx, m_name in enumerate(_months_en, 1):
+            res["R_%s_Mean" % m_name] = round(clim_m.get(m_idx), 2) if clim_m.get(m_idx) is not None else 0.0
     has_drought_mod = any(m in modules for m in [
         "De Martonne Aridity", "Evapotranspiration", "Hargreaves PET", "UNEP Aridity", "Water Deficit", "Dry Months",
         "Drought & Aridity", "Climate_Models"
@@ -2601,52 +2912,71 @@ def compute_point_fields(monthly, years, modules, temporal, daily_raw=None,
             totals_p = dict(raw_p)
         res.update(compute_trend_anomaly_fields(
             monthly.get("T2M", {}), totals_p))
+    _months_en = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
     if "Sea Level Pressure" in modules:
         conv = dict((ym, pressure_kpa_to_mbar(v)) for ym, v in monthly.get("SLP", {}).items())
         s = seasonal_means_from_monthly(conv)
+        c_slp = climat_monthly_means(conv)
         res.update({"PSL_Annual_Mean": s["Annual"], "PSL_Winter_Mean": s["Winter"],
                     "PSL_Spring_Mean": s["Spring"], "PSL_Summer_Mean": s["Summer"],
                     "PSL_Autumn_Mean": s["Autumn"],
                     "PSL_Annual_Range": monthly_range(conv)})
+        for m_idx, m_name in enumerate(_months_en, 1):
+            res["PSL_%s_Mean" % m_name] = round(c_slp.get(m_idx), 2) if c_slp.get(m_idx) is not None else None
     if "Surface Pressure" in modules:
         conv = dict((ym, pressure_kpa_to_mbar(v)) for ym, v in monthly.get("PS", {}).items())
         s = seasonal_means_from_monthly(conv)
+        c_ps = climat_monthly_means(conv)
         res.update({"PS_Annual_Mean": s["Annual"], "PS_Winter_Mean": s["Winter"],
                     "PS_Spring_Mean": s["Spring"], "PS_Summer_Mean": s["Summer"],
                     "PS_Autumn_Mean": s["Autumn"],
                     "PS_Annual_Range": monthly_range(conv)})
+        for m_idx, m_name in enumerate(_months_en, 1):
+            res["PS_%s_Mean" % m_name] = round(c_ps.get(m_idx), 2) if c_ps.get(m_idx) is not None else None
     if "Wind" in modules:
         res.update(compute_wind_fields(monthly.get("WS10M", {}), monthly.get("WD10M", {})))
     if "Relative Humidity" in modules:
         _rh_monthly = monthly.get("RH2M", {})
         s = seasonal_means_from_monthly(_rh_monthly)
+        c_rh = climat_monthly_means(_rh_monthly)
         res.update({"RH_Annual_Mean": s["Annual"], "RH_Winter_Mean": s["Winter"],
                     "RH_Spring_Mean": s["Spring"], "RH_Summer_Mean": s["Summer"],
                     "RH_Autumn_Mean": s["Autumn"],
                     "RH_Annual_Range": monthly_range(_rh_monthly)})
+        for m_idx, m_name in enumerate(_months_en, 1):
+            res["RH_%s_Mean" % m_name] = round(c_rh.get(m_idx), 2) if c_rh.get(m_idx) is not None else None
     if "Dew Point" in modules:
         _td_monthly = monthly.get("T2MDEW", {})
         s_td = seasonal_means_from_monthly(_td_monthly)
+        c_td = climat_monthly_means(_td_monthly)
         res.update({"Td_Annual_Mean": s_td["Annual"], "Td_Winter_Mean": s_td["Winter"],
                     "Td_Spring_Mean": s_td["Spring"], "Td_Summer_Mean": s_td["Summer"],
                     "Td_Autumn_Mean": s_td["Autumn"],
                     "Td_Annual_Range": monthly_range(_td_monthly)})
+        for m_idx, m_name in enumerate(_months_en, 1):
+            res["Td_%s_Mean" % m_name] = round(c_td.get(m_idx), 2) if c_td.get(m_idx) is not None else None
     if "Solar Radiation" in modules:
         res.update(compute_solar_fields(monthly.get("ALLSKY_SFC_SW_DWN", {}), years))
     if "UV Index" in modules:
         _uv_monthly = monthly.get("ALLSKY_SFC_UV_INDEX", {})
         s = seasonal_means_from_monthly(_uv_monthly)
+        c_uv = climat_monthly_means(_uv_monthly)
         res.update({"UV_Annual_Mean": s["Annual"], "UV_Winter_Mean": s["Winter"],
                     "UV_Spring_Mean": s["Spring"], "UV_Summer_Mean": s["Summer"],
                     "UV_Autumn_Mean": s["Autumn"],
                     "UV_Annual_Range": monthly_range(_uv_monthly)})
+        for m_idx, m_name in enumerate(_months_en, 1):
+            res["UV_%s_Mean" % m_name] = round(c_uv.get(m_idx), 2) if c_uv.get(m_idx) is not None else None
     if "Cloud Cover" in modules:
         _cld_monthly = monthly.get("CLOUD_AMT", {})
         s = seasonal_means_from_monthly(_cld_monthly)
+        c_cld = climat_monthly_means(_cld_monthly)
         res.update({"Cld_Annual_Mean": s["Annual"], "Cld_Winter_Mean": s["Winter"],
                     "Cld_Spring_Mean": s["Spring"], "Cld_Summer_Mean": s["Summer"],
                     "Cld_Autumn_Mean": s["Autumn"],
                     "Cld_Annual_Range": monthly_range(_cld_monthly)})
+        for m_idx, m_name in enumerate(_months_en, 1):
+            res["Cld_%s_Mean" % m_name] = round(c_cld.get(m_idx), 2) if c_cld.get(m_idx) is not None else None
     return res
 
 
@@ -5692,8 +6022,23 @@ class PowerClimateAtlasGenerator(object):
             with arcpy.da.SearchCursor(fc, fields) as cur:
                 for r in cur:
                     rows.append(list(r))
-            write_excel_file(xls_path, fields, rows, sheet_name="Data", rtl=False)
-            msg("Excel: %s" % xls_path)
+            
+            month_keywords = [
+                "January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"
+            ]
+            m_fnames = [fn for fn in fields if any(mk in fn for mk in month_keywords)]
+            base_fnames = [fn for fn in fields if fn in ("OBJECTID", "Source_ID", "Point_Lat", "Point_Lon")]
+            
+            sheets_to_write = [("Data", fields, rows, False)]
+            if m_fnames:
+                month_cols = base_fnames + m_fnames
+                month_indices = [fields.index(c) for c in month_cols if c in fields]
+                month_rows = [[r[idx] for idx in month_indices] for r in rows]
+                sheets_to_write.append(("Month", month_cols, month_rows, False))
+            
+            write_master_excel_workbook(xls_path, sheets_to_write)
+            msg("Excel: %s (sheets: %s)" % (xls_path, ", ".join(s[0] for s in sheets_to_write)))
         except Exception as ex:
             warn("Excel export failed: %s" % ex)
 

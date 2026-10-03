@@ -7,10 +7,10 @@
 
 The Climate Atlas Generator produces multi-tiered geospatial deliverables to support diverse analytical environments:
 
-1. **ESRI File Geodatabase (FGDB)**: Primary repository containing feature classes with 115 attribute fields, full descriptive aliases, and 64-bit floating point precision.
+1. **ESRI File Geodatabase (FGDB)**: Primary repository containing feature classes with up to 259 attribute fields (247 Climate Indicators + 12 Admin), full descriptive aliases, and 64-bit floating point precision.
 2. **ESRI Shapefile (.shp)**: Legacy vector interoperability layer with 10-character DBF field name truncation enforced via `SHP_FIELD_MAP`.
-3. **Floating-Point GeoTIFF / ESRI GRID Rasters**: 103 interpolated continuous surfaces organized across 18 modular directories.
-4. **Excel Data Dictionaries & Master Metadata Tables**: Human-readable spreadsheets with Arabic/English bilingual documentation.
+3. **Floating-Point GeoTIFF / ESRI GRID Rasters**: 103 interpolated continuous surfaces covering annual and seasonal climatological horizons organized across 18 modular directories.
+4. **Excel Data Dictionaries & Master Metadata Tables**: Dual-sheet workbooks (`Data` & `Month`) and human-readable spreadsheets with Arabic/English bilingual documentation.
 5. **NetCDF / Spatial Metadata**: CF-1.8 compliant metadata mappings for scientific exchange.
 
 ---
@@ -18,10 +18,10 @@ The Climate Atlas Generator produces multi-tiered geospatial deliverables to sup
 ## 2. File Geodatabase (FGDB) Schema Specifications
 
 - **Workspace Path**: `.../Climate_Atlas.gdb`
-- **Primary Feature Class**: `Climate_Atlas_Points`
+- **Primary Feature Class**: `Climate_Atlas_Points` (and modular element feature classes: `01_Temperature`, `02_Precipitation`, etc.)
 - **Geometry Type**: Point (`esriGeometryPoint`)
 - **Spatial Reference**: GCS_WGS_1984 (EPSG:4326) or user-specified Projected Coordinate System.
-- **Precision**: Double (`esriFieldTypeDouble`, 8-byte IEEE 754 floating point) for all 103 climate indicators.
+- **Precision**: Double (`esriFieldTypeDouble`, 8-byte IEEE 754 floating point) for all 247 climate indicators.
 - **Field Alias Preservation**: All fields carry full bilingual aliases (e.g. `T_Annual_Mean` alias: `Annual Mean Air Temperature (°C) / المتوسط السنوي لدرجة حرارة الهواء`).
 
 ---
@@ -113,3 +113,19 @@ Output_Rasters/
 - **Compression**: LZW lossless compression.
 - **NoData Sentinel**: `-3.4028234663852886e+38` (IEEE 754 32-bit float minimum) or ESRI Grid NoData.
 - **Pyramid Layers**: Bilinear interpolation resampling for continuous variables; Nearest Neighbor for integer counts (`Dry_Months_Count`).
+
+---
+
+## 5. Dual-Sheet Excel Workbooks & Raw Time-Series Archive
+
+### 5.1 Element Workbook Structure (`00_Tables_And_Reports/*.xls`)
+Every exported element workbook is generated with two comprehensive worksheets:
+1. **Sheet `Data`**: Preserves station identifiers (`Source_ID`, `Point_Lat`, `Point_Lon`), run parameters (`Data_Start`, `Data_End`, `Temporal`, `Interp_Meth`, `Cell_Size`), annual indicators, and seasonal indicators (DJF, MAM, JJA, SON).
+2. **Sheet `Month`**: Contains complete 12-month climatological profiles (`T_January_Mean` .. `T_December_Mean`, `R_January_Mean` .. `R_December_Mean`, etc.) across all monitoring stations.
+
+### 5.2 Local Raw Time-Series Archive (`Egypt_Monthly_Raw_1996_2025.json`)
+The complete 30-year monthly raw time-series downloaded from NASA POWER is preserved as a permanent structured JSON document in `00_Tables_And_Reports\Egypt_Monthly_Raw_1996_2025.json`. This provides:
+- Instant offline recalculations without API latency.
+- Full provenance and verifiable auditability back to raw CERES and MERRA-2 records.
+- Re-usable inputs for downstream hydrological and agroclimatic models.
+

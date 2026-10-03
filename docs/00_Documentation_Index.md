@@ -10,9 +10,9 @@
 
 ## 1. Executive Summary & Purpose
 
-The **NASA POWER & Open-Meteo Climate Atlas Generator** is an enterprise-grade automated climatological analysis and geospatial mapping platform designed for ArcGIS Desktop (ArcMap 10.8) and ArcGIS Pro (2.8+ / 3.x). The system synthesizes 30-year high-resolution climatological normals (such as the standard World Meteorological Organization WMO 1991–2020 baseline) across **18 distinct biophysical climate modules** comprising **103 scientific climate indicators** and **12 administrative/geoprocessing metadata fields** (115 total fields).
+The **NASA POWER & Open-Meteo Climate Atlas Generator** is an enterprise-grade automated climatological analysis and geospatial mapping platform designed for ArcGIS Desktop (ArcMap 10.8) and ArcGIS Pro (2.8+ / 3.x). The system synthesizes 30-year high-resolution climatological normals (such as the standard World Meteorological Organization WMO 1991–2020 baseline and 1996–2025 climatological normals) across **18 distinct biophysical climate modules** comprising **247 scientific climate indicators** (103 annual/seasonal/bioclimatic indicators + 144 monthly climatological indicators) and **12 administrative/geoprocessing metadata fields** (259 total fields).
 
-By bridging spaceborne satellite observations, global atmospheric reanalyses (NASA MERRA-2, NASA CERES, ECMWF ERA5, and ERA5-Land), and automated geostatistical interpolation routines, the platform enables the seamless generation of publication-quality vector geodatabases, shapefiles, surface rasters (GeoTIFF / ESRI GRID), and interactive Excel/CSV data dictionaries.
+By bridging spaceborne satellite observations, global atmospheric reanalyses (NASA MERRA-2, NASA CERES, ECMWF ERA5, and ERA5-Land), and automated geostatistical interpolation routines, the platform enables the seamless generation of publication-quality vector geodatabases, shapefiles, surface rasters (GeoTIFF / ESRI GRID), dual-sheet structured Excel workbooks (`Data` & `Month` sheets), and interactive Excel/CSV data dictionaries.
 
 ```
 +--------------------------------------------------------------------------------------------------+
@@ -54,8 +54,9 @@ By bridging spaceborne satellite observations, global atmospheric reanalyses (NA
 |              v                                               v                                   |
 |   +--------------------------+                   +--------------------------+                    |
 |   | Vector Geodatabase & SHP |                   | Geostatistical Surface   |                    |
-|   | 115 Fields (103 Climate) |                   | Spatial Interpolation    |                    |
+|   | 259 Fields (247 Climate) |                   | Spatial Interpolation    |                    |
 |   | 18 Modular Feature Sets  |                   | IDW / Spline / Kriging   |                    |
+|   | Dual-Sheet Excel Workbooks                   | (Annual & Seasonal Maps) |                    |
 |   +--------------------------+                   +-------------+------------+                    |
 |                                                                |                                 |
 |                                                                v                                 |
@@ -102,28 +103,28 @@ The complete documentation suite is organized modularly to enable deep-dive scie
 
 The atlas system synthesizes 18 dedicated biophysical modules, outputting each to an individual raster subfolder:
 
-| Code | Module Name (English / Arabic) | Output Raster Folder | Fields Count | Primary Reanalysis Parameters | Primary Mathematical Operations |
-|:---:|:---|:---|:---:|:---|:---|
-| **00** | Admin & Metadata / إدارة النظام | `-` (Vector attributes only) | 12 | System parameters, spatial coordinates | Runtime tracking, geodetic coordinates |
-| **01** | Temperature / درجات الحرارة | `01_Temperature` | 10 | `T2M`, `T2M_MAX`, `T2M_MIN` | Climatological means, seasonal means, extremes |
-| **02** | Precipitation / تساقط الأمطار | `02_Precipitation` | 8 | `PRECTOTCORR` | Multi-year annual sums, seasonal sums, monthly rate |
-| **03** | Sea Level Pressure / الضغط عند مستوى البحر | `03_Sea_Level_Pressure` | 6 | `PSL` (or `PS` reduced to MSL) | Climatological means, seasonal means, range |
-| **04** | Surface Pressure / الضغط الجوي السطحي | `04_Surface_Pressure` | 6 | `PS` | Climatological means, seasonal means, range |
-| **05** | Wind / حركة الرياح | `05_Wind` | 13 | `WS10M`, `U2M`, `V2M` | Scalar speed statistics, circular vector direction |
-| **06** | Relative Humidity / الرطوبة النسبية | `06_Relative_Humidity` | 6 | `RH2M` | Climatological means, seasonal means, range |
-| **07** | Dew Point / نقطة الندى | `07_Dew_Point` | 6 | `T2MDEW` | Climatological means, seasonal means, range |
-| **08** | Solar Radiation / الإشعاع الشمسي | `08_Solar_Radiation` | 7 | `ALLSKY_SFC_SW_DWN` | Daily mean insolation, annual accumulated totals |
-| **09** | UV Index / مؤشر الأشعة فوق البنفسجية | `09_UV_Index` | 6 | `ALLSKY_SFC_UV_INDEX` | Midday solar noon maximum index statistics |
-| **10** | Cloud Cover / الغطاء السحابي | `10_Cloud_Cover` | 6 | `CLDTOT` | Sky area fraction obscured by clouds (%) |
-| **11** | Heat Index / مؤشر الإجهاد الحراري | `11_Heat_Index` | 5 | Derived (`T2M`, `RH2M`) | Rothfusz 9-parameter polynomial, Stull Tw, ISO WBGT |
-| **12** | Wind Chill / عامل برودة الرياح | `12_Wind_Chill` | 2 | Derived (`T2M`, `WS10M`) | Joint US/Canada 2001 convective wind chill formula |
-| **13** | De Martonne Aridity / مؤشر دومارتون | `13_De_Martonne_Aridity` | 1 | Derived (`R_Annual_Mean`, `T_Annual_Mean`) | $I_{DM} = P / (T + 10)$ bioclimatic classification |
-| **14** | Evapotranspiration / البخر-نتح المرجعي | `14_Evapotranspiration` | 9 | Derived (`Ra`, `T`, `Tmax`, `Tmin`) | Hargreaves-Samani (1985) PET model |
-| **15** | UNEP Aridity / مؤشر الجفاف الدولي | `15_UNEP_Aridity` | 1 | Derived (`R_Annual_Mean`, `PET_HarAnn`) | $AI_{UNEP} = P / 	ext{PET}$ UNCCD dryland classification |
-| **16** | Water Deficit / العجز المائي المناخي | `16_Water_Deficit` | 1 | Derived (`R_Annual_Mean`, `PET_HarAnn`) | $CWD = P - 	ext{PET}$ annual net hydrological balance |
-| **17** | Dry Months / عدد الأشهر الجافة | `17_Dry_Months` | 1 | Derived (`P_m`, `T_m` across 12 months) | Bagnouls-Gaussen bioclimatic criterion ($P < 2T$) |
-| **18** | Trends & Anomalies / الاتجاهات والتغير | `18_Trends_And_Anomalies` | 9 | Derived multi-year time series | OLS decadal trend slope, 2011–2020 vs 1991–2020 |
-| **Total** | **All Modules Combined** | **18 Raster Folders** | **115** | **12 Admin + 103 Climate Indicators** | **Complete Multi-Disciplinary Climatological Atlas** |
+| Code | Module Name (English / Arabic) | Output Raster Folder | Total Fields | Annual/Seasonal | Monthly Climatological | Primary Mathematical Operations |
+|:---:|:---|:---|:---:|:---:|:---:|:---|
+| **00** | Admin & Metadata / إدارة النظام | `-` (Vector attributes only) | 12 | 12 | - | Runtime tracking, geodetic coordinates |
+| **01** | Temperature / درجات الحرارة | `01_Temperature` | 22 | 10 | 12 (Jan–Dec Mean) | Climatological means, seasonal means, monthly means |
+| **02** | Precipitation / تساقط الأمطار | `02_Precipitation` | 20 | 8 | 12 (Jan–Dec Sum Mean) | Multi-year annual sums, seasonal sums, monthly accumulated totals |
+| **03** | Sea Level Pressure / الضغط عند مستوى البحر | `03_Sea_Level_Pressure` | 18 | 6 | 12 (Jan–Dec Mean) | Climatological means, seasonal means, monthly sea-level pressure |
+| **04** | Surface Pressure / الضغط الجوي السطحي | `04_Surface_Pressure` | 18 | 6 | 12 (Jan–Dec Mean) | Climatological means, seasonal means, monthly surface pressure |
+| **05** | Wind / حركة الرياح | `05_Wind` | 37 | 13 | 24 (12 Spd + 12 Dir) | Scalar speed statistics, circular vector direction atan2(sin, cos) |
+| **06** | Relative Humidity / الرطوبة النسبية | `06_Relative_Humidity` | 18 | 6 | 12 (Jan–Dec Mean) | Climatological means, seasonal means, monthly relative humidity |
+| **07** | Dew Point / نقطة الندى | `07_Dew_Point` | 18 | 6 | 12 (Jan–Dec Mean) | Climatological means, seasonal means, monthly dew point temperature |
+| **08** | Solar Radiation / الإشعاع الشمسي | `08_Solar_Radiation` | 19 | 7 | 12 (Jan–Dec Daily Mean) | Daily mean insolation, annual accumulated totals, monthly rates |
+| **09** | UV Index / مؤشر الأشعة فوق البنفسجية | `09_UV_Index` | 18 | 6 | 12 (Jan–Dec Mean) | Midday solar noon maximum index statistics, monthly UV index |
+| **10** | Cloud Cover / الغطاء السحابي | `10_Cloud_Cover` | 18 | 6 | 12 (Jan–Dec Mean) | Sky area fraction obscured by clouds (%), monthly coverage |
+| **11** | Heat Index / مؤشر الإجهاد الحراري | `11_Heat_Index` | 5 | 5 | - | Rothfusz 9-parameter polynomial, Stull Tw, ISO WBGT |
+| **12** | Wind Chill / عامل برودة الرياح | `12_Wind_Chill` | 2 | 2 | - | Joint US/Canada 2001 convective wind chill formula |
+| **13** | De Martonne Aridity / مؤشر دومارتون | `13_De_Martonne_Aridity` | 1 | 1 | - | $I_{DM} = P / (T + 10)$ bioclimatic classification |
+| **14** | Evapotranspiration / البخر-نتح المرجعي | `14_Evapotranspiration` | 21 | 9 | 12 (Jan–Dec FAO-56 Sum) | Hargreaves-Samani (1985) PET model, monthly FAO-56 totals |
+| **15** | UNEP Aridity / مؤشر الجفاف الدولي | `15_UNEP_Aridity` | 1 | 1 | - | $AI_{UNEP} = P / \text{PET}$ UNCCD dryland classification |
+| **16** | Water Deficit / العجز المائي المناخي | `16_Water_Deficit` | 1 | 1 | - | $CWD = P - \text{PET}$ annual net hydrological balance |
+| **17** | Dry Months / عدد الأشهر الجافة | `17_Dry_Months` | 1 | 1 | - | Bagnouls-Gaussen bioclimatic criterion ($P < 2T$) |
+| **18** | Trends & Anomalies / الاتجاهات والتغير | `18_Trends_And_Anomalies` | 9 | 9 | - | OLS decadal trend slope, 2011–2020 vs 1991–2020 |
+| **Total** | **All Modules Combined** | **18 Raster Folders** | **259** | **115 (12 Admin + 103 Ann/Sea)** | **144 Monthly Indicators** | **Complete Multi-Disciplinary Climatological Atlas** |
 
 ---
 

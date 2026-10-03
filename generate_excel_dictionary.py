@@ -211,6 +211,114 @@ FIELDS_DATA = [
         "unit": u"°C",
         "map_title": u"خريطة المتوسط السنوي للنهايات الصغرى لدرجة الحرارة (°C)"
     },
+    {
+        "short_name": "T_JanMean",
+        "full_name": "T_January_Mean",
+        "module_code": "01_Temperature",
+        "module_name": "01_Temperature (درجة الحرارة)",
+        "desc_ar": u"المتوسط الحسابي لدرجة حرارة الهواء عند ارتفاع 2 متر لشهر يناير عبر فترة الرصد 1996–2025.",
+        "unit": u"°C",
+        "map_title": u"خريطة متوسط درجة الحرارة لشهر يناير (°C)"
+    },
+    {
+        "short_name": "T_FebMean",
+        "full_name": "T_February_Mean",
+        "module_code": "01_Temperature",
+        "module_name": "01_Temperature (درجة الحرارة)",
+        "desc_ar": u"المتوسط الحسابي لدرجة حرارة الهواء عند ارتفاع 2 متر لشهر فبراير عبر فترة الرصد 1996–2025.",
+        "unit": u"°C",
+        "map_title": u"خريطة متوسط درجة الحرارة لشهر فبراير (°C)"
+    },
+    {
+        "short_name": "T_MarMean",
+        "full_name": "T_March_Mean",
+        "module_code": "01_Temperature",
+        "module_name": "01_Temperature (درجة الحرارة)",
+        "desc_ar": u"المتوسط الحسابي لدرجة حرارة الهواء عند ارتفاع 2 متر لشهر مارس عبر فترة الرصد 1996–2025.",
+        "unit": u"°C",
+        "map_title": u"خريطة متوسط درجة الحرارة لشهر مارس (°C)"
+    },
+    {
+        "short_name": "T_AprMean",
+        "full_name": "T_April_Mean",
+        "module_code": "01_Temperature",
+        "module_name": "01_Temperature (درجة الحرارة)",
+        "desc_ar": u"المتوسط الحسابي لدرجة حرارة الهواء عند ارتفاع 2 متر لشهر أبريل عبر فترة الرصد 1996–2025.",
+        "unit": u"°C",
+        "map_title": u"خريطة متوسط درجة الحرارة لشهر أبريل (°C)"
+    },
+    {
+        "short_name": "T_MayMean",
+        "full_name": "T_May_Mean",
+        "module_code": "01_Temperature",
+        "module_name": "01_Temperature (درجة الحرارة)",
+        "desc_ar": u"المتوسط الحسابي لدرجة حرارة الهواء عند ارتفاع 2 متر لشهر مايو عبر فترة الرصد 1996–2025.",
+        "unit": u"°C",
+        "map_title": u"خريطة متوسط درجة الحرارة لشهر مايو (°C)"
+    },
+    {
+        "short_name": "T_JunMean",
+        "full_name": "T_June_Mean",
+        "module_code": "01_Temperature",
+        "module_name": "01_Temperature (درجة الحرارة)",
+        "desc_ar": u"المتوسط الحسابي لدرجة حرارة الهواء عند ارتفاع 2 متر لشهر يونيو عبر فترة الرصد 1996–2025.",
+        "unit": u"°C",
+        "map_title": u"خريطة متوسط درجة الحرارة لشهر يونيو (°C)"
+    },
+    {
+        "short_name": "T_JulMean",
+        "full_name": "T_July_Mean",
+        "module_code": "01_Temperature",
+        "module_name": "01_Temperature (درجة الحرارة)",
+        "desc_ar": u"المتوسط الحسابي لدرجة حرارة الهواء عند ارتفاع 2 متر لشهر يوليو عبر فترة الرصد 1996–2025.",
+        "unit": u"°C",
+        "map_title": u"خريطة متوسط درجة الحرارة لشهر يوليو (°C)"
+    },
+    {
+        "short_name": "T_AugMean",
+        "full_name": "T_August_Mean",
+        "module_code": "01_Temperature",
+        "module_name": "01_Temperature (درجة الحرارة)",
+        "desc_ar": u"المتوسط الحسابي لدرجة حرارة الهواء عند ارتفاع 2 متر لشهر أغسطس عبر فترة الرصد 1996–2025.",
+        "unit": u"°C",
+        "map_title": u"خريطة متوسط درجة الحرارة لشهر أغسطس (°C)"
+    },
+    {
+        "short_name": "T_SepMean",
+        "full_name": "T_September_Mean",
+        "module_code": "01_Temperature",
+        "module_name": "01_Temperature (درجة الحرارة)",
+        "desc_ar": u"المتوسط الحسابي لدرجة حرارة الهواء عند ارتفاع 2 متر لشهر سبتمبر عبر فترة الرصد 1996–2025.",
+        "unit": u"°C",
+        "map_title": u"خريطة متوسط درجة الحرارة لشهر سبتمبر (°C)"
+    },
+    {
+        "short_name": "T_OctMean",
+        "full_name": "T_October_Mean",
+        "module_code": "01_Temperature",
+        "module_name": "01_Temperature (درجة الحرارة)",
+        "desc_ar": u"المتوسط الحسابي لدرجة حرارة الهواء عند ارتفاع 2 متر لشهر أكتوبر عبر فترة الرصد 1996–2025.",
+        "unit": u"°C",
+        "map_title": u"خريطة متوسط درجة الحرارة لشهر أكتوبر (°C)"
+    },
+    {
+        "short_name": "T_NovMean",
+        "full_name": "T_November_Mean",
+        "module_code": "01_Temperature",
+        "module_name": "01_Temperature (درجة الحرارة)",
+        "desc_ar": u"المتوسط الحسابي لدرجة حرارة الهواء عند ارتفاع 2 متر لشهر نوفمبر عبر فترة الرصد 1996–2025.",
+        "unit": u"°C",
+        "map_title": u"خريطة متوسط درجة الحرارة لشهر نوفمبر (°C)"
+    },
+    {
+        "short_name": "T_DecMean",
+        "full_name": "T_December_Mean",
+        "module_code": "01_Temperature",
+        "module_name": "01_Temperature (درجة الحرارة)",
+        "desc_ar": u"المتوسط الحسابي لدرجة حرارة الهواء عند ارتفاع 2 متر لشهر ديسمبر عبر فترة الرصد 1996–2025.",
+        "unit": u"°C",
+        "map_title": u"خريطة متوسط درجة الحرارة لشهر ديسمبر (°C)"
+    },
 
     # --- 3. مؤشر الحرارة والراحة البيومناخية (11_Heat_Index) ---
     {
@@ -314,6 +422,114 @@ FIELDS_DATA = [
         "unit": u"°C",
         "map_title": u"خريطة المدى السنوي لدرجة حرارة نقطة الندى (°C)"
     },
+    {
+        "short_name": "Td_JanMean",
+        "full_name": "Td_January_Mean",
+        "module_code": "07_Dew_Point",
+        "module_name": "07_Dew_Point (نقطة الندى)",
+        "desc_ar": u"متوسط درجة حرارة نقطة الندى عند ارتفاع 2 متر لشهر يناير.",
+        "unit": u"°C",
+        "map_title": u"خريطة متوسط درجة حرارة نقطة الندى لشهر يناير (°C)"
+    },
+    {
+        "short_name": "Td_FebMean",
+        "full_name": "Td_February_Mean",
+        "module_code": "07_Dew_Point",
+        "module_name": "07_Dew_Point (نقطة الندى)",
+        "desc_ar": u"متوسط درجة حرارة نقطة الندى عند ارتفاع 2 متر لشهر فبراير.",
+        "unit": u"°C",
+        "map_title": u"خريطة متوسط درجة حرارة نقطة الندى لشهر فبراير (°C)"
+    },
+    {
+        "short_name": "Td_MarMean",
+        "full_name": "Td_March_Mean",
+        "module_code": "07_Dew_Point",
+        "module_name": "07_Dew_Point (نقطة الندى)",
+        "desc_ar": u"متوسط درجة حرارة نقطة الندى عند ارتفاع 2 متر لشهر مارس.",
+        "unit": u"°C",
+        "map_title": u"خريطة متوسط درجة حرارة نقطة الندى لشهر مارس (°C)"
+    },
+    {
+        "short_name": "Td_AprMean",
+        "full_name": "Td_April_Mean",
+        "module_code": "07_Dew_Point",
+        "module_name": "07_Dew_Point (نقطة الندى)",
+        "desc_ar": u"متوسط درجة حرارة نقطة الندى عند ارتفاع 2 متر لشهر أبريل.",
+        "unit": u"°C",
+        "map_title": u"خريطة متوسط درجة حرارة نقطة الندى لشهر أبريل (°C)"
+    },
+    {
+        "short_name": "Td_MayMean",
+        "full_name": "Td_May_Mean",
+        "module_code": "07_Dew_Point",
+        "module_name": "07_Dew_Point (نقطة الندى)",
+        "desc_ar": u"متوسط درجة حرارة نقطة الندى عند ارتفاع 2 متر لشهر مايو.",
+        "unit": u"°C",
+        "map_title": u"خريطة متوسط درجة حرارة نقطة الندى لشهر مايو (°C)"
+    },
+    {
+        "short_name": "Td_JunMean",
+        "full_name": "Td_June_Mean",
+        "module_code": "07_Dew_Point",
+        "module_name": "07_Dew_Point (نقطة الندى)",
+        "desc_ar": u"متوسط درجة حرارة نقطة الندى عند ارتفاع 2 متر لشهر يونيو.",
+        "unit": u"°C",
+        "map_title": u"خريطة متوسط درجة حرارة نقطة الندى لشهر يونيو (°C)"
+    },
+    {
+        "short_name": "Td_JulMean",
+        "full_name": "Td_July_Mean",
+        "module_code": "07_Dew_Point",
+        "module_name": "07_Dew_Point (نقطة الندى)",
+        "desc_ar": u"متوسط درجة حرارة نقطة الندى عند ارتفاع 2 متر لشهر يوليو.",
+        "unit": u"°C",
+        "map_title": u"خريطة متوسط درجة حرارة نقطة الندى لشهر يوليو (°C)"
+    },
+    {
+        "short_name": "Td_AugMean",
+        "full_name": "Td_August_Mean",
+        "module_code": "07_Dew_Point",
+        "module_name": "07_Dew_Point (نقطة الندى)",
+        "desc_ar": u"متوسط درجة حرارة نقطة الندى عند ارتفاع 2 متر لشهر أغسطس.",
+        "unit": u"°C",
+        "map_title": u"خريطة متوسط درجة حرارة نقطة الندى لشهر أغسطس (°C)"
+    },
+    {
+        "short_name": "Td_SepMean",
+        "full_name": "Td_September_Mean",
+        "module_code": "07_Dew_Point",
+        "module_name": "07_Dew_Point (نقطة الندى)",
+        "desc_ar": u"متوسط درجة حرارة نقطة الندى عند ارتفاع 2 متر لشهر سبتمبر.",
+        "unit": u"°C",
+        "map_title": u"خريطة متوسط درجة حرارة نقطة الندى لشهر سبتمبر (°C)"
+    },
+    {
+        "short_name": "Td_OctMean",
+        "full_name": "Td_October_Mean",
+        "module_code": "07_Dew_Point",
+        "module_name": "07_Dew_Point (نقطة الندى)",
+        "desc_ar": u"متوسط درجة حرارة نقطة الندى عند ارتفاع 2 متر لشهر أكتوبر.",
+        "unit": u"°C",
+        "map_title": u"خريطة متوسط درجة حرارة نقطة الندى لشهر أكتوبر (°C)"
+    },
+    {
+        "short_name": "Td_NovMean",
+        "full_name": "Td_November_Mean",
+        "module_code": "07_Dew_Point",
+        "module_name": "07_Dew_Point (نقطة الندى)",
+        "desc_ar": u"متوسط درجة حرارة نقطة الندى عند ارتفاع 2 متر لشهر نوفمبر.",
+        "unit": u"°C",
+        "map_title": u"خريطة متوسط درجة حرارة نقطة الندى لشهر نوفمبر (°C)"
+    },
+    {
+        "short_name": "Td_DecMean",
+        "full_name": "Td_December_Mean",
+        "module_code": "07_Dew_Point",
+        "module_name": "07_Dew_Point (نقطة الندى)",
+        "desc_ar": u"متوسط درجة حرارة نقطة الندى عند ارتفاع 2 متر لشهر ديسمبر.",
+        "unit": u"°C",
+        "map_title": u"خريطة متوسط درجة حرارة نقطة الندى لشهر ديسمبر (°C)"
+    },
 
     # --- 5. التساقط والأمطار (02_Precipitation) ---
     {
@@ -388,6 +604,114 @@ FIELDS_DATA = [
         "unit": u"مم/فصل (mm/season)",
         "map_title": u"خريطة متوسط هطول الأمطار خلال فصل الخريف (مم/فصل)"
     },
+    {
+        "short_name": "R_JanMean",
+        "full_name": "R_January_Mean",
+        "module_code": "02_Precipitation",
+        "module_name": "02_Precipitation (الأمطار)",
+        "desc_ar": u"متوسط مجموع كميات الأمطار التراكمية لشهر يناير عبر سنوات فترة الرصد 1996–2025.",
+        "unit": u"ملم/شهر (mm/month)",
+        "map_title": u"خريطة متوسط مجموع أمطار شهر يناير (ملم/شهر)"
+    },
+    {
+        "short_name": "R_FebMean",
+        "full_name": "R_February_Mean",
+        "module_code": "02_Precipitation",
+        "module_name": "02_Precipitation (الأمطار)",
+        "desc_ar": u"متوسط مجموع كميات الأمطار التراكمية لشهر فبراير عبر سنوات فترة الرصد 1996–2025.",
+        "unit": u"ملم/شهر (mm/month)",
+        "map_title": u"خريطة متوسط مجموع أمطار شهر فبراير (ملم/شهر)"
+    },
+    {
+        "short_name": "R_MarMean",
+        "full_name": "R_March_Mean",
+        "module_code": "02_Precipitation",
+        "module_name": "02_Precipitation (الأمطار)",
+        "desc_ar": u"متوسط مجموع كميات الأمطار التراكمية لشهر مارس عبر سنوات فترة الرصد 1996–2025.",
+        "unit": u"ملم/شهر (mm/month)",
+        "map_title": u"خريطة متوسط مجموع أمطار شهر مارس (ملم/شهر)"
+    },
+    {
+        "short_name": "R_AprMean",
+        "full_name": "R_April_Mean",
+        "module_code": "02_Precipitation",
+        "module_name": "02_Precipitation (الأمطار)",
+        "desc_ar": u"متوسط مجموع كميات الأمطار التراكمية لشهر أبريل عبر سنوات فترة الرصد 1996–2025.",
+        "unit": u"ملم/شهر (mm/month)",
+        "map_title": u"خريطة متوسط مجموع أمطار شهر أبريل (ملم/شهر)"
+    },
+    {
+        "short_name": "R_MayMean",
+        "full_name": "R_May_Mean",
+        "module_code": "02_Precipitation",
+        "module_name": "02_Precipitation (الأمطار)",
+        "desc_ar": u"متوسط مجموع كميات الأمطار التراكمية لشهر مايو عبر سنوات فترة الرصد 1996–2025.",
+        "unit": u"ملم/شهر (mm/month)",
+        "map_title": u"خريطة متوسط مجموع أمطار شهر مايو (ملم/شهر)"
+    },
+    {
+        "short_name": "R_JunMean",
+        "full_name": "R_June_Mean",
+        "module_code": "02_Precipitation",
+        "module_name": "02_Precipitation (الأمطار)",
+        "desc_ar": u"متوسط مجموع كميات الأمطار التراكمية لشهر يونيو عبر سنوات فترة الرصد 1996–2025.",
+        "unit": u"ملم/شهر (mm/month)",
+        "map_title": u"خريطة متوسط مجموع أمطار شهر يونيو (ملم/شهر)"
+    },
+    {
+        "short_name": "R_JulMean",
+        "full_name": "R_July_Mean",
+        "module_code": "02_Precipitation",
+        "module_name": "02_Precipitation (الأمطار)",
+        "desc_ar": u"متوسط مجموع كميات الأمطار التراكمية لشهر يوليو عبر سنوات فترة الرصد 1996–2025.",
+        "unit": u"ملم/شهر (mm/month)",
+        "map_title": u"خريطة متوسط مجموع أمطار شهر يوليو (ملم/شهر)"
+    },
+    {
+        "short_name": "R_AugMean",
+        "full_name": "R_August_Mean",
+        "module_code": "02_Precipitation",
+        "module_name": "02_Precipitation (الأمطار)",
+        "desc_ar": u"متوسط مجموع كميات الأمطار التراكمية لشهر أغسطس عبر سنوات فترة الرصد 1996–2025.",
+        "unit": u"ملم/شهر (mm/month)",
+        "map_title": u"خريطة متوسط مجموع أمطار شهر أغسطس (ملم/شهر)"
+    },
+    {
+        "short_name": "R_SepMean",
+        "full_name": "R_September_Mean",
+        "module_code": "02_Precipitation",
+        "module_name": "02_Precipitation (الأمطار)",
+        "desc_ar": u"متوسط مجموع كميات الأمطار التراكمية لشهر سبتمبر عبر سنوات فترة الرصد 1996–2025.",
+        "unit": u"ملم/شهر (mm/month)",
+        "map_title": u"خريطة متوسط مجموع أمطار شهر سبتمبر (ملم/شهر)"
+    },
+    {
+        "short_name": "R_OctMean",
+        "full_name": "R_October_Mean",
+        "module_code": "02_Precipitation",
+        "module_name": "02_Precipitation (الأمطار)",
+        "desc_ar": u"متوسط مجموع كميات الأمطار التراكمية لشهر أكتوبر عبر سنوات فترة الرصد 1996–2025.",
+        "unit": u"ملم/شهر (mm/month)",
+        "map_title": u"خريطة متوسط مجموع أمطار شهر أكتوبر (ملم/شهر)"
+    },
+    {
+        "short_name": "R_NovMean",
+        "full_name": "R_November_Mean",
+        "module_code": "02_Precipitation",
+        "module_name": "02_Precipitation (الأمطار)",
+        "desc_ar": u"متوسط مجموع كميات الأمطار التراكمية لشهر نوفمبر عبر سنوات فترة الرصد 1996–2025.",
+        "unit": u"ملم/شهر (mm/month)",
+        "map_title": u"خريطة متوسط مجموع أمطار شهر نوفمبر (ملم/شهر)"
+    },
+    {
+        "short_name": "R_DecMean",
+        "full_name": "R_December_Mean",
+        "module_code": "02_Precipitation",
+        "module_name": "02_Precipitation (الأمطار)",
+        "desc_ar": u"متوسط مجموع كميات الأمطار التراكمية لشهر ديسمبر عبر سنوات فترة الرصد 1996–2025.",
+        "unit": u"ملم/شهر (mm/month)",
+        "map_title": u"خريطة متوسط مجموع أمطار شهر ديسمبر (ملم/شهر)"
+    },
 
     # --- 6. ضغط مستوى سطح البحر (03_Sea_Level_Pressure) ---
     {
@@ -444,6 +768,114 @@ FIELDS_DATA = [
         "unit": u"hPa / mbar",
         "map_title": u"خريطة المدى السنوي لضغط مستوى سطح البحر (hPa)"
     },
+    {
+        "short_name": "PSL_JanMn",
+        "full_name": "PSL_January_Mean",
+        "module_code": "03_Sea_Level_Pressure",
+        "module_name": "03_Sea_Level_Pressure (ضغط مستوى البحر)",
+        "desc_ar": u"متوسط الضغط الجوي المصحح لمستوى سطح البحر القياسي لشهر يناير (SLP).",
+        "unit": u"hPa / mbar",
+        "map_title": u"خريطة متوسط ضغط مستوى سطح البحر لشهر يناير (hPa)"
+    },
+    {
+        "short_name": "PSL_FebMn",
+        "full_name": "PSL_February_Mean",
+        "module_code": "03_Sea_Level_Pressure",
+        "module_name": "03_Sea_Level_Pressure (ضغط مستوى البحر)",
+        "desc_ar": u"متوسط الضغط الجوي المصحح لمستوى سطح البحر القياسي لشهر فبراير (SLP).",
+        "unit": u"hPa / mbar",
+        "map_title": u"خريطة متوسط ضغط مستوى سطح البحر لشهر فبراير (hPa)"
+    },
+    {
+        "short_name": "PSL_MarMn",
+        "full_name": "PSL_March_Mean",
+        "module_code": "03_Sea_Level_Pressure",
+        "module_name": "03_Sea_Level_Pressure (ضغط مستوى البحر)",
+        "desc_ar": u"متوسط الضغط الجوي المصحح لمستوى سطح البحر القياسي لشهر مارس (SLP).",
+        "unit": u"hPa / mbar",
+        "map_title": u"خريطة متوسط ضغط مستوى سطح البحر لشهر مارس (hPa)"
+    },
+    {
+        "short_name": "PSL_AprMn",
+        "full_name": "PSL_April_Mean",
+        "module_code": "03_Sea_Level_Pressure",
+        "module_name": "03_Sea_Level_Pressure (ضغط مستوى البحر)",
+        "desc_ar": u"متوسط الضغط الجوي المصحح لمستوى سطح البحر القياسي لشهر أبريل (SLP).",
+        "unit": u"hPa / mbar",
+        "map_title": u"خريطة متوسط ضغط مستوى سطح البحر لشهر أبريل (hPa)"
+    },
+    {
+        "short_name": "PSL_MayMn",
+        "full_name": "PSL_May_Mean",
+        "module_code": "03_Sea_Level_Pressure",
+        "module_name": "03_Sea_Level_Pressure (ضغط مستوى البحر)",
+        "desc_ar": u"متوسط الضغط الجوي المصحح لمستوى سطح البحر القياسي لشهر مايو (SLP).",
+        "unit": u"hPa / mbar",
+        "map_title": u"خريطة متوسط ضغط مستوى سطح البحر لشهر مايو (hPa)"
+    },
+    {
+        "short_name": "PSL_JunMn",
+        "full_name": "PSL_June_Mean",
+        "module_code": "03_Sea_Level_Pressure",
+        "module_name": "03_Sea_Level_Pressure (ضغط مستوى البحر)",
+        "desc_ar": u"متوسط الضغط الجوي المصحح لمستوى سطح البحر القياسي لشهر يونيو (SLP).",
+        "unit": u"hPa / mbar",
+        "map_title": u"خريطة متوسط ضغط مستوى سطح البحر لشهر يونيو (hPa)"
+    },
+    {
+        "short_name": "PSL_JulMn",
+        "full_name": "PSL_July_Mean",
+        "module_code": "03_Sea_Level_Pressure",
+        "module_name": "03_Sea_Level_Pressure (ضغط مستوى البحر)",
+        "desc_ar": u"متوسط الضغط الجوي المصحح لمستوى سطح البحر القياسي لشهر يوليو (SLP).",
+        "unit": u"hPa / mbar",
+        "map_title": u"خريطة متوسط ضغط مستوى سطح البحر لشهر يوليو (hPa)"
+    },
+    {
+        "short_name": "PSL_AugMn",
+        "full_name": "PSL_August_Mean",
+        "module_code": "03_Sea_Level_Pressure",
+        "module_name": "03_Sea_Level_Pressure (ضغط مستوى البحر)",
+        "desc_ar": u"متوسط الضغط الجوي المصحح لمستوى سطح البحر القياسي لشهر أغسطس (SLP).",
+        "unit": u"hPa / mbar",
+        "map_title": u"خريطة متوسط ضغط مستوى سطح البحر لشهر أغسطس (hPa)"
+    },
+    {
+        "short_name": "PSL_SepMn",
+        "full_name": "PSL_September_Mean",
+        "module_code": "03_Sea_Level_Pressure",
+        "module_name": "03_Sea_Level_Pressure (ضغط مستوى البحر)",
+        "desc_ar": u"متوسط الضغط الجوي المصحح لمستوى سطح البحر القياسي لشهر سبتمبر (SLP).",
+        "unit": u"hPa / mbar",
+        "map_title": u"خريطة متوسط ضغط مستوى سطح البحر لشهر سبتمبر (hPa)"
+    },
+    {
+        "short_name": "PSL_OctMn",
+        "full_name": "PSL_October_Mean",
+        "module_code": "03_Sea_Level_Pressure",
+        "module_name": "03_Sea_Level_Pressure (ضغط مستوى البحر)",
+        "desc_ar": u"متوسط الضغط الجوي المصحح لمستوى سطح البحر القياسي لشهر أكتوبر (SLP).",
+        "unit": u"hPa / mbar",
+        "map_title": u"خريطة متوسط ضغط مستوى سطح البحر لشهر أكتوبر (hPa)"
+    },
+    {
+        "short_name": "PSL_NovMn",
+        "full_name": "PSL_November_Mean",
+        "module_code": "03_Sea_Level_Pressure",
+        "module_name": "03_Sea_Level_Pressure (ضغط مستوى البحر)",
+        "desc_ar": u"متوسط الضغط الجوي المصحح لمستوى سطح البحر القياسي لشهر نوفمبر (SLP).",
+        "unit": u"hPa / mbar",
+        "map_title": u"خريطة متوسط ضغط مستوى سطح البحر لشهر نوفمبر (hPa)"
+    },
+    {
+        "short_name": "PSL_DecMn",
+        "full_name": "PSL_December_Mean",
+        "module_code": "03_Sea_Level_Pressure",
+        "module_name": "03_Sea_Level_Pressure (ضغط مستوى البحر)",
+        "desc_ar": u"متوسط الضغط الجوي المصحح لمستوى سطح البحر القياسي لشهر ديسمبر (SLP).",
+        "unit": u"hPa / mbar",
+        "map_title": u"خريطة متوسط ضغط مستوى سطح البحر لشهر ديسمبر (hPa)"
+    },
 
     # --- 7. الضغط الجوي السطحي الفعلي (04_Surface_Pressure) ---
     {
@@ -499,6 +931,114 @@ FIELDS_DATA = [
         "desc_ar": u"المدى البارومتري السنوي للضغط السطحي (الفارق بين أعلى وأدنى متوسط شهري للضغط السطحي).",
         "unit": u"hPa / mbar",
         "map_title": u"خريطة المدى السنوي للضغط الجوي السطحي (hPa)"
+    },
+    {
+        "short_name": "PS_JanMean",
+        "full_name": "PS_January_Mean",
+        "module_code": "04_Surface_Pressure",
+        "module_name": "04_Surface_Pressure (الضغط السطحي)",
+        "desc_ar": u"متوسط الضغط الجوي السطحي الفعلي الحقيقي عند منسوب المحطة لشهر يناير.",
+        "unit": u"hPa / mbar",
+        "map_title": u"خريطة متوسط الضغط السطحي الفعلي لشهر يناير (hPa)"
+    },
+    {
+        "short_name": "PS_FebMean",
+        "full_name": "PS_February_Mean",
+        "module_code": "04_Surface_Pressure",
+        "module_name": "04_Surface_Pressure (الضغط السطحي)",
+        "desc_ar": u"متوسط الضغط الجوي السطحي الفعلي الحقيقي عند منسوب المحطة لشهر فبراير.",
+        "unit": u"hPa / mbar",
+        "map_title": u"خريطة متوسط الضغط السطحي الفعلي لشهر فبراير (hPa)"
+    },
+    {
+        "short_name": "PS_MarMean",
+        "full_name": "PS_March_Mean",
+        "module_code": "04_Surface_Pressure",
+        "module_name": "04_Surface_Pressure (الضغط السطحي)",
+        "desc_ar": u"متوسط الضغط الجوي السطحي الفعلي الحقيقي عند منسوب المحطة لشهر مارس.",
+        "unit": u"hPa / mbar",
+        "map_title": u"خريطة متوسط الضغط السطحي الفعلي لشهر مارس (hPa)"
+    },
+    {
+        "short_name": "PS_AprMean",
+        "full_name": "PS_April_Mean",
+        "module_code": "04_Surface_Pressure",
+        "module_name": "04_Surface_Pressure (الضغط السطحي)",
+        "desc_ar": u"متوسط الضغط الجوي السطحي الفعلي الحقيقي عند منسوب المحطة لشهر أبريل.",
+        "unit": u"hPa / mbar",
+        "map_title": u"خريطة متوسط الضغط السطحي الفعلي لشهر أبريل (hPa)"
+    },
+    {
+        "short_name": "PS_MayMean",
+        "full_name": "PS_May_Mean",
+        "module_code": "04_Surface_Pressure",
+        "module_name": "04_Surface_Pressure (الضغط السطحي)",
+        "desc_ar": u"متوسط الضغط الجوي السطحي الفعلي الحقيقي عند منسوب المحطة لشهر مايو.",
+        "unit": u"hPa / mbar",
+        "map_title": u"خريطة متوسط الضغط السطحي الفعلي لشهر مايو (hPa)"
+    },
+    {
+        "short_name": "PS_JunMean",
+        "full_name": "PS_June_Mean",
+        "module_code": "04_Surface_Pressure",
+        "module_name": "04_Surface_Pressure (الضغط السطحي)",
+        "desc_ar": u"متوسط الضغط الجوي السطحي الفعلي الحقيقي عند منسوب المحطة لشهر يونيو.",
+        "unit": u"hPa / mbar",
+        "map_title": u"خريطة متوسط الضغط السطحي الفعلي لشهر يونيو (hPa)"
+    },
+    {
+        "short_name": "PS_JulMean",
+        "full_name": "PS_July_Mean",
+        "module_code": "04_Surface_Pressure",
+        "module_name": "04_Surface_Pressure (الضغط السطحي)",
+        "desc_ar": u"متوسط الضغط الجوي السطحي الفعلي الحقيقي عند منسوب المحطة لشهر يوليو.",
+        "unit": u"hPa / mbar",
+        "map_title": u"خريطة متوسط الضغط السطحي الفعلي لشهر يوليو (hPa)"
+    },
+    {
+        "short_name": "PS_AugMean",
+        "full_name": "PS_August_Mean",
+        "module_code": "04_Surface_Pressure",
+        "module_name": "04_Surface_Pressure (الضغط السطحي)",
+        "desc_ar": u"متوسط الضغط الجوي السطحي الفعلي الحقيقي عند منسوب المحطة لشهر أغسطس.",
+        "unit": u"hPa / mbar",
+        "map_title": u"خريطة متوسط الضغط السطحي الفعلي لشهر أغسطس (hPa)"
+    },
+    {
+        "short_name": "PS_SepMean",
+        "full_name": "PS_September_Mean",
+        "module_code": "04_Surface_Pressure",
+        "module_name": "04_Surface_Pressure (الضغط السطحي)",
+        "desc_ar": u"متوسط الضغط الجوي السطحي الفعلي الحقيقي عند منسوب المحطة لشهر سبتمبر.",
+        "unit": u"hPa / mbar",
+        "map_title": u"خريطة متوسط الضغط السطحي الفعلي لشهر سبتمبر (hPa)"
+    },
+    {
+        "short_name": "PS_OctMean",
+        "full_name": "PS_October_Mean",
+        "module_code": "04_Surface_Pressure",
+        "module_name": "04_Surface_Pressure (الضغط السطحي)",
+        "desc_ar": u"متوسط الضغط الجوي السطحي الفعلي الحقيقي عند منسوب المحطة لشهر أكتوبر.",
+        "unit": u"hPa / mbar",
+        "map_title": u"خريطة متوسط الضغط السطحي الفعلي لشهر أكتوبر (hPa)"
+    },
+    {
+        "short_name": "PS_NovMean",
+        "full_name": "PS_November_Mean",
+        "module_code": "04_Surface_Pressure",
+        "module_name": "04_Surface_Pressure (الضغط السطحي)",
+        "desc_ar": u"متوسط الضغط الجوي السطحي الفعلي الحقيقي عند منسوب المحطة لشهر نوفمبر.",
+        "unit": u"hPa / mbar",
+        "map_title": u"خريطة متوسط الضغط السطحي الفعلي لشهر نوفمبر (hPa)"
+    },
+    {
+        "short_name": "PS_DecMean",
+        "full_name": "PS_December_Mean",
+        "module_code": "04_Surface_Pressure",
+        "module_name": "04_Surface_Pressure (الضغط السطحي)",
+        "desc_ar": u"متوسط الضغط الجوي السطحي الفعلي الحقيقي عند منسوب المحطة لشهر ديسمبر.",
+        "unit": u"hPa / mbar",
+        "map_title": u"خريطة متوسط الضغط السطحي الفعلي لشهر ديسمبر (hPa)"
     },
 
     # --- 8. سرعة واتجاه الرياح (05_Wind) ---
@@ -619,6 +1159,222 @@ FIELDS_DATA = [
         "unit": u"درجة (°)",
         "map_title": u"خريطة اتجاه الرياح السائد خلال فصل الخريف (درجات)"
     },
+    {
+        "short_name": "WSp_JanMn",
+        "full_name": "W_Spd_January_Mean",
+        "module_code": "05_Wind",
+        "module_name": "05_Wind (الرياح)",
+        "desc_ar": u"متوسط سرعة الرياح على ارتفاع 10 أمتار لشهر يناير عبر فترة الرصد.",
+        "unit": u"م/ث (m/s)",
+        "map_title": u"خريطة متوسط سرعة الرياح لشهر يناير (م/ث)"
+    },
+    {
+        "short_name": "WSp_FebMn",
+        "full_name": "W_Spd_February_Mean",
+        "module_code": "05_Wind",
+        "module_name": "05_Wind (الرياح)",
+        "desc_ar": u"متوسط سرعة الرياح على ارتفاع 10 أمتار لشهر فبراير عبر فترة الرصد.",
+        "unit": u"م/ث (m/s)",
+        "map_title": u"خريطة متوسط سرعة الرياح لشهر فبراير (م/ث)"
+    },
+    {
+        "short_name": "WSp_MarMn",
+        "full_name": "W_Spd_March_Mean",
+        "module_code": "05_Wind",
+        "module_name": "05_Wind (الرياح)",
+        "desc_ar": u"متوسط سرعة الرياح على ارتفاع 10 أمتار لشهر مارس عبر فترة الرصد.",
+        "unit": u"م/ث (m/s)",
+        "map_title": u"خريطة متوسط سرعة الرياح لشهر مارس (م/ث)"
+    },
+    {
+        "short_name": "WSp_AprMn",
+        "full_name": "W_Spd_April_Mean",
+        "module_code": "05_Wind",
+        "module_name": "05_Wind (الرياح)",
+        "desc_ar": u"متوسط سرعة الرياح على ارتفاع 10 أمتار لشهر أبريل عبر فترة الرصد.",
+        "unit": u"م/ث (m/s)",
+        "map_title": u"خريطة متوسط سرعة الرياح لشهر أبريل (م/ث)"
+    },
+    {
+        "short_name": "WSp_MayMn",
+        "full_name": "W_Spd_May_Mean",
+        "module_code": "05_Wind",
+        "module_name": "05_Wind (الرياح)",
+        "desc_ar": u"متوسط سرعة الرياح على ارتفاع 10 أمتار لشهر مايو عبر فترة الرصد.",
+        "unit": u"م/ث (m/s)",
+        "map_title": u"خريطة متوسط سرعة الرياح لشهر مايو (م/ث)"
+    },
+    {
+        "short_name": "WSp_JunMn",
+        "full_name": "W_Spd_June_Mean",
+        "module_code": "05_Wind",
+        "module_name": "05_Wind (الرياح)",
+        "desc_ar": u"متوسط سرعة الرياح على ارتفاع 10 أمتار لشهر يونيو عبر فترة الرصد.",
+        "unit": u"م/ث (m/s)",
+        "map_title": u"خريطة متوسط سرعة الرياح لشهر يونيو (م/ث)"
+    },
+    {
+        "short_name": "WSp_JulMn",
+        "full_name": "W_Spd_July_Mean",
+        "module_code": "05_Wind",
+        "module_name": "05_Wind (الرياح)",
+        "desc_ar": u"متوسط سرعة الرياح على ارتفاع 10 أمتار لشهر يوليو عبر فترة الرصد.",
+        "unit": u"م/ث (m/s)",
+        "map_title": u"خريطة متوسط سرعة الرياح لشهر يوليو (م/ث)"
+    },
+    {
+        "short_name": "WSp_AugMn",
+        "full_name": "W_Spd_August_Mean",
+        "module_code": "05_Wind",
+        "module_name": "05_Wind (الرياح)",
+        "desc_ar": u"متوسط سرعة الرياح على ارتفاع 10 أمتار لشهر أغسطس عبر فترة الرصد.",
+        "unit": u"م/ث (m/s)",
+        "map_title": u"خريطة متوسط سرعة الرياح لشهر أغسطس (م/ث)"
+    },
+    {
+        "short_name": "WSp_SepMn",
+        "full_name": "W_Spd_September_Mean",
+        "module_code": "05_Wind",
+        "module_name": "05_Wind (الرياح)",
+        "desc_ar": u"متوسط سرعة الرياح على ارتفاع 10 أمتار لشهر سبتمبر عبر فترة الرصد.",
+        "unit": u"م/ث (m/s)",
+        "map_title": u"خريطة متوسط سرعة الرياح لشهر سبتمبر (م/ث)"
+    },
+    {
+        "short_name": "WSp_OctMn",
+        "full_name": "W_Spd_October_Mean",
+        "module_code": "05_Wind",
+        "module_name": "05_Wind (الرياح)",
+        "desc_ar": u"متوسط سرعة الرياح على ارتفاع 10 أمتار لشهر أكتوبر عبر فترة الرصد.",
+        "unit": u"م/ث (m/s)",
+        "map_title": u"خريطة متوسط سرعة الرياح لشهر أكتوبر (م/ث)"
+    },
+    {
+        "short_name": "WSp_NovMn",
+        "full_name": "W_Spd_November_Mean",
+        "module_code": "05_Wind",
+        "module_name": "05_Wind (الرياح)",
+        "desc_ar": u"متوسط سرعة الرياح على ارتفاع 10 أمتار لشهر نوفمبر عبر فترة الرصد.",
+        "unit": u"م/ث (m/s)",
+        "map_title": u"خريطة متوسط سرعة الرياح لشهر نوفمبر (م/ث)"
+    },
+    {
+        "short_name": "WSp_DecMn",
+        "full_name": "W_Spd_December_Mean",
+        "module_code": "05_Wind",
+        "module_name": "05_Wind (الرياح)",
+        "desc_ar": u"متوسط سرعة الرياح على ارتفاع 10 أمتار لشهر ديسمبر عبر فترة الرصد.",
+        "unit": u"م/ث (m/s)",
+        "map_title": u"خريطة متوسط سرعة الرياح لشهر ديسمبر (م/ث)"
+    },
+    {
+        "short_name": "WDr_JanMn",
+        "full_name": "W_Dir_January_Mean",
+        "module_code": "05_Wind",
+        "module_name": "05_Wind (الرياح)",
+        "desc_ar": u"متوسط اتجاه الرياح السائد لشهر يناير محسوب بالمتوسط الدائري المتجهي (atan2).",
+        "unit": u"درجة (°) / Degree",
+        "map_title": u"خريطة اتجاه الرياح السائد لشهر يناير (°)"
+    },
+    {
+        "short_name": "WDr_FebMn",
+        "full_name": "W_Dir_February_Mean",
+        "module_code": "05_Wind",
+        "module_name": "05_Wind (الرياح)",
+        "desc_ar": u"متوسط اتجاه الرياح السائد لشهر فبراير محسوب بالمتوسط الدائري المتجهي (atan2).",
+        "unit": u"درجة (°) / Degree",
+        "map_title": u"خريطة اتجاه الرياح السائد لشهر فبراير (°)"
+    },
+    {
+        "short_name": "WDr_MarMn",
+        "full_name": "W_Dir_March_Mean",
+        "module_code": "05_Wind",
+        "module_name": "05_Wind (الرياح)",
+        "desc_ar": u"متوسط اتجاه الرياح السائد لشهر مارس محسوب بالمتوسط الدائري المتجهي (atan2).",
+        "unit": u"درجة (°) / Degree",
+        "map_title": u"خريطة اتجاه الرياح السائد لشهر مارس (°)"
+    },
+    {
+        "short_name": "WDr_AprMn",
+        "full_name": "W_Dir_April_Mean",
+        "module_code": "05_Wind",
+        "module_name": "05_Wind (الرياح)",
+        "desc_ar": u"متوسط اتجاه الرياح السائد لشهر أبريل محسوب بالمتوسط الدائري المتجهي (atan2).",
+        "unit": u"درجة (°) / Degree",
+        "map_title": u"خريطة اتجاه الرياح السائد لشهر أبريل (°)"
+    },
+    {
+        "short_name": "WDr_MayMn",
+        "full_name": "W_Dir_May_Mean",
+        "module_code": "05_Wind",
+        "module_name": "05_Wind (الرياح)",
+        "desc_ar": u"متوسط اتجاه الرياح السائد لشهر مايو محسوب بالمتوسط الدائري المتجهي (atan2).",
+        "unit": u"درجة (°) / Degree",
+        "map_title": u"خريطة اتجاه الرياح السائد لشهر مايو (°)"
+    },
+    {
+        "short_name": "WDr_JunMn",
+        "full_name": "W_Dir_June_Mean",
+        "module_code": "05_Wind",
+        "module_name": "05_Wind (الرياح)",
+        "desc_ar": u"متوسط اتجاه الرياح السائد لشهر يونيو محسوب بالمتوسط الدائري المتجهي (atan2).",
+        "unit": u"درجة (°) / Degree",
+        "map_title": u"خريطة اتجاه الرياح السائد لشهر يونيو (°)"
+    },
+    {
+        "short_name": "WDr_JulMn",
+        "full_name": "W_Dir_July_Mean",
+        "module_code": "05_Wind",
+        "module_name": "05_Wind (الرياح)",
+        "desc_ar": u"متوسط اتجاه الرياح السائد لشهر يوليو محسوب بالمتوسط الدائري المتجهي (atan2).",
+        "unit": u"درجة (°) / Degree",
+        "map_title": u"خريطة اتجاه الرياح السائد لشهر يوليو (°)"
+    },
+    {
+        "short_name": "WDr_AugMn",
+        "full_name": "W_Dir_August_Mean",
+        "module_code": "05_Wind",
+        "module_name": "05_Wind (الرياح)",
+        "desc_ar": u"متوسط اتجاه الرياح السائد لشهر أغسطس محسوب بالمتوسط الدائري المتجهي (atan2).",
+        "unit": u"درجة (°) / Degree",
+        "map_title": u"خريطة اتجاه الرياح السائد لشهر أغسطس (°)"
+    },
+    {
+        "short_name": "WDr_SepMn",
+        "full_name": "W_Dir_September_Mean",
+        "module_code": "05_Wind",
+        "module_name": "05_Wind (الرياح)",
+        "desc_ar": u"متوسط اتجاه الرياح السائد لشهر سبتمبر محسوب بالمتوسط الدائري المتجهي (atan2).",
+        "unit": u"درجة (°) / Degree",
+        "map_title": u"خريطة اتجاه الرياح السائد لشهر سبتمبر (°)"
+    },
+    {
+        "short_name": "WDr_OctMn",
+        "full_name": "W_Dir_October_Mean",
+        "module_code": "05_Wind",
+        "module_name": "05_Wind (الرياح)",
+        "desc_ar": u"متوسط اتجاه الرياح السائد لشهر أكتوبر محسوب بالمتوسط الدائري المتجهي (atan2).",
+        "unit": u"درجة (°) / Degree",
+        "map_title": u"خريطة اتجاه الرياح السائد لشهر أكتوبر (°)"
+    },
+    {
+        "short_name": "WDr_NovMn",
+        "full_name": "W_Dir_November_Mean",
+        "module_code": "05_Wind",
+        "module_name": "05_Wind (الرياح)",
+        "desc_ar": u"متوسط اتجاه الرياح السائد لشهر نوفمبر محسوب بالمتوسط الدائري المتجهي (atan2).",
+        "unit": u"درجة (°) / Degree",
+        "map_title": u"خريطة اتجاه الرياح السائد لشهر نوفمبر (°)"
+    },
+    {
+        "short_name": "WDr_DecMn",
+        "full_name": "W_Dir_December_Mean",
+        "module_code": "05_Wind",
+        "module_name": "05_Wind (الرياح)",
+        "desc_ar": u"متوسط اتجاه الرياح السائد لشهر ديسمبر محسوب بالمتوسط الدائري المتجهي (atan2).",
+        "unit": u"درجة (°) / Degree",
+        "map_title": u"خريطة اتجاه الرياح السائد لشهر ديسمبر (°)"
+    },
 
     # --- 9. الرطوبة النسبية (06_Relative_Humidity) ---
     {
@@ -674,6 +1430,114 @@ FIELDS_DATA = [
         "desc_ar": u"المدى السنوي للرطوبة النسبية (الفارق بين أعلى شهر رطوبة وأدنى شهر رطوبة).",
         "unit": u"%",
         "map_title": u"خريطة المدى السنوي للرطوبة النسبية (%)"
+    },
+    {
+        "short_name": "RH_JanMean",
+        "full_name": "RH_January_Mean",
+        "module_code": "06_Relative_Humidity",
+        "module_name": "06_Relative_Humidity (الرطوبة النسبية)",
+        "desc_ar": u"متوسط الرطوبة النسبية عند ارتفاع 2 متر لشهر يناير عبر فترة الرصد.",
+        "unit": u"%",
+        "map_title": u"خريطة متوسط الرطوبة النسبية لشهر يناير (%)"
+    },
+    {
+        "short_name": "RH_FebMean",
+        "full_name": "RH_February_Mean",
+        "module_code": "06_Relative_Humidity",
+        "module_name": "06_Relative_Humidity (الرطوبة النسبية)",
+        "desc_ar": u"متوسط الرطوبة النسبية عند ارتفاع 2 متر لشهر فبراير عبر فترة الرصد.",
+        "unit": u"%",
+        "map_title": u"خريطة متوسط الرطوبة النسبية لشهر فبراير (%)"
+    },
+    {
+        "short_name": "RH_MarMean",
+        "full_name": "RH_March_Mean",
+        "module_code": "06_Relative_Humidity",
+        "module_name": "06_Relative_Humidity (الرطوبة النسبية)",
+        "desc_ar": u"متوسط الرطوبة النسبية عند ارتفاع 2 متر لشهر مارس عبر فترة الرصد.",
+        "unit": u"%",
+        "map_title": u"خريطة متوسط الرطوبة النسبية لشهر مارس (%)"
+    },
+    {
+        "short_name": "RH_AprMean",
+        "full_name": "RH_April_Mean",
+        "module_code": "06_Relative_Humidity",
+        "module_name": "06_Relative_Humidity (الرطوبة النسبية)",
+        "desc_ar": u"متوسط الرطوبة النسبية عند ارتفاع 2 متر لشهر أبريل عبر فترة الرصد.",
+        "unit": u"%",
+        "map_title": u"خريطة متوسط الرطوبة النسبية لشهر أبريل (%)"
+    },
+    {
+        "short_name": "RH_MayMean",
+        "full_name": "RH_May_Mean",
+        "module_code": "06_Relative_Humidity",
+        "module_name": "06_Relative_Humidity (الرطوبة النسبية)",
+        "desc_ar": u"متوسط الرطوبة النسبية عند ارتفاع 2 متر لشهر مايو عبر فترة الرصد.",
+        "unit": u"%",
+        "map_title": u"خريطة متوسط الرطوبة النسبية لشهر مايو (%)"
+    },
+    {
+        "short_name": "RH_JunMean",
+        "full_name": "RH_June_Mean",
+        "module_code": "06_Relative_Humidity",
+        "module_name": "06_Relative_Humidity (الرطوبة النسبية)",
+        "desc_ar": u"متوسط الرطوبة النسبية عند ارتفاع 2 متر لشهر يونيو عبر فترة الرصد.",
+        "unit": u"%",
+        "map_title": u"خريطة متوسط الرطوبة النسبية لشهر يونيو (%)"
+    },
+    {
+        "short_name": "RH_JulMean",
+        "full_name": "RH_July_Mean",
+        "module_code": "06_Relative_Humidity",
+        "module_name": "06_Relative_Humidity (الرطوبة النسبية)",
+        "desc_ar": u"متوسط الرطوبة النسبية عند ارتفاع 2 متر لشهر يوليو عبر فترة الرصد.",
+        "unit": u"%",
+        "map_title": u"خريطة متوسط الرطوبة النسبية لشهر يوليو (%)"
+    },
+    {
+        "short_name": "RH_AugMean",
+        "full_name": "RH_August_Mean",
+        "module_code": "06_Relative_Humidity",
+        "module_name": "06_Relative_Humidity (الرطوبة النسبية)",
+        "desc_ar": u"متوسط الرطوبة النسبية عند ارتفاع 2 متر لشهر أغسطس عبر فترة الرصد.",
+        "unit": u"%",
+        "map_title": u"خريطة متوسط الرطوبة النسبية لشهر أغسطس (%)"
+    },
+    {
+        "short_name": "RH_SepMean",
+        "full_name": "RH_September_Mean",
+        "module_code": "06_Relative_Humidity",
+        "module_name": "06_Relative_Humidity (الرطوبة النسبية)",
+        "desc_ar": u"متوسط الرطوبة النسبية عند ارتفاع 2 متر لشهر سبتمبر عبر فترة الرصد.",
+        "unit": u"%",
+        "map_title": u"خريطة متوسط الرطوبة النسبية لشهر سبتمبر (%)"
+    },
+    {
+        "short_name": "RH_OctMean",
+        "full_name": "RH_October_Mean",
+        "module_code": "06_Relative_Humidity",
+        "module_name": "06_Relative_Humidity (الرطوبة النسبية)",
+        "desc_ar": u"متوسط الرطوبة النسبية عند ارتفاع 2 متر لشهر أكتوبر عبر فترة الرصد.",
+        "unit": u"%",
+        "map_title": u"خريطة متوسط الرطوبة النسبية لشهر أكتوبر (%)"
+    },
+    {
+        "short_name": "RH_NovMean",
+        "full_name": "RH_November_Mean",
+        "module_code": "06_Relative_Humidity",
+        "module_name": "06_Relative_Humidity (الرطوبة النسبية)",
+        "desc_ar": u"متوسط الرطوبة النسبية عند ارتفاع 2 متر لشهر نوفمبر عبر فترة الرصد.",
+        "unit": u"%",
+        "map_title": u"خريطة متوسط الرطوبة النسبية لشهر نوفمبر (%)"
+    },
+    {
+        "short_name": "RH_DecMean",
+        "full_name": "RH_December_Mean",
+        "module_code": "06_Relative_Humidity",
+        "module_name": "06_Relative_Humidity (الرطوبة النسبية)",
+        "desc_ar": u"متوسط الرطوبة النسبية عند ارتفاع 2 متر لشهر ديسمبر عبر فترة الرصد.",
+        "unit": u"%",
+        "map_title": u"خريطة متوسط الرطوبة النسبية لشهر ديسمبر (%)"
     },
 
     # --- 10. الإشعاع الشمسي (08_Solar_Radiation) ---
@@ -740,6 +1604,114 @@ FIELDS_DATA = [
         "unit": u"kWh/m²/day",
         "map_title": u"خريطة المدى السنوي للإشعاع الشمسي (kWh/m²/day)"
     },
+    {
+        "short_name": "Sol_JanMn",
+        "full_name": "Sol_January_Mean",
+        "module_code": "08_Solar_Radiation",
+        "module_name": "08_Solar_Radiation (الإشعاع الشمسي)",
+        "desc_ar": u"المعدل اليومي للإشعاع الشمسي الكلي الساقط على السطح الأفقي لشهر يناير.",
+        "unit": u"kWh/m²/day",
+        "map_title": u"خريطة المعدل اليومي للإشعاع الشمسي لشهر يناير (kWh/m²/day)"
+    },
+    {
+        "short_name": "Sol_FebMn",
+        "full_name": "Sol_February_Mean",
+        "module_code": "08_Solar_Radiation",
+        "module_name": "08_Solar_Radiation (الإشعاع الشمسي)",
+        "desc_ar": u"المعدل اليومي للإشعاع الشمسي الكلي الساقط على السطح الأفقي لشهر فبراير.",
+        "unit": u"kWh/m²/day",
+        "map_title": u"خريطة المعدل اليومي للإشعاع الشمسي لشهر فبراير (kWh/m²/day)"
+    },
+    {
+        "short_name": "Sol_MarMn",
+        "full_name": "Sol_March_Mean",
+        "module_code": "08_Solar_Radiation",
+        "module_name": "08_Solar_Radiation (الإشعاع الشمسي)",
+        "desc_ar": u"المعدل اليومي للإشعاع الشمسي الكلي الساقط على السطح الأفقي لشهر مارس.",
+        "unit": u"kWh/m²/day",
+        "map_title": u"خريطة المعدل اليومي للإشعاع الشمسي لشهر مارس (kWh/m²/day)"
+    },
+    {
+        "short_name": "Sol_AprMn",
+        "full_name": "Sol_April_Mean",
+        "module_code": "08_Solar_Radiation",
+        "module_name": "08_Solar_Radiation (الإشعاع الشمسي)",
+        "desc_ar": u"المعدل اليومي للإشعاع الشمسي الكلي الساقط على السطح الأفقي لشهر أبريل.",
+        "unit": u"kWh/m²/day",
+        "map_title": u"خريطة المعدل اليومي للإشعاع الشمسي لشهر أبريل (kWh/m²/day)"
+    },
+    {
+        "short_name": "Sol_MayMn",
+        "full_name": "Sol_May_Mean",
+        "module_code": "08_Solar_Radiation",
+        "module_name": "08_Solar_Radiation (الإشعاع الشمسي)",
+        "desc_ar": u"المعدل اليومي للإشعاع الشمسي الكلي الساقط على السطح الأفقي لشهر مايو.",
+        "unit": u"kWh/m²/day",
+        "map_title": u"خريطة المعدل اليومي للإشعاع الشمسي لشهر مايو (kWh/m²/day)"
+    },
+    {
+        "short_name": "Sol_JunMn",
+        "full_name": "Sol_June_Mean",
+        "module_code": "08_Solar_Radiation",
+        "module_name": "08_Solar_Radiation (الإشعاع الشمسي)",
+        "desc_ar": u"المعدل اليومي للإشعاع الشمسي الكلي الساقط على السطح الأفقي لشهر يونيو.",
+        "unit": u"kWh/m²/day",
+        "map_title": u"خريطة المعدل اليومي للإشعاع الشمسي لشهر يونيو (kWh/m²/day)"
+    },
+    {
+        "short_name": "Sol_JulMn",
+        "full_name": "Sol_July_Mean",
+        "module_code": "08_Solar_Radiation",
+        "module_name": "08_Solar_Radiation (الإشعاع الشمسي)",
+        "desc_ar": u"المعدل اليومي للإشعاع الشمسي الكلي الساقط على السطح الأفقي لشهر يوليو.",
+        "unit": u"kWh/m²/day",
+        "map_title": u"خريطة المعدل اليومي للإشعاع الشمسي لشهر يوليو (kWh/m²/day)"
+    },
+    {
+        "short_name": "Sol_AugMn",
+        "full_name": "Sol_August_Mean",
+        "module_code": "08_Solar_Radiation",
+        "module_name": "08_Solar_Radiation (الإشعاع الشمسي)",
+        "desc_ar": u"المعدل اليومي للإشعاع الشمسي الكلي الساقط على السطح الأفقي لشهر أغسطس.",
+        "unit": u"kWh/m²/day",
+        "map_title": u"خريطة المعدل اليومي للإشعاع الشمسي لشهر أغسطس (kWh/m²/day)"
+    },
+    {
+        "short_name": "Sol_SepMn",
+        "full_name": "Sol_September_Mean",
+        "module_code": "08_Solar_Radiation",
+        "module_name": "08_Solar_Radiation (الإشعاع الشمسي)",
+        "desc_ar": u"المعدل اليومي للإشعاع الشمسي الكلي الساقط على السطح الأفقي لشهر سبتمبر.",
+        "unit": u"kWh/m²/day",
+        "map_title": u"خريطة المعدل اليومي للإشعاع الشمسي لشهر سبتمبر (kWh/m²/day)"
+    },
+    {
+        "short_name": "Sol_OctMn",
+        "full_name": "Sol_October_Mean",
+        "module_code": "08_Solar_Radiation",
+        "module_name": "08_Solar_Radiation (الإشعاع الشمسي)",
+        "desc_ar": u"المعدل اليومي للإشعاع الشمسي الكلي الساقط على السطح الأفقي لشهر أكتوبر.",
+        "unit": u"kWh/m²/day",
+        "map_title": u"خريطة المعدل اليومي للإشعاع الشمسي لشهر أكتوبر (kWh/m²/day)"
+    },
+    {
+        "short_name": "Sol_NovMn",
+        "full_name": "Sol_November_Mean",
+        "module_code": "08_Solar_Radiation",
+        "module_name": "08_Solar_Radiation (الإشعاع الشمسي)",
+        "desc_ar": u"المعدل اليومي للإشعاع الشمسي الكلي الساقط على السطح الأفقي لشهر نوفمبر.",
+        "unit": u"kWh/m²/day",
+        "map_title": u"خريطة المعدل اليومي للإشعاع الشمسي لشهر نوفمبر (kWh/m²/day)"
+    },
+    {
+        "short_name": "Sol_DecMn",
+        "full_name": "Sol_December_Mean",
+        "module_code": "08_Solar_Radiation",
+        "module_name": "08_Solar_Radiation (الإشعاع الشمسي)",
+        "desc_ar": u"المعدل اليومي للإشعاع الشمسي الكلي الساقط على السطح الأفقي لشهر ديسمبر.",
+        "unit": u"kWh/m²/day",
+        "map_title": u"خريطة المعدل اليومي للإشعاع الشمسي لشهر ديسمبر (kWh/m²/day)"
+    },
 
     # --- 11. مؤشر الأشعة فوق البنفسجية (09_UV_Index) ---
     {
@@ -796,6 +1768,114 @@ FIELDS_DATA = [
         "unit": u"مؤشر (0-16+)",
         "map_title": u"خريطة المدى السنوي لمؤشر الأشعة فوق البنفسجية"
     },
+    {
+        "short_name": "UV_JanMean",
+        "full_name": "UV_January_Mean",
+        "module_code": "09_UV_Index",
+        "module_name": "09_UV_Index (الأشعة فوق البنفسجية)",
+        "desc_ar": u"متوسط مؤشر الأشعة فوق البنفسجية القصوى لشهر يناير وفق معيار WHO.",
+        "unit": u"مؤشر (0-16+)",
+        "map_title": u"خريطة متوسط مؤشر الأشعة فوق البنفسجية لشهر يناير"
+    },
+    {
+        "short_name": "UV_FebMean",
+        "full_name": "UV_February_Mean",
+        "module_code": "09_UV_Index",
+        "module_name": "09_UV_Index (الأشعة فوق البنفسجية)",
+        "desc_ar": u"متوسط مؤشر الأشعة فوق البنفسجية القصوى لشهر فبراير وفق معيار WHO.",
+        "unit": u"مؤشر (0-16+)",
+        "map_title": u"خريطة متوسط مؤشر الأشعة فوق البنفسجية لشهر فبراير"
+    },
+    {
+        "short_name": "UV_MarMean",
+        "full_name": "UV_March_Mean",
+        "module_code": "09_UV_Index",
+        "module_name": "09_UV_Index (الأشعة فوق البنفسجية)",
+        "desc_ar": u"متوسط مؤشر الأشعة فوق البنفسجية القصوى لشهر مارس وفق معيار WHO.",
+        "unit": u"مؤشر (0-16+)",
+        "map_title": u"خريطة متوسط مؤشر الأشعة فوق البنفسجية لشهر مارس"
+    },
+    {
+        "short_name": "UV_AprMean",
+        "full_name": "UV_April_Mean",
+        "module_code": "09_UV_Index",
+        "module_name": "09_UV_Index (الأشعة فوق البنفسجية)",
+        "desc_ar": u"متوسط مؤشر الأشعة فوق البنفسجية القصوى لشهر أبريل وفق معيار WHO.",
+        "unit": u"مؤشر (0-16+)",
+        "map_title": u"خريطة متوسط مؤشر الأشعة فوق البنفسجية لشهر أبريل"
+    },
+    {
+        "short_name": "UV_MayMean",
+        "full_name": "UV_May_Mean",
+        "module_code": "09_UV_Index",
+        "module_name": "09_UV_Index (الأشعة فوق البنفسجية)",
+        "desc_ar": u"متوسط مؤشر الأشعة فوق البنفسجية القصوى لشهر مايو وفق معيار WHO.",
+        "unit": u"مؤشر (0-16+)",
+        "map_title": u"خريطة متوسط مؤشر الأشعة فوق البنفسجية لشهر مايو"
+    },
+    {
+        "short_name": "UV_JunMean",
+        "full_name": "UV_June_Mean",
+        "module_code": "09_UV_Index",
+        "module_name": "09_UV_Index (الأشعة فوق البنفسجية)",
+        "desc_ar": u"متوسط مؤشر الأشعة فوق البنفسجية القصوى لشهر يونيو وفق معيار WHO.",
+        "unit": u"مؤشر (0-16+)",
+        "map_title": u"خريطة متوسط مؤشر الأشعة فوق البنفسجية لشهر يونيو"
+    },
+    {
+        "short_name": "UV_JulMean",
+        "full_name": "UV_July_Mean",
+        "module_code": "09_UV_Index",
+        "module_name": "09_UV_Index (الأشعة فوق البنفسجية)",
+        "desc_ar": u"متوسط مؤشر الأشعة فوق البنفسجية القصوى لشهر يوليو وفق معيار WHO.",
+        "unit": u"مؤشر (0-16+)",
+        "map_title": u"خريطة متوسط مؤشر الأشعة فوق البنفسجية لشهر يوليو"
+    },
+    {
+        "short_name": "UV_AugMean",
+        "full_name": "UV_August_Mean",
+        "module_code": "09_UV_Index",
+        "module_name": "09_UV_Index (الأشعة فوق البنفسجية)",
+        "desc_ar": u"متوسط مؤشر الأشعة فوق البنفسجية القصوى لشهر أغسطس وفق معيار WHO.",
+        "unit": u"مؤشر (0-16+)",
+        "map_title": u"خريطة متوسط مؤشر الأشعة فوق البنفسجية لشهر أغسطس"
+    },
+    {
+        "short_name": "UV_SepMean",
+        "full_name": "UV_September_Mean",
+        "module_code": "09_UV_Index",
+        "module_name": "09_UV_Index (الأشعة فوق البنفسجية)",
+        "desc_ar": u"متوسط مؤشر الأشعة فوق البنفسجية القصوى لشهر سبتمبر وفق معيار WHO.",
+        "unit": u"مؤشر (0-16+)",
+        "map_title": u"خريطة متوسط مؤشر الأشعة فوق البنفسجية لشهر سبتمبر"
+    },
+    {
+        "short_name": "UV_OctMean",
+        "full_name": "UV_October_Mean",
+        "module_code": "09_UV_Index",
+        "module_name": "09_UV_Index (الأشعة فوق البنفسجية)",
+        "desc_ar": u"متوسط مؤشر الأشعة فوق البنفسجية القصوى لشهر أكتوبر وفق معيار WHO.",
+        "unit": u"مؤشر (0-16+)",
+        "map_title": u"خريطة متوسط مؤشر الأشعة فوق البنفسجية لشهر أكتوبر"
+    },
+    {
+        "short_name": "UV_NovMean",
+        "full_name": "UV_November_Mean",
+        "module_code": "09_UV_Index",
+        "module_name": "09_UV_Index (الأشعة فوق البنفسجية)",
+        "desc_ar": u"متوسط مؤشر الأشعة فوق البنفسجية القصوى لشهر نوفمبر وفق معيار WHO.",
+        "unit": u"مؤشر (0-16+)",
+        "map_title": u"خريطة متوسط مؤشر الأشعة فوق البنفسجية لشهر نوفمبر"
+    },
+    {
+        "short_name": "UV_DecMean",
+        "full_name": "UV_December_Mean",
+        "module_code": "09_UV_Index",
+        "module_name": "09_UV_Index (الأشعة فوق البنفسجية)",
+        "desc_ar": u"متوسط مؤشر الأشعة فوق البنفسجية القصوى لشهر ديسمبر وفق معيار WHO.",
+        "unit": u"مؤشر (0-16+)",
+        "map_title": u"خريطة متوسط مؤشر الأشعة فوق البنفسجية لشهر ديسمبر"
+    },
 
     # --- 12. الغطاء السحابي (10_Cloud_Cover) ---
     {
@@ -851,6 +1931,114 @@ FIELDS_DATA = [
         "desc_ar": u"المدى السنوي لتغطية السحب (الفارق بين أكثر شهور السنة غيوماً وأكثرها صفاءً).",
         "unit": u"%",
         "map_title": u"خريطة المدى السنوي لنسبة الغطاء السحابي (%)"
+    },
+    {
+        "short_name": "Cld_JanMn",
+        "full_name": "Cld_January_Mean",
+        "module_code": "10_Cloud_Cover",
+        "module_name": "10_Cloud_Cover (الغطاء السحابي)",
+        "desc_ar": u"متوسط نسبة الغطاء السحابي الكلي للسماء لشهر يناير.",
+        "unit": u"%",
+        "map_title": u"خريطة متوسط الغطاء السحابي لشهر يناير (%)"
+    },
+    {
+        "short_name": "Cld_FebMn",
+        "full_name": "Cld_February_Mean",
+        "module_code": "10_Cloud_Cover",
+        "module_name": "10_Cloud_Cover (الغطاء السحابي)",
+        "desc_ar": u"متوسط نسبة الغطاء السحابي الكلي للسماء لشهر فبراير.",
+        "unit": u"%",
+        "map_title": u"خريطة متوسط الغطاء السحابي لشهر فبراير (%)"
+    },
+    {
+        "short_name": "Cld_MarMn",
+        "full_name": "Cld_March_Mean",
+        "module_code": "10_Cloud_Cover",
+        "module_name": "10_Cloud_Cover (الغطاء السحابي)",
+        "desc_ar": u"متوسط نسبة الغطاء السحابي الكلي للسماء لشهر مارس.",
+        "unit": u"%",
+        "map_title": u"خريطة متوسط الغطاء السحابي لشهر مارس (%)"
+    },
+    {
+        "short_name": "Cld_AprMn",
+        "full_name": "Cld_April_Mean",
+        "module_code": "10_Cloud_Cover",
+        "module_name": "10_Cloud_Cover (الغطاء السحابي)",
+        "desc_ar": u"متوسط نسبة الغطاء السحابي الكلي للسماء لشهر أبريل.",
+        "unit": u"%",
+        "map_title": u"خريطة متوسط الغطاء السحابي لشهر أبريل (%)"
+    },
+    {
+        "short_name": "Cld_MayMn",
+        "full_name": "Cld_May_Mean",
+        "module_code": "10_Cloud_Cover",
+        "module_name": "10_Cloud_Cover (الغطاء السحابي)",
+        "desc_ar": u"متوسط نسبة الغطاء السحابي الكلي للسماء لشهر مايو.",
+        "unit": u"%",
+        "map_title": u"خريطة متوسط الغطاء السحابي لشهر مايو (%)"
+    },
+    {
+        "short_name": "Cld_JunMn",
+        "full_name": "Cld_June_Mean",
+        "module_code": "10_Cloud_Cover",
+        "module_name": "10_Cloud_Cover (الغطاء السحابي)",
+        "desc_ar": u"متوسط نسبة الغطاء السحابي الكلي للسماء لشهر يونيو.",
+        "unit": u"%",
+        "map_title": u"خريطة متوسط الغطاء السحابي لشهر يونيو (%)"
+    },
+    {
+        "short_name": "Cld_JulMn",
+        "full_name": "Cld_July_Mean",
+        "module_code": "10_Cloud_Cover",
+        "module_name": "10_Cloud_Cover (الغطاء السحابي)",
+        "desc_ar": u"متوسط نسبة الغطاء السحابي الكلي للسماء لشهر يوليو.",
+        "unit": u"%",
+        "map_title": u"خريطة متوسط الغطاء السحابي لشهر يوليو (%)"
+    },
+    {
+        "short_name": "Cld_AugMn",
+        "full_name": "Cld_August_Mean",
+        "module_code": "10_Cloud_Cover",
+        "module_name": "10_Cloud_Cover (الغطاء السحابي)",
+        "desc_ar": u"متوسط نسبة الغطاء السحابي الكلي للسماء لشهر أغسطس.",
+        "unit": u"%",
+        "map_title": u"خريطة متوسط الغطاء السحابي لشهر أغسطس (%)"
+    },
+    {
+        "short_name": "Cld_SepMn",
+        "full_name": "Cld_September_Mean",
+        "module_code": "10_Cloud_Cover",
+        "module_name": "10_Cloud_Cover (الغطاء السحابي)",
+        "desc_ar": u"متوسط نسبة الغطاء السحابي الكلي للسماء لشهر سبتمبر.",
+        "unit": u"%",
+        "map_title": u"خريطة متوسط الغطاء السحابي لشهر سبتمبر (%)"
+    },
+    {
+        "short_name": "Cld_OctMn",
+        "full_name": "Cld_October_Mean",
+        "module_code": "10_Cloud_Cover",
+        "module_name": "10_Cloud_Cover (الغطاء السحابي)",
+        "desc_ar": u"متوسط نسبة الغطاء السحابي الكلي للسماء لشهر أكتوبر.",
+        "unit": u"%",
+        "map_title": u"خريطة متوسط الغطاء السحابي لشهر أكتوبر (%)"
+    },
+    {
+        "short_name": "Cld_NovMn",
+        "full_name": "Cld_November_Mean",
+        "module_code": "10_Cloud_Cover",
+        "module_name": "10_Cloud_Cover (الغطاء السحابي)",
+        "desc_ar": u"متوسط نسبة الغطاء السحابي الكلي للسماء لشهر نوفمبر.",
+        "unit": u"%",
+        "map_title": u"خريطة متوسط الغطاء السحابي لشهر نوفمبر (%)"
+    },
+    {
+        "short_name": "Cld_DecMn",
+        "full_name": "Cld_December_Mean",
+        "module_code": "10_Cloud_Cover",
+        "module_name": "10_Cloud_Cover (الغطاء السحابي)",
+        "desc_ar": u"متوسط نسبة الغطاء السحابي الكلي للسماء لشهر ديسمبر.",
+        "unit": u"%",
+        "map_title": u"خريطة متوسط الغطاء السحابي لشهر ديسمبر (%)"
     },
 
     # --- 13. مؤشر البرودة الريحية (12_Wind_Chill) ---
@@ -965,6 +2153,114 @@ FIELDS_DATA = [
         "desc_ar": u"التبخر-نتح الكامن السنوي بهارجريفز (حقل رديف مطابق تماماً لـ ET_Annual_Total للتوافقية العكسية).",
         "unit": u"ملم (mm)",
         "map_title": u"خريطة التبخر والنتح الكامن السنوي بهارجريفز (ملم)"
+    },
+    {
+        "short_name": "ET_JanTot",
+        "full_name": "ET_January_Total",
+        "module_code": "14_Evapotranspiration",
+        "module_name": "14_Evapotranspiration (البخر والنتح)",
+        "desc_ar": u"متوسط مجموع البخر والنتح المرجعي الكامن لشهر يناير بطريقة هارجريفز-ساماني FAO-56.",
+        "unit": u"ملم/شهر (mm/month)",
+        "map_title": u"خريطة مجموع البخر والنتح لشهر يناير (ملم/شهر)"
+    },
+    {
+        "short_name": "ET_FebTot",
+        "full_name": "ET_February_Total",
+        "module_code": "14_Evapotranspiration",
+        "module_name": "14_Evapotranspiration (البخر والنتح)",
+        "desc_ar": u"متوسط مجموع البخر والنتح المرجعي الكامن لشهر فبراير بطريقة هارجريفز-ساماني FAO-56.",
+        "unit": u"ملم/شهر (mm/month)",
+        "map_title": u"خريطة مجموع البخر والنتح لشهر فبراير (ملم/شهر)"
+    },
+    {
+        "short_name": "ET_MarTot",
+        "full_name": "ET_March_Total",
+        "module_code": "14_Evapotranspiration",
+        "module_name": "14_Evapotranspiration (البخر والنتح)",
+        "desc_ar": u"متوسط مجموع البخر والنتح المرجعي الكامن لشهر مارس بطريقة هارجريفز-ساماني FAO-56.",
+        "unit": u"ملم/شهر (mm/month)",
+        "map_title": u"خريطة مجموع البخر والنتح لشهر مارس (ملم/شهر)"
+    },
+    {
+        "short_name": "ET_AprTot",
+        "full_name": "ET_April_Total",
+        "module_code": "14_Evapotranspiration",
+        "module_name": "14_Evapotranspiration (البخر والنتح)",
+        "desc_ar": u"متوسط مجموع البخر والنتح المرجعي الكامن لشهر أبريل بطريقة هارجريفز-ساماني FAO-56.",
+        "unit": u"ملم/شهر (mm/month)",
+        "map_title": u"خريطة مجموع البخر والنتح لشهر أبريل (ملم/شهر)"
+    },
+    {
+        "short_name": "ET_MayTot",
+        "full_name": "ET_May_Total",
+        "module_code": "14_Evapotranspiration",
+        "module_name": "14_Evapotranspiration (البخر والنتح)",
+        "desc_ar": u"متوسط مجموع البخر والنتح المرجعي الكامن لشهر مايو بطريقة هارجريفز-ساماني FAO-56.",
+        "unit": u"ملم/شهر (mm/month)",
+        "map_title": u"خريطة مجموع البخر والنتح لشهر مايو (ملم/شهر)"
+    },
+    {
+        "short_name": "ET_JunTot",
+        "full_name": "ET_June_Total",
+        "module_code": "14_Evapotranspiration",
+        "module_name": "14_Evapotranspiration (البخر والنتح)",
+        "desc_ar": u"متوسط مجموع البخر والنتح المرجعي الكامن لشهر يونيو بطريقة هارجريفز-ساماني FAO-56.",
+        "unit": u"ملم/شهر (mm/month)",
+        "map_title": u"خريطة مجموع البخر والنتح لشهر يونيو (ملم/شهر)"
+    },
+    {
+        "short_name": "ET_JulTot",
+        "full_name": "ET_July_Total",
+        "module_code": "14_Evapotranspiration",
+        "module_name": "14_Evapotranspiration (البخر والنتح)",
+        "desc_ar": u"متوسط مجموع البخر والنتح المرجعي الكامن لشهر يوليو بطريقة هارجريفز-ساماني FAO-56.",
+        "unit": u"ملم/شهر (mm/month)",
+        "map_title": u"خريطة مجموع البخر والنتح لشهر يوليو (ملم/شهر)"
+    },
+    {
+        "short_name": "ET_AugTot",
+        "full_name": "ET_August_Total",
+        "module_code": "14_Evapotranspiration",
+        "module_name": "14_Evapotranspiration (البخر والنتح)",
+        "desc_ar": u"متوسط مجموع البخر والنتح المرجعي الكامن لشهر أغسطس بطريقة هارجريفز-ساماني FAO-56.",
+        "unit": u"ملم/شهر (mm/month)",
+        "map_title": u"خريطة مجموع البخر والنتح لشهر أغسطس (ملم/شهر)"
+    },
+    {
+        "short_name": "ET_SepTot",
+        "full_name": "ET_September_Total",
+        "module_code": "14_Evapotranspiration",
+        "module_name": "14_Evapotranspiration (البخر والنتح)",
+        "desc_ar": u"متوسط مجموع البخر والنتح المرجعي الكامن لشهر سبتمبر بطريقة هارجريفز-ساماني FAO-56.",
+        "unit": u"ملم/شهر (mm/month)",
+        "map_title": u"خريطة مجموع البخر والنتح لشهر سبتمبر (ملم/شهر)"
+    },
+    {
+        "short_name": "ET_OctTot",
+        "full_name": "ET_October_Total",
+        "module_code": "14_Evapotranspiration",
+        "module_name": "14_Evapotranspiration (البخر والنتح)",
+        "desc_ar": u"متوسط مجموع البخر والنتح المرجعي الكامن لشهر أكتوبر بطريقة هارجريفز-ساماني FAO-56.",
+        "unit": u"ملم/شهر (mm/month)",
+        "map_title": u"خريطة مجموع البخر والنتح لشهر أكتوبر (ملم/شهر)"
+    },
+    {
+        "short_name": "ET_NovTot",
+        "full_name": "ET_November_Total",
+        "module_code": "14_Evapotranspiration",
+        "module_name": "14_Evapotranspiration (البخر والنتح)",
+        "desc_ar": u"متوسط مجموع البخر والنتح المرجعي الكامن لشهر نوفمبر بطريقة هارجريفز-ساماني FAO-56.",
+        "unit": u"ملم/شهر (mm/month)",
+        "map_title": u"خريطة مجموع البخر والنتح لشهر نوفمبر (ملم/شهر)"
+    },
+    {
+        "short_name": "ET_DecTot",
+        "full_name": "ET_December_Total",
+        "module_code": "14_Evapotranspiration",
+        "module_name": "14_Evapotranspiration (البخر والنتح)",
+        "desc_ar": u"متوسط مجموع البخر والنتح المرجعي الكامن لشهر ديسمبر بطريقة هارجريفز-ساماني FAO-56.",
+        "unit": u"ملم/شهر (mm/month)",
+        "map_title": u"خريطة مجموع البخر والنتح لشهر ديسمبر (ملم/شهر)"
     },
 
     # --- 16. مؤشر القحولة العالمي (15_UNEP_Aridity) ---
@@ -1091,7 +2387,7 @@ MODULES_SUMMARY = [
         "name_ar": u"درجة الحرارة",
         "folder": "01_Temperature",
         "fc": "01_Temperature",
-        "count": 10,
+        "count": 22,
         "unit": u"°C",
         "method": u"NASA POWER T2M, T2M_MAX, T2M_MIN / WMO Climatological Normals"
     },
@@ -1101,7 +2397,7 @@ MODULES_SUMMARY = [
         "name_ar": u"الأمطار والتساقط",
         "folder": "02_Precipitation",
         "fc": "02_Precipitation",
-        "count": 8,
+        "count": 20,
         "unit": u"mm",
         "method": u"NASA POWER PRECTOTCORR / Annual, Seasonal Totals & Ranges"
     },
@@ -1111,7 +2407,7 @@ MODULES_SUMMARY = [
         "name_ar": u"ضغط مستوى سطح البحر",
         "folder": "03_Sea_Level_Pressure",
         "fc": "03_Sea_Level_Pressure",
-        "count": 6,
+        "count": 18,
         "unit": u"hPa / mbar",
         "method": u"NASA POWER SLP / Reduced to Standard Mean Sea Level"
     },
@@ -1121,7 +2417,7 @@ MODULES_SUMMARY = [
         "name_ar": u"الضغط السطحي الفعلي",
         "folder": "04_Surface_Pressure",
         "fc": "04_Surface_Pressure",
-        "count": 6,
+        "count": 18,
         "unit": u"hPa / mbar",
         "method": u"NASA POWER PS / Actual Local Topographic Station Pressure"
     },
@@ -1131,7 +2427,7 @@ MODULES_SUMMARY = [
         "name_ar": u"الرياح السطحية (سرعة واتجاه)",
         "folder": "05_Wind",
         "fc": "05_Wind",
-        "count": 13,
+        "count": 37,
         "unit": u"m/s, °",
         "method": u"NASA POWER WS10M, WD10M / Circular Mean Vector atan2"
     },
@@ -1141,7 +2437,7 @@ MODULES_SUMMARY = [
         "name_ar": u"الرطوبة النسبية",
         "folder": "06_Relative_Humidity",
         "fc": "06_Relative_Humidity",
-        "count": 6,
+        "count": 18,
         "unit": u"%",
         "method": u"NASA POWER RH2M / Climatological Relative Humidity at 2m"
     },
@@ -1151,7 +2447,7 @@ MODULES_SUMMARY = [
         "name_ar": u"نقطة الندى",
         "folder": "07_Dew_Point",
         "fc": "07_Dew_Point",
-        "count": 6,
+        "count": 18,
         "unit": u"°C",
         "method": u"NASA POWER T2MDEW / Dew Point Temperature at 2m"
     },
@@ -1161,7 +2457,7 @@ MODULES_SUMMARY = [
         "name_ar": u"الإشعاع الشمسي والطاقة",
         "folder": "08_Solar_Radiation",
         "fc": "08_Solar_Radiation",
-        "count": 7,
+        "count": 19,
         "unit": u"kWh/m²/day",
         "method": u"NASA POWER ALLSKY_SFC_SW_DWN / Daily Mean & Cumulative Annual"
     },
@@ -1171,7 +2467,7 @@ MODULES_SUMMARY = [
         "name_ar": u"مؤشر الأشعة فوق البنفسجية",
         "folder": "09_UV_Index",
         "fc": "09_UV_Index",
-        "count": 6,
+        "count": 18,
         "unit": u"Index (0–16+)",
         "method": u"WHO / WMO Global Solar UV Index Standard"
     },
@@ -1181,7 +2477,7 @@ MODULES_SUMMARY = [
         "name_ar": u"الغطاء السحابي",
         "folder": "10_Cloud_Cover",
         "fc": "10_Cloud_Cover",
-        "count": 6,
+        "count": 18,
         "unit": u"%",
         "method": u"NASA POWER CLOUD_AMT / Total Sky Cloud Fraction"
     },
@@ -1221,7 +2517,7 @@ MODULES_SUMMARY = [
         "name_ar": u"البخر والنتح المرجعي (ET)",
         "folder": "14_Evapotranspiration",
         "fc": "14_Evapotranspiration",
-        "count": 9,
+        "count": 21,
         "unit": u"mm",
         "method": u"FAO-56 Hargreaves-Samani (1985) Extraterrestrial Radiation Ra"
     },
@@ -1331,10 +2627,10 @@ def build_excel(output_path):
     engine_meta = [
         (u"اسم الأداة والمنصة البرمجية (Software Platform)", u"NASA POWER Climate Atlas Generator (ArcGIS 10.8 & Pro)", u"أداة المعالجة الكارتوجرافية والتحليل المناخي الآلي لمنظومة ArcGIS"),
         (u"مزود ونماذج البيانات المناخية (Data Source & Models)", u"NASA POWER API (CERES & MERRA-2 Gridded Reanalysis)", u"نماذج الاستشعار الفضائي وإعادة التحليل المناخي المعتمدة لوكالة ناسا"),
-        (u"الفترة الزمنية المناخية القياسية (Climate Normal Period)", u"1996 – 2025 (سلسلة مناخية قياسية مكتملة 30 عاماً)", u"تطابق المعيار الدولي للمعدلات المناخية القياسية (WMO 30-Year Normal)"),
+        (u"الفترة الزمنية المناخية القياسية (Climate Normal Period)", u"1996 – 2025 (سلسلة 30 عاماً تشمل المتوسطات الشهرية والفصلية والسنوية)", u"تطابق المعيار الدولي للمعدلات المناخية القياسية (WMO 30-Year Normal)"),
         (u"المعايير العلمية والمرجعيات الدولية (Scientific Standards)", u"WMO-No. 1203 / FAO-56 Irrigation / Steadman & ISO 7243", u"المنهجيات المعتمدة عالمياً لحساب الراحة الحرارية والقحولة والتبخر"),
         (u"التغطية الجغرافية ونظام الإحداثيات (Spatial Scope & Coordinate System)", u"Global Coverage (WGS 1984 / EPSG:4326)", u"تغطية عالمية شاملة بدقة شبكية منتظمة وقابلة للقص على أي دولة أو إقليم"),
-        (u"إجمالي الحقول الموصوفة في القاموس (Total Defined Fields)", u"116 حقلاً معيارياً (Standard Fields)", u"تشمل الحقول الإدارية والفيزيائية والفصلية ومتجهات الرياح والموديلات"),
+        (u"إجمالي الحقول الموصوفة في القاموس (Total Defined Fields)", u"259 حقلاً معيارياً (247 مؤشراً مناخياً + 12 حقلاً إدارياً)", u"تشمل الحقول الإدارية والفيزيائية والفصلية ومتجهات الرياح والموديلات"),
         (u"عدد الحزم والعناصر المناخية (Climate Modules)", u"18 حزمة موديولية متكاملة (18 Complete Modules)", u"مجلدات راسترات وطبقات معالم بقاعدة البيانات الجغرافية متطابقة 1:1"),
     ]
 

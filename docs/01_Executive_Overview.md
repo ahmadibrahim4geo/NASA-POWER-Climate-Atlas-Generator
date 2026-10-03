@@ -21,7 +21,7 @@ The platform achieves five key scientific objectives:
 
 1. **Standardized Climatological Normal Generation**: Implements strict World Meteorological Organization (WMO) protocols to compute 30-year baseline normals (standard 1991–2020 period or user-customized temporal ranges).
 2. **Multi-Source Reanalysis Fusion**: Integrates NASA POWER (MERRA-2 atmospheric dynamics and CERES solar fluxes) with Open-Meteo (ECMWF ERA5 and ERA5-Land high-resolution reanalyses) in a unified geodatabase architecture.
-3. **Comprehensive Biophysical Indicator Suite**: Expands beyond basic temperature and rainfall to generate 103 specialized climate indicators across 18 modules, including occupational heat strain (WBGT), agroclimatic water demands (Hargreaves PET), UNCCD aridity indices, and decadal trend trajectories.
+3. **Comprehensive Biophysical Indicator Suite**: Expands beyond basic temperature and rainfall to generate 247 specialized climate indicators across 18 modules (103 annual, seasonal, and derived indicators + 144 climatological monthly indicators for all 12 calendar months), including occupational heat strain (WBGT), agroclimatic water demands (Hargreaves PET), UNCCD aridity indices, and decadal trend trajectories.
 4. **Automated Geostatistical Surface Modeling**: Seamlessly interpolates point-based climatological matrices into continuous raster surfaces using deterministic (IDW, Spline) and geostatistical (Ordinary Kriging) spatial models.
 5. **Full Audit Traceability**: Employs an immutable data dictionary and code-to-documentation mapping where every raster cell, shapefile attribute, and Excel entry is mathematically grounded and source-attributed.
 
@@ -37,6 +37,7 @@ The software architecture operates across three distinct operational layers:
 | - Fishnet point sampling over user-defined polygon extent                                        |
 | - Dual-provider REST API querying (NASA POWER API v2 & Open-Meteo Archive API)                   |
 | - Local offline caching mechanism to prevent redundant API queries                              |
+| - Permanent raw 30-year monthly time-series archive (Egypt_Monthly_Raw_1996_2025.json)           |
 +--------------------------------------------------------------------------------------------------+
                                                |
                                                v
@@ -53,11 +54,11 @@ The software architecture operates across three distinct operational layers:
                                                v
 +--------------------------------------------------------------------------------------------------+
 | LAYER 3: GEOSPATIAL SYNTHESIS & PUBLICATION                                                      |
-| - File Geodatabase (FGDB) feature classes (115 fields with full descriptive aliases)             |
+| - File Geodatabase (FGDB) feature classes (259 fields with full descriptive aliases)             |
 | - Shapefile export (10-character DBF field name mapping via SHP_FIELD_MAP)                       |
-| - Surface interpolation (Spatial Analyst IDW / Spline / Kriging)                                 |
+| - Surface interpolation (Spatial Analyst IDW / Spline / Kriging for Annual & Seasonal Maps)      |
 | - 18 structured raster directories containing 103 GeoTIFF floating-point layers                  |
-| - Automated Excel Data Dictionaries & Master Metadata Reports                                    |
+| - Automated Dual-Sheet Excel Workbooks (Data & Month sheets) & Master Classification Guides      |
 +--------------------------------------------------------------------------------------------------+
 ```
 

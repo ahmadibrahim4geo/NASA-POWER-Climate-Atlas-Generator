@@ -109,7 +109,7 @@ The processing pipeline executes through a sequence of 13 deterministic, audited
 
 ### Stage 10: Vector Schema Building (FGDB & Shapefile)
 - **Module**: `POWER_Climate_Atlas_Generator_10_8.pyt` (lines 4380–4500).
-- **Functionality**: Creates the output File Geodatabase feature class and/or Shapefile. Adds all 115 attribute fields (12 Admin + 103 Climate Indicators). Applies `SHP_FIELD_MAP` to truncate field names to 10 characters for DBF compatibility while preserving full names and descriptive aliases in the FGDB.
+- **Functionality**: Creates the output File Geodatabase feature classes and/or Shapefiles. Adds up to 259 attribute fields (12 Admin + 247 Climate Indicators including 144 monthly indicators). Applies `SHP_FIELD_MAP` to truncate field names to 10 characters for DBF compatibility while preserving full names and descriptive aliases in the FGDB.
 
 ### Stage 11: Geostatistical Surface Interpolation
 - **Module**: `raster_atlas_generator.py` (lines 1736–2650).
@@ -120,8 +120,8 @@ The processing pipeline executes through a sequence of 13 deterministic, audited
 
 ### Stage 12: Raster Masking, Snapping, and 18-Folder Tree Organization
 - **Module**: `raster_atlas_generator.py` (lines 1800–2650).
-- **Functionality**: Clips all interpolated surfaces to the study area boundary mask. Snaps cell geometry to a common origin to guarantee identical cell alignment across all 103 rasters. Organizes the outputs into 18 standardized directory trees (e.g. `01_Temperature`, `02_Precipitation`, etc.).
+- **Functionality**: Clips all interpolated surfaces to the study area boundary mask. Snaps cell geometry to a common origin to guarantee identical cell alignment across all 103 annual and seasonal rasters. Organizes the outputs into 18 standardized directory trees (e.g. `01_Temperature`, `02_Precipitation`, etc.).
 
-### Stage 13: Layer Symbology Application & Excel Dictionary Export
-- **Module**: `raster_atlas_generator.py` (lines 2660–2750), `generate_excel_dictionary.py`.
-- **Functionality**: Applies pre-authored ArcGIS layer files (`.lyr`) and color ramps (e.g. blue-to-red for temperature, greens-to-blues for rainfall, orange-to-purple for heat stress). Exports `Climate_Atlas_Fields_Dictionary_AR_EN_Units.xlsx` containing complete field documentation.
+### Stage 13: Layer Symbology Application & Dual-Sheet Excel Workbook Export
+- **Module**: `raster_atlas_generator.py` (lines 2660–2750), `generate_excel_dictionary.py`, `generate_master_atlas_excel.py`.
+- **Functionality**: Applies pre-authored ArcGIS layer files (`.lyr`) and color ramps (e.g. blue-to-red for temperature, greens-to-blues for rainfall, orange-to-purple for heat stress). Exports dual-sheet element Excel workbooks (`Data` & `Month` sheets) and comprehensive classification guide `Climate_Atlas_Classification_Guide.xlsx` and `Climate_Atlas_Fields_Dictionary_AR_EN_Units.xlsx`.
